@@ -54,3 +54,13 @@ function flowaxy_env_bool(string $key, bool $default = false): bool
 
     return in_array(strtolower($value), ['1', 'true', 'yes', 'on'], true);
 }
+
+function flowaxy_env_value(string $key, string $default = ''): string
+{
+    $value = trim((string) (flowaxy_env($key, $default) ?? $default));
+    if ($value === '' || str_starts_with($value, '[ТУТ')) {
+        return '';
+    }
+
+    return $value;
+}

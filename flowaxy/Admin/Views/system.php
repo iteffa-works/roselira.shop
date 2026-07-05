@@ -69,26 +69,26 @@ $gitSubject = trim((string) ($gitStatus['local_subject'] ?? ''));
 
 $feedLinks = [
     [
-        'label' => 'Google Merchant',
-        'desc' => 'Product feed для Google Ads',
+        'label' => 'Google Merchant Center',
+        'desc' => 'Товарний XML-feed для Google Ads / Merchant Center',
         'path' => '/feeds/google.xml',
         'tone' => 'google',
     ],
     [
         'label' => 'Meta Catalog',
-        'desc' => 'Product feed для Facebook / Instagram',
+        'desc' => 'Товарний XML-feed для Facebook та Instagram',
         'path' => '/feeds/meta.xml',
         'tone' => 'meta',
     ],
     [
-        'label' => 'Sitemap',
+        'label' => 'Sitemap.xml',
         'desc' => 'XML-карта сайту для пошукових систем',
         'path' => '/sitemap.xml',
         'tone' => 'seo',
     ],
     [
         'label' => 'robots.txt',
-        'desc' => 'Правила індексації для краулерів',
+        'desc' => 'Правила індексації для пошукових роботів',
         'path' => '/robots.txt',
         'tone' => 'seo',
     ],
@@ -309,7 +309,7 @@ rmdir roselira.shop</pre>
                     <span class="admin-system__endpoint-body">
                         <strong><?= e($link['label']) ?></strong>
                         <span><?= e($link['desc']) ?></span>
-                        <code><?= e($link['path']) ?></code>
+                        <code><?= e($href !== '' ? $href : $link['path']) ?></code>
                     </span>
                     <span class="admin-system__endpoint-go" aria-hidden="true">↗</span>
                 </a>

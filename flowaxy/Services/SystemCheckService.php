@@ -34,9 +34,9 @@ final class SystemCheckService
             $this->checkAnalytics(),
             $this->checkTelegram(),
             $this->checkCatalog(),
-            $this->checkPublicFeedUrl('google_feed_url', '/feeds/google.xml', 'Google feed (URL)'),
-            $this->checkPublicFeedUrl('meta_feed_url', '/feeds/meta.xml', 'Meta feed (URL)'),
-            $this->checkPublicUrl('sitemap_url', '/sitemap.xml', 'Sitemap (URL)'),
+            $this->checkPublicFeedUrl('google_feed_url', '/feeds/google.xml', 'Google Merchant Center — URL'),
+            $this->checkPublicFeedUrl('meta_feed_url', '/feeds/meta.xml', 'Meta Catalog — URL'),
+            $this->checkPublicUrl('sitemap_url', '/sitemap.xml', 'Sitemap.xml — URL'),
         ];
 
         $summary = ['ok' => 0, 'warn' => 0, 'error' => 0];
@@ -114,13 +114,13 @@ final class SystemCheckService
     /** @return array<string, mixed> */
     private function checkGoogleFeed(): array
     {
-        return $this->checkFeedInternal('google_feed', 'Google Merchant feed', fn(): string => $this->feeds->buildGoogleXml());
+        return $this->checkFeedInternal('google_feed', 'Google Merchant Center', fn(): string => $this->feeds->buildGoogleXml());
     }
 
     /** @return array<string, mixed> */
     private function checkMetaFeed(): array
     {
-        return $this->checkFeedInternal('meta_feed', 'Meta Catalog feed', fn(): string => $this->feeds->buildMetaXml());
+        return $this->checkFeedInternal('meta_feed', 'Meta Catalog', fn(): string => $this->feeds->buildMetaXml());
     }
 
     /** @return array<string, mixed> */
@@ -159,7 +159,7 @@ final class SystemCheckService
         $isProd = (app_config()['app_env'] ?? '') === 'production';
 
         if ($secret === '') {
-            return $this->item('feed_secret', 'FEED_SECRET', $isProd ? 'warn' : 'ok', 'Не задано — feeds відкриті', '');
+            return $this->item('feed_secret', 'FEED_SECRET', $isProd ? 'warn' : 'ok', 'Не задано в .env — feeds без токена', '');
         }
 
         return $this->item('feed_secret', 'FEED_SECRET', 'ok', 'Захист увімкнено', '');
@@ -212,7 +212,7 @@ final class SystemCheckService
         $isProd = (app_config()['app_env'] ?? '') === 'production';
 
         if ($meta === '' && $ga4 === '' && $gtm === '') {
-            return $this->item('analytics', 'Analytics / Pixel', $isProd ? 'warn' : 'ok', 'Не налаштовано в .env', '');
+            return $this->item('analytics', 'Meta Pixel / GA4 / GTM', $isProd ? 'warn' : 'ok', 'Не задано в .env', '');
         }
 
         $parts = array_filter([
@@ -221,7 +221,7 @@ final class SystemCheckService
             $gtm !== '' ? 'GTM' : '',
         ]);
 
-        return $this->item('analytics', 'Analytics / Pixel', 'ok', implode(', ', $parts), '');
+        return $this->item('analytics', 'Meta Pixel / GA4 / GTM', 'ok', implode(', ', $parts), '');
     }
 
     /** @return array<string, mixed> */
