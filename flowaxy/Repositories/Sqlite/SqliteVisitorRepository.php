@@ -468,14 +468,108 @@ final class SqliteVisitorRepository implements VisitorRepositoryInterface
 
     public function purgeOlderThan(int $days): int
     {
-        $since = date('c', strtotime('-' . max(1, $days) . ' days'));
+        return $this->purgeAnalytics('older_than', max(1, $days))['sessions'];
+    }
+
+    /** @param list<string>|null $eventTypes @return array{events: int, sessions: int} */
+    public function purgeAnalytics(
+        string $scope,
+        int $periodDays = 0,
+        ?string $path = null,
+        ?string $viewport = null,
+        ?array $eventTypes = null,
+    ): array {
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            throw new \InvalidArgumentException('Invalid purge scope: ' . $scope);
+        }
+
         $pdo = $this->connection->pdo();
+        $conditions = ['1=1'];
+        $params = [];
+        $cutoff = null;
 
-        $pdo->prepare('DELETE FROM visitor_events WHERE created_at < :since')->execute(['since' => $since]);
-        $stmt = $pdo->prepare('DELETE FROM visitor_sessions WHERE created_at < :since');
-        $stmt->execute(['since' => $since]);
+        if ($scope === 'within_last') {
+            $periodDays = max(1, $periodDays);
+            $cutoff = date('c', strtotime('-' . $periodDays . ' days'));
+            $conditions[] = 'e.created_at >= :cutoff';
+            $params['cutoff'] = $cutoff;
+        } elseif ($scope === 'older_than') {
+            $periodDays = max(1, $periodDays);
+            $cutoff = date('c', strtotime('-' . $periodDays . ' days'));
+            $conditions[] = 'e.created_at < :cutoff';
+            $params['cutoff'] = $cutoff;
+        }
 
-        return $stmt->rowCount();
+        if ($path !== null && $path !== '') {
+            $conditions[] = 'e.path = :path';
+            $params['path'] = $path;
+        }
+
+        if ($eventTypes !== null && $eventTypes !== []) {
+            $placeholders = [];
+            foreach (array_values($eventTypes) as $index => $type) {
+                $key = 'event_type_' . $index;
+                $placeholders[] = ':' . $key;
+                $params[$key] = $type;
+            }
+            $conditions[] = 'e.event_type IN (' . implode(', ', $placeholders) . ')';
+        }
+
+        $vwExpr = $this->effectiveViewportWidthExpression();
+        $viewportFilter = $this->viewportSqlFilter($viewport, $vwExpr);
+        if ($viewportFilter !== '') {
+            $conditions[] = substr($viewportFilter, 5);
+        }
+        $params = array_merge($params, $this->viewportRangeParams($viewport));
+
+        $where = implode(' AND ', $conditions);
+        $partialFilter = ($path !== null && $path !== '')
+            || ($viewport !== null && $viewport !== '')
+            || ($eventTypes !== null && $eventTypes !== []);
+
+        $pdo->beginTransaction();
+
+        try {
+            $eventsStmt = $pdo->prepare(<<<SQL
+                DELETE FROM visitor_events
+                WHERE rowid IN (
+                    SELECT e.rowid
+                    FROM visitor_events e
+                    INNER JOIN visitor_sessions s ON s.id = e.session_id
+                    WHERE {$where}
+                )
+                SQL);
+            $eventsStmt->execute($params);
+            $eventsDeleted = $eventsStmt->rowCount();
+
+            if (!$partialFilter) {
+                if ($scope === 'all') {
+                    $sessionsStmt = $pdo->prepare('DELETE FROM visitor_sessions');
+                    $sessionsStmt->execute();
+                } else {
+                    $sessionsStmt = $pdo->prepare(
+                        $scope === 'older_than'
+                            ? 'DELETE FROM visitor_sessions WHERE created_at < :cutoff'
+                            : 'DELETE FROM visitor_sessions WHERE created_at >= :cutoff',
+                    );
+                    $sessionsStmt->execute(['cutoff' => $cutoff]);
+                }
+            } else {
+                $sessionsStmt = $pdo->prepare(
+                    'DELETE FROM visitor_sessions WHERE id NOT IN (SELECT DISTINCT session_id FROM visitor_events)',
+                );
+                $sessionsStmt->execute();
+            }
+
+            $sessionsDeleted = $sessionsStmt->rowCount();
+            $pdo->commit();
+
+            return ['events' => $eventsDeleted, 'sessions' => $sessionsDeleted];
+        } catch (\Throwable $exception) {
+            $pdo->rollBack();
+
+            throw $exception;
+        }
     }
 
     private function since(int $days): string

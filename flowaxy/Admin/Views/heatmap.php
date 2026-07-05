@@ -125,4 +125,102 @@ $heatmapQuery = static function (array $overrides = []) use ($days, $heatmapPath
     </p>
 </section>
 
+<?php
+$cleanupContext = [
+    'csrf' => (string) ($csrf ?? ''),
+    'days' => $days,
+    'page' => $heatmapPath,
+    'viewport' => $viewport,
+];
+$cleanupForm = static function (
+    string $scope,
+    int $periodDays,
+    string $label,
+    string $confirm,
+    bool $danger = false,
+) use ($cleanupContext): void {
+    $btnClass = 'admin-btn admin-btn--sm' . ($danger ? ' admin-btn--danger' : '');
+    ?>
+    <form
+        method="post"
+        action="<?= e(admin_url('heatmap/cleanup')) ?>"
+        class="admin-heatmap-cleanup__action"
+        onsubmit="return confirm(<?= json_encode($confirm, JSON_UNESCAPED_UNICODE) ?>)"
+    >
+        <input type="hidden" name="csrf" value="<?= e($cleanupContext['csrf']) ?>">
+        <input type="hidden" name="scope" value="<?= e($scope) ?>">
+        <input type="hidden" name="period_days" value="<?= (int) $periodDays ?>">
+        <input type="hidden" name="days" value="<?= (int) $cleanupContext['days'] ?>">
+        <input type="hidden" name="page" value="<?= e($cleanupContext['page']) ?>">
+        <input type="hidden" name="viewport" value="<?= e($cleanupContext['viewport']) ?>">
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="filter_page" value="1" checked>
+            <span>Лише ця сторінка</span>
+        </label>
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="filter_viewport" value="1" checked>
+            <span>Лише <?= e($cleanupContext['viewport']) ?></span>
+        </label>
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="clicks_only" value="1" checked>
+            <span>Лише кліки</span>
+        </label>
+        <button type="submit" class="<?= e($btnClass) ?>"><?= e($label) ?></button>
+    </form>
+    <?php
+};
+?>
+
+<details class="admin-card admin-card--danger admin-heatmap-cleanup">
+    <summary class="admin-heatmap-cleanup__summary">Очистити дані аналітики</summary>
+    <p class="admin-muted admin-card__desc">Незворотне видалення подій і порожніх сесій. Зніміть фільтри, щоб очистити всю локальну аналітику.</p>
+
+    <div class="admin-heatmap-cleanup__presets">
+        <?php $cleanupForm('within_last', 1, 'За останній день', 'Видалити дані за останній день?'); ?>
+        <?php $cleanupForm('within_last', 7, 'За 7 днів', 'Видалити дані за останні 7 днів?'); ?>
+        <?php $cleanupForm('older_than', 30, 'Старіші за 30 днів', 'Видалити дані старіші за 30 днів?'); ?>
+        <?php $cleanupForm('all', 0, 'За все час', 'УВАГА: видалити всі відповідні дані?', true); ?>
+    </div>
+
+    <form
+        method="post"
+        action="<?= e(admin_url('heatmap/cleanup')) ?>"
+        class="admin-heatmap-cleanup__custom"
+        onsubmit="return confirm('Видалити дані за обраним періодом?')"
+    >
+        <input type="hidden" name="csrf" value="<?= e($cleanupContext['csrf']) ?>">
+        <input type="hidden" name="days" value="<?= (int) $cleanupContext['days'] ?>">
+        <input type="hidden" name="page" value="<?= e($cleanupContext['page']) ?>">
+        <input type="hidden" name="viewport" value="<?= e($cleanupContext['viewport']) ?>">
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="filter_page" value="1" checked>
+            <span>Лише ця сторінка</span>
+        </label>
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="filter_viewport" value="1" checked>
+            <span>Лише <?= e($cleanupContext['viewport']) ?></span>
+        </label>
+        <label class="admin-heatmap-cleanup__filter">
+            <input type="checkbox" name="clicks_only" value="1" checked>
+            <span>Лише кліки</span>
+        </label>
+        <div class="admin-heatmap-cleanup__custom-row">
+            <select name="scope" class="admin-input admin-input-sm" aria-label="Тип періоду">
+                <option value="within_last">За останні N днів</option>
+                <option value="older_than">Старіші за N днів</option>
+            </select>
+            <input
+                type="number"
+                name="period_days"
+                class="admin-input admin-input-sm admin-heatmap-cleanup__days"
+                min="1"
+                max="3650"
+                value="14"
+                aria-label="Кількість днів"
+            >
+            <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger">Видалити</button>
+        </div>
+    </form>
+</details>
+
 <script src="<?= asset('assets/js/admin-dashboard.js') ?>" defer></script>

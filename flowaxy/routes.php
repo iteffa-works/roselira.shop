@@ -37,6 +37,7 @@ return static function (Router $router): void {
     $router->get('/admin', DashboardController::class . '::index');
     $router->get('/admin/api/google-analytics', DashboardController::class . '::googleAnalytics');
     $router->get('/admin/heatmap', DashboardController::class . '::heatmap');
+    $router->post('/admin/heatmap/cleanup', DashboardController::class . '::heatmapCleanup');
     $router->get('/admin/login', AuthController::class . '::loginForm');
     $router->post('/admin/login', AuthController::class . '::login');
     $router->get('/admin/logout', AuthController::class . '::logout');

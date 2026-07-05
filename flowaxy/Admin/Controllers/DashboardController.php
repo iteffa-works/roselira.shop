@@ -79,12 +79,61 @@ final class DashboardController extends CatalogAdminController
 
         $content = $this->view->renderAdmin('heatmap', [
             'analytics' => $analytics,
+            'csrf' => $this->auth->csrfToken(),
         ]);
 
         return Response::html($this->view->renderAdmin('layout_tool', [
             'content' => $content,
             'title' => 'Heatmap кліків',
             'flash' => $this->auth->getFlash(),
+        ]));
+    }
+
+    public function heatmapCleanup(Request $request): Response
+    {
+        if ($response = $this->requireAuth()) {
+            return $response;
+        }
+
+        if ($response = $this->verifyPost($request)) {
+            return $response;
+        }
+
+        $scope = (string) $request->post('scope', '');
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            $this->auth->flash('error', 'Невідомий параметр очистки.');
+
+            return $this->redirectToHeatmap($request);
+        }
+
+        $periodDays = max(1, min(3650, (int) $request->post('period_days', 7)));
+        $path = $request->post('filter_page') === '1' ? (string) $request->post('page', '/') : null;
+        $viewport = $request->post('filter_viewport') === '1' ? (string) $request->post('viewport', '') : null;
+        $eventTypes = $request->post('clicks_only') === '1' ? ['click'] : null;
+
+        try {
+            $result = $this->analytics->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
+            $this->auth->flash(
+                'success',
+                sprintf('Видалено %d подій та %d сесій.', $result['events'], $result['sessions']),
+            );
+        } catch (\Throwable) {
+            $this->auth->flash('error', 'Не вдалося очистити дані аналітики.');
+        }
+
+        return $this->redirectToHeatmap($request);
+    }
+
+    private function redirectToHeatmap(Request $request): Response
+    {
+        $days = max(1, min(90, (int) $request->post('days', $request->query('days', 7))));
+        $page = (string) $request->post('page', $request->query('page', '/'));
+        $viewport = (string) $request->post('viewport', $request->query('viewport', ''));
+
+        return $this->redirect(admin_url('heatmap', [
+            'days' => $days,
+            'page' => $page,
+            'viewport' => $viewport,
         ]));
     }
 

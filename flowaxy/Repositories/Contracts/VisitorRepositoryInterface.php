@@ -41,4 +41,17 @@ interface VisitorRepositoryInterface
     public function recentSessions(int $limit = 10): array;
 
     public function purgeOlderThan(int $days): int;
+
+    /**
+     * @param 'all'|'within_last'|'older_than' $scope
+     * @param list<string>|null $eventTypes
+     * @return array{events: int, sessions: int}
+     */
+    public function purgeAnalytics(
+        string $scope,
+        int $periodDays = 0,
+        ?string $path = null,
+        ?string $viewport = null,
+        ?array $eventTypes = null,
+    ): array;
 }

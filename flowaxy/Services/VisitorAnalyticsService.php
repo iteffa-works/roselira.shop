@@ -188,6 +188,31 @@ final class VisitorAnalyticsService
         return $this->visitors->purgeOlderThan(self::RETENTION_DAYS);
     }
 
+    /**
+     * @param 'all'|'within_last'|'older_than' $scope
+     * @param list<string>|null $eventTypes
+     * @return array{events: int, sessions: int}
+     */
+    public function purgeAnalytics(
+        string $scope,
+        int $periodDays = 0,
+        ?string $path = null,
+        ?string $viewport = null,
+        ?array $eventTypes = null,
+    ): array {
+        if ($path !== null && $path !== '') {
+            $path = $this->normalizePath($path);
+        } else {
+            $path = null;
+        }
+
+        if ($viewport === '') {
+            $viewport = null;
+        }
+
+        return $this->visitors->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
+    }
+
     private function normalizePath(string $path): string
     {
         $path = '/' . trim($path, '/');

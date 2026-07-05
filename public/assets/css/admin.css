@@ -3429,6 +3429,57 @@ body.admin {
     margin: 0;
 }
 
+.admin-heatmap-cleanup {
+    margin-top: 0.75rem;
+}
+
+.admin-heatmap-cleanup__summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+
+.admin-heatmap-cleanup__summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-heatmap-cleanup__presets {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.admin-heatmap-cleanup__action,
+.admin-heatmap-cleanup__custom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem 0.75rem;
+    background: #fef2f2;
+    border-radius: 8px;
+}
+
+.admin-heatmap-cleanup__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: #57534e;
+}
+
+.admin-heatmap-cleanup__custom-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.admin-heatmap-cleanup__days {
+    width: 5rem;
+}
+
 @media (max-width: 900px) {
     .admin-heatmap-toolbar {
         flex-direction: column;
