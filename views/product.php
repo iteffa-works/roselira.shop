@@ -192,16 +192,34 @@ $productJson = json_encode([
         }
         ?>
         <?php if ($hasSections): ?>
+        <?php
+            $activeSections = [];
+            foreach ($sectionKeys as $sectionKey) {
+                if (!empty($sections[$sectionKey])) {
+                    $activeSections[] = $sectionKey;
+                }
+            }
+            $splitAt = (int) ceil(count($activeSections) / 2);
+            $accordionColumns = array_values(array_filter([
+                array_slice($activeSections, 0, $splitAt),
+                array_slice($activeSections, $splitAt),
+            ], static fn(array $column): bool => $column !== []));
+        ?>
         <section class="landing__details">
-            <div class="product-accordion">
-                <?php foreach ($sectionKeys as $sectionKey): ?>
-                    <?php if (empty($sections[$sectionKey])) {
-                        continue;
-                    } ?>
-                <details class="product-accordion__item"<?= $sectionKey === 'description' ? ' open' : '' ?>>
-                    <summary class="product-accordion__summary"><?= e(t('section_' . $sectionKey)) ?></summary>
-                    <div class="product-accordion__body"><?= nl2br(e((string) $sections[$sectionKey])) ?></div>
-                </details>
+            <div class="product-accordion" data-product-accordion>
+                <?php foreach ($accordionColumns as $columnKeys): ?>
+                <div class="product-accordion__col">
+                    <?php foreach ($columnKeys as $sectionKey): ?>
+                    <details class="product-accordion__item" data-section="<?= e($sectionKey) ?>"<?= $sectionKey === 'description' ? ' open' : '' ?>>
+                        <summary class="product-accordion__summary">
+                            <span class="product-accordion__icon" aria-hidden="true"></span>
+                            <span class="product-accordion__label"><?= e(t('section_' . $sectionKey)) ?></span>
+                            <span class="product-accordion__chevron" aria-hidden="true"></span>
+                        </summary>
+                        <div class="product-accordion__body"><?= nl2br(e((string) $sections[$sectionKey])) ?></div>
+                    </details>
+                    <?php endforeach; ?>
+                </div>
                 <?php endforeach; ?>
             </div>
         </section>

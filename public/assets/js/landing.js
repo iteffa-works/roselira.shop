@@ -415,4 +415,22 @@
 
     selectVariant(activeVariantId);
     updateSwatchTrackFade();
+
+    document.querySelectorAll('[data-product-accordion]').forEach(function (root) {
+        var items = root.querySelectorAll('.product-accordion__item');
+
+        items.forEach(function (item) {
+            item.addEventListener('toggle', function () {
+                if (!item.open) {
+                    return;
+                }
+
+                items.forEach(function (other) {
+                    if (other !== item) {
+                        other.open = false;
+                    }
+                });
+            });
+        });
+    });
 })();
