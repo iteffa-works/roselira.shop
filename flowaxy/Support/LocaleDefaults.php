@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 7;
+    public const STRINGS_VERSION = 8;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -46,12 +46,11 @@ final class LocaleDefaults
             'home_subtitle' => 'Original KIKO Milano cosmetics and accessories — browse and order online.',
             'reviews' => 'reviews',
             'rating_of' => ':rating of :max',
-            'footer' => '© Roselira — roselira.shop',
+            'footer_credit' => 'Made with love by',
             'footer_privacy' => 'Privacy',
             'footer_terms' => 'Terms',
             'footer_delivery' => 'Delivery & returns',
             'footer_contact' => 'Contact',
-            'footer_credit' => 'Made with love by Flowaxy Digital Studio',
             'meta_privacy_title' => 'Privacy Policy — Roselira',
             'meta_privacy_desc' => 'How Roselira collects and uses personal data when you place an order.',
             'meta_terms_title' => 'Terms of Service — Roselira',
@@ -117,7 +116,7 @@ final class LocaleDefaults
             'footer_terms' => 'Умови',
             'footer_delivery' => 'Доставка',
             'footer_contact' => 'Контакт',
-            'footer_credit' => 'З любов\'ю Flowaxy Digital Studio',
+            'footer_credit' => 'З любов\'ю',
             'meta_privacy_title' => 'Політика конфіденційності — Roselira',
             'meta_privacy_desc' => 'Як Roselira збирає та використовує персональні дані при замовленні.',
             'meta_terms_title' => 'Умови користування — Roselira',
@@ -183,7 +182,7 @@ final class LocaleDefaults
             'footer_terms' => 'Условия',
             'footer_delivery' => 'Доставка',
             'footer_contact' => 'Контакт',
-            'footer_credit' => 'С любовью Flowaxy Digital Studio',
+            'footer_credit' => 'С любовью',
             'meta_privacy_title' => 'Политика конфиденциальности — Roselira',
             'meta_privacy_desc' => 'Как Roselira собирает и использует персональные данные при заказе.',
             'meta_terms_title' => 'Условия использования — Roselira',

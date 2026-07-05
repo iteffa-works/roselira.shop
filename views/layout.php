@@ -98,25 +98,32 @@
     $contactTelegram = (string) ($siteConfig['contact_telegram'] ?? '');
     ?>
     <footer class="site-footer">
-        <div class="container site-footer__inner">
-            <nav class="site-footer__nav" aria-label="Legal">
-                <a href="/privacy"><?= e(t('footer_privacy')) ?></a>
-                <a href="/terms"><?= e(t('footer_terms')) ?></a>
-                <a href="/delivery"><?= e(t('footer_delivery')) ?></a>
-            </nav>
-            <?php if ($contactEmail !== '' || $contactTelegram !== ''): ?>
-            <p class="site-footer__contact">
-                <?= e(t('footer_contact')) ?>:
-                <?php if ($contactEmail !== ''): ?>
-                <a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a>
+        <div class="container site-footer__bar">
+            <div class="site-footer__start">
+                <nav class="site-footer__nav" aria-label="Legal">
+                    <a href="/privacy"><?= e(t('footer_privacy')) ?></a>
+                    <a href="/terms"><?= e(t('footer_terms')) ?></a>
+                    <a href="/delivery"><?= e(t('footer_delivery')) ?></a>
+                </nav>
+                <?php if ($contactEmail !== '' || $contactTelegram !== ''): ?>
+                <span class="site-footer__contact">
+                    <?= e(t('footer_contact')) ?>:
+                    <?php if ($contactEmail !== ''): ?>
+                    <a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a>
+                    <?php endif; ?>
+                    <?php if ($contactTelegram !== ''): ?>
+                    <?php if ($contactEmail !== ''): ?><span class="site-footer__contact-sep">·</span><?php endif; ?>
+                    <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener"><?= e($contactTelegram) ?></a>
+                    <?php endif; ?>
+                </span>
                 <?php endif; ?>
-                <?php if ($contactTelegram !== ''): ?>
-                <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener"><?= e($contactTelegram) ?></a>
-                <?php endif; ?>
-            </p>
-            <?php endif; ?>
-            <p class="site-footer__copy"><?= e(t('footer')) ?></p>
-            <p class="site-footer__credit"><?= e(t('footer_credit')) ?></p>
+            </div>
+            <div class="site-footer__end">
+                <span class="site-footer__copy">© <?= date('Y') ?> Roselira · roselira.shop</span>
+                <span class="site-footer__credit">
+                    <?= e(t('footer_credit')) ?> <a href="https://flowaxy.com" target="_blank" rel="noopener">Flowaxy Digital Studio</a>
+                </span>
+            </div>
         </div>
     </footer>
 
