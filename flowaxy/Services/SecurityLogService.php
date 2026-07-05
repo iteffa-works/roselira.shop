@@ -109,7 +109,7 @@ final class SecurityLogService
         return [
             'ok' => 'Клієнт',
             'suspect' => 'Підозріло',
-            'fraud' => 'Мошенник',
+            'fraud' => 'Шахрай',
         ];
     }
 
