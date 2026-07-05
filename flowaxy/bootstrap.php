@@ -121,6 +121,7 @@ $container->singleton(GitUpdateService::class, static function (Container $c) us
         (string) $config['project_root'],
         (string) $config['git_repo_url'],
         (string) $config['git_branch'],
+        (string) ($config['git_binary'] ?? ''),
     );
 });
 

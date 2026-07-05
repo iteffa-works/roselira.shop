@@ -24,6 +24,7 @@ return [
     'project_root' => $basePath,
     'git_repo_url' => trim((string) (flowaxy_env('GIT_REPO_URL', 'https://github.com/iteffa-works/roselira.shop.git') ?? '')),
     'git_branch' => trim((string) (flowaxy_env('GIT_BRANCH', 'main') ?? '')),
+    'git_binary' => trim((string) (flowaxy_env('GIT_BINARY', '') ?? '')),
     'cron_secret' => trim((string) (flowaxy_env('CRON_SECRET', '') ?? '')),
 
     'views_path' => $basePath . '/views',

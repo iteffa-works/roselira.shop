@@ -83,6 +83,7 @@ $gitUpdate = new GitUpdateService(
     $config['project_root'],
     $config['git_repo_url'],
     $config['git_branch'],
+    (string) ($config['git_binary'] ?? ''),
 );
 $systemCheck = new SystemCheckService(
     $catalog,

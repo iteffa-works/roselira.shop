@@ -81,12 +81,24 @@ Deploy checklist:
 
 ## Git deploy & auto-update
 
-Initial setup on hosting:
+Initial setup on hosting (files go into **current folder**, not a subfolder):
 
 ```bash
+cd /home/roselira/roselira.com/shop   # your site root (where public/ will live)
 git clone https://github.com/iteffa-works/roselira.shop.git .
 cp .env.example .env
 # configure .env, writable storage/
+```
+
+**Important:** the `.` at the end of `git clone` is required. Without it, Git creates a `roselira.shop/` subfolder.
+
+If you already cloned without `.`:
+
+```bash
+cd /path/to/site/root
+mv roselira.shop/* .
+mv roselira.shop/.git .
+rmdir roselira.shop
 ```
 
 Manual update: **Admin → Система → Git pull зараз**
