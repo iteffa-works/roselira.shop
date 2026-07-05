@@ -116,6 +116,7 @@
             </p>
             <?php endif; ?>
             <p class="site-footer__copy"><?= e(t('footer')) ?></p>
+            <p class="site-footer__credit"><?= e(t('footer_credit')) ?></p>
         </div>
     </footer>
 
@@ -136,6 +137,9 @@
     <?php endif; ?>
     <?php if (!empty($pageScript)): ?>
     <script src="<?= asset('assets/js/' . $pageScript . '.js') ?>" defer></script>
+    <?php endif; ?>
+    <?php if (!empty($loadRecaptcha)): ?>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <?php endif; ?>
 </body>
 </html>

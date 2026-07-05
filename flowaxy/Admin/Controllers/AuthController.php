@@ -8,6 +8,7 @@ use Flowaxy\Core\Request;
 use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\AdminAuthService;
+use Flowaxy\Services\RecaptchaService;
 use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Support\LoginRateLimiter;
 
@@ -18,6 +19,7 @@ final class AuthController extends AdminController
         AdminAuthService $auth,
         private readonly LoginRateLimiter $loginRateLimiter,
         private readonly SecurityLogService $security,
+        private readonly RecaptchaService $recaptcha,
     ) {
         parent::__construct($view, $auth);
     }
@@ -55,12 +57,15 @@ final class AuthController extends AdminController
                 'message' => 'IP rate limit',
             ]);
 
-            return Response::html($this->view->renderAdmin('layout', [
-                'template' => 'login',
-                'title' => 'Вхід',
-                'error' => 'Забагато спроб. Спробуйте через 15 хвилин.',
-                'csrf' => $this->auth->csrfToken(),
-            ]));
+            return $this->loginError('Забагато спроб. Спробуйте через 15 хвилин.');
+        }
+
+        if (!$this->recaptcha->verifyRequest($request)) {
+            $this->security->log('login_captcha_failed', 'fraud', [
+                'message' => 'reCAPTCHA failed',
+            ]);
+
+            return $this->loginError('Підтвердіть перевірку reCAPTCHA.');
         }
 
         $username = trim((string) $request->post('username', ''));
@@ -78,10 +83,15 @@ final class AuthController extends AdminController
         $this->loginRateLimiter->hit();
         $this->security->log('login_failed', 'suspect', ['username' => $username]);
 
+        return $this->loginError('Невірний логін або пароль.');
+    }
+
+    private function loginError(string $error): Response
+    {
         return Response::html($this->view->renderAdmin('layout', [
             'template' => 'login',
             'title' => 'Вхід',
-            'error' => 'Невірний логін або пароль.',
+            'error' => $error,
             'csrf' => $this->auth->csrfToken(),
         ]));
     }

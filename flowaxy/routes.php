@@ -10,6 +10,7 @@ use Flowaxy\Admin\Controllers\OrdersController as AdminOrdersController;
 use Flowaxy\Admin\Controllers\ProductController as AdminProductController;
 use Flowaxy\Admin\Controllers\DatabaseController;
 use Flowaxy\Admin\Controllers\NotificationsController;
+use Flowaxy\Admin\Controllers\PagesController;
 use Flowaxy\Admin\Controllers\RatesController;
 use Flowaxy\Admin\Controllers\SecurityController;
 use Flowaxy\Admin\Controllers\SystemController;
@@ -47,6 +48,8 @@ return static function (Router $router): void {
     $router->post('/admin/database', DatabaseController::class . '::cleanup');
     $router->get('/admin/locales', LocalesController::class . '::index');
     $router->post('/admin/locales', LocalesController::class . '::save');
+    $router->get('/admin/pages', PagesController::class . '::index');
+    $router->post('/admin/pages', PagesController::class . '::save');
     $router->get('/admin/rates', RatesController::class . '::index');
     $router->post('/admin/rates', RatesController::class . '::update');
     $router->get('/admin/notifications', NotificationsController::class . '::index');

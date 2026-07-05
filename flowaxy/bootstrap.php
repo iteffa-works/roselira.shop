@@ -28,8 +28,10 @@ use Flowaxy\Services\CronService;
 use Flowaxy\Services\ExchangeService;
 use Flowaxy\Services\GitUpdateService;
 use Flowaxy\Services\LocaleService;
+use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\OrderService;
 use Flowaxy\Services\ProductFeedService;
+use Flowaxy\Services\RecaptchaService;
 use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
@@ -105,6 +107,17 @@ $container->singleton(SecurityRepositoryInterface::class, static fn(Container $c
 $container->singleton(SecurityLogService::class, static fn(Container $c): SecurityLogService => new SecurityLogService(
     $c->make(SecurityRepositoryInterface::class),
 ));
+
+$container->singleton(LegalPageService::class, static fn(Container $c): LegalPageService => new LegalPageService(
+    $c->make(SettingsRepositoryInterface::class),
+));
+
+$container->singleton(RecaptchaService::class, static function (Container $c) use ($config): RecaptchaService {
+    return new RecaptchaService(
+        (string) ($config['recaptcha_site_key'] ?? ''),
+        (string) ($config['recaptcha_secret_key'] ?? ''),
+    );
+});
 
 $container->singleton(OrderRateLimiter::class, static fn(Container $c): OrderRateLimiter => new OrderRateLimiter(
     $c->make(SecurityLogService::class),

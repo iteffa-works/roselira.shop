@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 5;
+    public const STRINGS_VERSION = 7;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -32,6 +32,8 @@ final class LocaleDefaults
             'order_error_name_length',
             'order_error_comment_length',
             'order_error_variant_inactive',
+            'order_error_captcha',
+            'footer_credit',
             'order_success',
         ];
     }
@@ -49,6 +51,7 @@ final class LocaleDefaults
             'footer_terms' => 'Terms',
             'footer_delivery' => 'Delivery & returns',
             'footer_contact' => 'Contact',
+            'footer_credit' => 'Made with love by Flowaxy Digital Studio',
             'meta_privacy_title' => 'Privacy Policy — Roselira',
             'meta_privacy_desc' => 'How Roselira collects and uses personal data when you place an order.',
             'meta_terms_title' => 'Terms of Service — Roselira',
@@ -97,6 +100,7 @@ final class LocaleDefaults
             'order_error_name_length' => 'Name is too long (max 100 characters).',
             'order_error_comment_length' => 'Comment is too long (max 500 characters).',
             'order_error_variant_inactive' => 'Selected shade is unavailable.',
+            'order_error_captcha' => 'Please confirm you are not a robot.',
         ];
     }
 
@@ -113,6 +117,7 @@ final class LocaleDefaults
             'footer_terms' => 'Умови',
             'footer_delivery' => 'Доставка',
             'footer_contact' => 'Контакт',
+            'footer_credit' => 'З любов\'ю Flowaxy Digital Studio',
             'meta_privacy_title' => 'Політика конфіденційності — Roselira',
             'meta_privacy_desc' => 'Як Roselira збирає та використовує персональні дані при замовленні.',
             'meta_terms_title' => 'Умови користування — Roselira',
@@ -161,6 +166,7 @@ final class LocaleDefaults
             'order_error_name_length' => 'Занадто довге ім\'я (макс. 100 символів).',
             'order_error_comment_length' => 'Занадто довгий коментар (макс. 500 символів).',
             'order_error_variant_inactive' => 'Обраний відтінок недоступний.',
+            'order_error_captcha' => 'Підтвердіть, що ви не робот.',
         ];
     }
 
@@ -177,6 +183,7 @@ final class LocaleDefaults
             'footer_terms' => 'Условия',
             'footer_delivery' => 'Доставка',
             'footer_contact' => 'Контакт',
+            'footer_credit' => 'С любовью Flowaxy Digital Studio',
             'meta_privacy_title' => 'Политика конфиденциальности — Roselira',
             'meta_privacy_desc' => 'Как Roselira собирает и использует персональные данные при заказе.',
             'meta_terms_title' => 'Условия использования — Roselira',
@@ -225,6 +232,7 @@ final class LocaleDefaults
             'order_error_name_length' => 'Слишком длинное имя (макс. 100 символов).',
             'order_error_comment_length' => 'Слишком длинный комментарий (макс. 500 символов).',
             'order_error_variant_inactive' => 'Выбранный оттенок недоступен.',
+            'order_error_captcha' => 'Подтвердите, что вы не робот.',
         ];
     }
 }

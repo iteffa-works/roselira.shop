@@ -74,6 +74,7 @@ final class ProductController
             'defaultVariant' => $defaultVariant,
             'hasRating' => $this->catalog->productHasRating($product),
             'showOrderForm' => $this->catalog->productUsesOrderForm($product),
+            'loadRecaptcha' => recaptcha_enabled() && $this->catalog->productUsesOrderForm($product),
         ]));
     }
 }

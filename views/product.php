@@ -142,7 +142,7 @@ $productJson = json_encode([
                 <?php endif; ?>
 
                 <?php if (!empty($showOrderForm)): ?>
-                <form class="order-form" data-order-form action="/order" method="post" novalidate data-error-network="<?= e(t('order_error_server')) ?>">
+                <form class="order-form" data-order-form action="/order" method="post" novalidate data-error-network="<?= e(t('order_error_server')) ?>" data-error-captcha="<?= e(t('order_error_captcha')) ?>">
                     <h2 class="order-form__title"><?= e(t('order_title')) ?></h2>
                     <input type="hidden" name="product_slug" value="<?= e($product['slug'] ?? '') ?>">
                     <input type="hidden" name="variant_id" value="<?= e($product['default_variant'] ?? '') ?>" data-variant-input>
@@ -164,6 +164,10 @@ $productJson = json_encode([
                         <span><?= e(t('order_comment')) ?></span>
                         <textarea name="comment" rows="3" placeholder="<?= e(t('order_comment_placeholder')) ?>"></textarea>
                     </label>
+
+                    <?php if (recaptcha_enabled()): ?>
+                    <?php $recaptchaClass = 'recaptcha-widget--order'; require __DIR__ . '/partials/recaptcha.php'; ?>
+                    <?php endif; ?>
 
                     <button type="submit" class="cta-button order-form__submit"><?= e(t('order_submit')) ?></button>
                     <p class="order-form__message" data-order-message hidden></p>

@@ -69,6 +69,18 @@ function app_config(): array
     return AppState::$config;
 }
 
+function recaptcha_site_key(): string
+{
+    return (string) (AppState::$config['recaptcha_site_key'] ?? '');
+}
+
+function recaptcha_enabled(): bool
+{
+    $config = AppState::$config;
+
+    return ($config['recaptcha_site_key'] ?? '') !== '' && ($config['recaptcha_secret_key'] ?? '') !== '';
+}
+
 function formatPrice(float $price, string $currency = 'UAH'): string
 {
     $symbols = ['USD' => '$', 'EUR' => '€', 'UAH' => '₴'];

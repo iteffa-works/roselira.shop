@@ -334,6 +334,18 @@
                 orderMessage.className = 'order-form__message';
             }
 
+            if (orderForm.querySelector('.g-recaptcha')) {
+                var captchaField = orderForm.querySelector('[name="g-recaptcha-response"]');
+                if (!captchaField || !captchaField.value) {
+                    if (orderMessage) {
+                        orderMessage.hidden = false;
+                        orderMessage.classList.add('is-error');
+                        orderMessage.textContent = orderForm.getAttribute('data-error-captcha') || 'Confirm captcha';
+                    }
+                    return;
+                }
+            }
+
             var submitButton = orderForm.querySelector('.order-form__submit');
             if (submitButton) {
                 submitButton.disabled = true;
@@ -393,6 +405,9 @@
                 .finally(function () {
                     if (submitButton) {
                         submitButton.disabled = false;
+                    }
+                    if (window.grecaptcha && orderForm.querySelector('.g-recaptcha')) {
+                        grecaptcha.reset();
                     }
                 });
         });

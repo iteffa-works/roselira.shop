@@ -4,5 +4,8 @@
     <input type="hidden" name="csrf" value="<?= e($csrf ?? '') ?>">
     <label>Логін <input type="text" name="username" required autocomplete="username"></label>
     <label>Пароль <input type="password" name="password" required autocomplete="current-password"></label>
+    <?php if (recaptcha_enabled()): ?>
+    <?php $recaptchaClass = 'recaptcha-widget--admin'; require dirname(__DIR__, 3) . '/views/partials/recaptcha.php'; ?>
+    <?php endif; ?>
     <button type="submit">Увійти</button>
 </form>

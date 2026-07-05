@@ -100,6 +100,8 @@ final class SecurityLogService
             'login_success' => 'Вхід OK',
             'login_failed' => 'Невірний логін',
             'login_rate_limited' => 'Ліміт входу',
+            'login_captcha_failed' => 'reCAPTCHA (вхід)',
+            'order_captcha_failed' => 'reCAPTCHA (замовлення)',
         ];
     }
 

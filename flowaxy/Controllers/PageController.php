@@ -6,8 +6,8 @@ namespace Flowaxy\Controllers;
 
 use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
+use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\LocaleService;
-use Flowaxy\Support\LegalContent;
 
 final class PageController
 {
@@ -21,6 +21,7 @@ final class PageController
     public function __construct(
         private readonly View $view,
         private readonly LocaleService $locale,
+        private readonly LegalPageService $legalPages,
     ) {
     }
 
@@ -51,7 +52,7 @@ final class PageController
             'canonicalPath' => '/' . $page,
             'content' => 'legal/page',
             'pageHeading' => $this->locale->t($meta['title']),
-            'legalSections' => LegalContent::sections($page, $locale),
+            'legalSections' => $this->legalPages->getSections($page, $locale),
         ]));
     }
 }

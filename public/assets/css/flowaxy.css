@@ -745,6 +745,20 @@ a {
     overflow: hidden;
 }
 
+.recaptcha-widget {
+    margin: 0.25rem 0 0.75rem;
+}
+
+.recaptcha-widget--order {
+    transform-origin: 0 0;
+}
+
+@media (max-width: 400px) {
+    .recaptcha-widget--order {
+        transform: scale(0.92);
+    }
+}
+
 .order-form__message {
     margin-top: 0.75rem;
     font-size: 0.875rem;
@@ -1027,6 +1041,13 @@ a {
     margin: 0;
     font-size: 0.8125rem;
     opacity: 0.7;
+}
+
+.site-footer__credit {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.55;
+    letter-spacing: 0.01em;
 }
 
 .legal-page {

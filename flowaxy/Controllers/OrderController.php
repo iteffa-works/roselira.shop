@@ -8,6 +8,7 @@ use Flowaxy\Core\Request;
 use Flowaxy\Core\Response;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\OrderService;
+use Flowaxy\Services\RecaptchaService;
 use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Support\AppState;
 use Flowaxy\Support\OrderRateLimiter;
@@ -18,6 +19,7 @@ final class OrderController
         private readonly OrderService $orders,
         private readonly OrderRateLimiter $rateLimiter,
         private readonly SecurityLogService $security,
+        private readonly RecaptchaService $recaptcha,
     ) {
     }
 
@@ -36,6 +38,17 @@ final class OrderController
                 'success' => false,
                 'message' => AppState::$locale->t('order_error_rate_limit'),
             ], 429);
+        }
+
+        if (!$this->recaptcha->verifyRequest($request)) {
+            $this->security->log('order_captcha_failed', 'fraud', [
+                'message' => 'reCAPTCHA failed',
+            ]);
+
+            return Response::json([
+                'success' => false,
+                'message' => AppState::$locale->t('order_error_captcha'),
+            ], 422);
         }
 
         $result = $this->orders->createFromRequest($request);

@@ -8,6 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/admin.css') ?>">
+    <?php if (($template ?? '') === 'login' && recaptcha_enabled()): ?>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <?php endif; ?>
 </head>
 <body class="admin<?= isset($template) && $template === 'login' ? ' admin--auth' : '' ?>"<?= ($template ?? '') !== 'login' && ($template ?? '') !== 'install' ? ' data-admin-shell' : '' ?>>
 <?php if (!empty($flash)): ?>
@@ -38,6 +41,7 @@ $nav = [
     'orders' => ['label' => 'Замовлення', 'url' => admin_url('orders')],
     'catalog' => ['label' => 'Каталог', 'url' => admin_url('catalog')],
     'locales' => ['label' => 'Тексти UI', 'url' => admin_url('locales')],
+    'pages' => ['label' => 'Сторінки', 'url' => admin_url('pages')],
     'rates' => ['label' => 'Курси', 'url' => admin_url('rates')],
     'notifications' => ['label' => 'Сповіщення', 'url' => admin_url('notifications')],
     'database' => ['label' => 'База даних', 'url' => admin_url('database')],

@@ -26,6 +26,8 @@ return [
     'git_branch' => trim((string) (flowaxy_env('GIT_BRANCH', 'main') ?? '')),
     'git_binary' => trim((string) (flowaxy_env('GIT_BINARY', '') ?? '')),
     'cron_secret' => trim((string) (flowaxy_env('CRON_SECRET', '') ?? '')),
+    'recaptcha_site_key' => trim((string) (flowaxy_env('RECAPTCHA_SITE_KEY', '') ?? '')),
+    'recaptcha_secret_key' => trim((string) (flowaxy_env('RECAPTCHA_SECRET_KEY', '') ?? '')),
 
     'views_path' => $basePath . '/views',
     'admin_views_path' => __DIR__ . '/Admin/Views',
