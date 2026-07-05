@@ -416,20 +416,52 @@
     selectVariant(activeVariantId);
     updateSwatchTrackFade();
 
-    document.querySelectorAll('[data-product-accordion]').forEach(function (root) {
-        var items = root.querySelectorAll('.product-accordion__item');
+    document.querySelectorAll('[data-product-tabs]').forEach(function (root) {
+        var tabs = root.querySelectorAll('.product-tabs__tab');
+        var panels = root.querySelectorAll('.product-tabs__panel');
 
-        items.forEach(function (item) {
-            item.addEventListener('toggle', function () {
-                if (!item.open) {
+        function activateTab(tab) {
+            var section = tab.getAttribute('data-section');
+            if (!section) {
+                return;
+            }
+
+            tabs.forEach(function (item) {
+                var isActive = item === tab;
+                item.classList.toggle('is-active', isActive);
+                item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            panels.forEach(function (panel) {
+                var isActive = panel.getAttribute('data-section') === section;
+                panel.classList.toggle('is-active', isActive);
+                panel.hidden = !isActive;
+            });
+        }
+
+        tabs.forEach(function (tab, index) {
+            tab.addEventListener('click', function () {
+                activateTab(tab);
+            });
+
+            tab.addEventListener('keydown', function (event) {
+                var nextIndex = index;
+
+                if (event.key === 'ArrowRight') {
+                    nextIndex = (index + 1) % tabs.length;
+                } else if (event.key === 'ArrowLeft') {
+                    nextIndex = (index - 1 + tabs.length) % tabs.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = tabs.length - 1;
+                } else {
                     return;
                 }
 
-                items.forEach(function (other) {
-                    if (other !== item) {
-                        other.open = false;
-                    }
-                });
+                event.preventDefault();
+                tabs[nextIndex].focus();
+                activateTab(tabs[nextIndex]);
             });
         });
     });

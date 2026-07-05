@@ -199,28 +199,39 @@ $productJson = json_encode([
                     $activeSections[] = $sectionKey;
                 }
             }
-            $splitAt = (int) ceil(count($activeSections) / 2);
-            $accordionColumns = array_values(array_filter([
-                array_slice($activeSections, 0, $splitAt),
-                array_slice($activeSections, $splitAt),
-            ], static fn(array $column): bool => $column !== []));
         ?>
         <section class="landing__details">
-            <div class="product-accordion" data-product-accordion>
-                <?php foreach ($accordionColumns as $columnKeys): ?>
-                <div class="product-accordion__col">
-                    <?php foreach ($columnKeys as $sectionKey): ?>
-                    <details class="product-accordion__item" data-section="<?= e($sectionKey) ?>"<?= $sectionKey === 'description' ? ' open' : '' ?>>
-                        <summary class="product-accordion__summary">
-                            <span class="product-accordion__icon" aria-hidden="true"></span>
-                            <span class="product-accordion__label"><?= e(t('section_' . $sectionKey)) ?></span>
-                            <span class="product-accordion__chevron" aria-hidden="true"></span>
-                        </summary>
-                        <div class="product-accordion__body"><?= nl2br(e((string) $sections[$sectionKey])) ?></div>
-                    </details>
+            <div class="product-tabs" data-product-tabs>
+                <div class="product-tabs__nav" role="tablist" aria-label="<?= e(t('description_title')) ?>">
+                    <?php foreach ($activeSections as $index => $sectionKey): ?>
+                    <button
+                        type="button"
+                        class="product-tabs__tab<?= $index === 0 ? ' is-active' : '' ?>"
+                        role="tab"
+                        id="product-tab-<?= e($sectionKey) ?>"
+                        aria-selected="<?= $index === 0 ? 'true' : 'false' ?>"
+                        aria-controls="product-panel-<?= e($sectionKey) ?>"
+                        data-section="<?= e($sectionKey) ?>"
+                    >
+                        <span class="product-tabs__icon" aria-hidden="true"></span>
+                        <span class="product-tabs__label"><?= e(t('section_' . $sectionKey)) ?></span>
+                    </button>
                     <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
+                <div class="product-tabs__panels">
+                    <?php foreach ($activeSections as $index => $sectionKey): ?>
+                    <div
+                        class="product-tabs__panel<?= $index === 0 ? ' is-active' : '' ?>"
+                        role="tabpanel"
+                        id="product-panel-<?= e($sectionKey) ?>"
+                        aria-labelledby="product-tab-<?= e($sectionKey) ?>"
+                        data-section="<?= e($sectionKey) ?>"
+                        <?= $index !== 0 ? ' hidden' : '' ?>
+                    >
+                        <div class="product-tabs__content"><?= nl2br(e((string) $sections[$sectionKey])) ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </section>
         <?php elseif (!empty($product['description'])): ?>
