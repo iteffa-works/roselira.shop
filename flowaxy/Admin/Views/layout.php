@@ -8,12 +8,18 @@
     <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/admin.css') ?>">
+    <?php require __DIR__ . '/partials/tracking.php'; ?>
     <?php if (($template ?? '') === 'login' && recaptcha_enabled()): ?>
     <script src="<?= asset('assets/js/recaptcha.js') ?>"></script>
     <script src="https://www.google.com/recaptcha/api.js?onload=flowaxyInitRecaptcha&render=explicit" async defer></script>
     <?php endif; ?>
 </head>
 <body class="admin<?= isset($template) && ($template === 'login' || $template === 'install') ? ' admin--auth' : '' ?>"<?= ($template ?? '') !== 'login' && ($template ?? '') !== 'install' ? ' data-admin-shell' : '' ?>>
+<?php
+$adminGtmId = (string) (app_config()['gtm_container_id'] ?? '');
+if ($adminGtmId !== ''): ?>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?= e($adminGtmId) ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<?php endif; ?>
 <?php if (!empty($flash)): ?>
 <div class="admin-flash admin-flash--<?= e($flash['type'] ?? 'info') ?>"><?= e($flash['message'] ?? '') ?></div>
 <?php endif; ?>
@@ -103,6 +109,9 @@ $nav = [
     </div>
 </div>
 <script src="<?= asset('assets/js/admin.js') ?>" defer></script>
+<?php endif; ?>
+<?php if (!empty(app_config()['gtm_container_id']) || !empty(app_config()['ga4_measurement_id'])): ?>
+<script src="<?= asset('assets/js/admin-analytics.js') ?>" defer></script>
 <?php endif; ?>
 </body>
 </html>
