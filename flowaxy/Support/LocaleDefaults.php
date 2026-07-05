@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 8;
+    public const STRINGS_VERSION = 9;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -34,6 +34,12 @@ final class LocaleDefaults
             'order_error_variant_inactive',
             'order_error_captcha',
             'footer_credit',
+            'footer_copy',
+            'footer_nav_label',
+            'cookie_title',
+            'cookie_banner_text',
+            'cookie_accept',
+            'cookie_reject',
             'order_success',
         ];
     }
@@ -47,9 +53,11 @@ final class LocaleDefaults
             'reviews' => 'reviews',
             'rating_of' => ':rating of :max',
             'footer_credit' => 'Made with love by',
-            'footer_privacy' => 'Privacy',
-            'footer_terms' => 'Terms',
-            'footer_delivery' => 'Delivery & returns',
+            'footer_copy' => '© :year Roselira · product catalog',
+            'footer_nav_label' => 'Footer links',
+            'footer_privacy' => 'Privacy Policy',
+            'footer_terms' => 'Terms of Use',
+            'footer_delivery' => 'Delivery',
             'footer_contact' => 'Contact',
             'meta_privacy_title' => 'Privacy Policy — Roselira',
             'meta_privacy_desc' => 'How Roselira collects and uses personal data when you place an order.',
@@ -57,8 +65,9 @@ final class LocaleDefaults
             'meta_terms_desc' => 'Terms for using roselira.shop and placing orders.',
             'meta_delivery_title' => 'Delivery & Returns — Roselira',
             'meta_delivery_desc' => 'Shipping, payment and return policy for Roselira orders.',
-            'cookie_banner_text' => 'We use cookies for language, theme and analytics (after consent).',
-            'cookie_accept' => 'Accept',
+            'cookie_title' => 'Cookies',
+            'cookie_banner_text' => 'We use cookies for language, theme, and analytics — only after you consent.',
+            'cookie_accept' => 'Accept all',
             'cookie_reject' => 'Essential only',
             'not_found_text' => 'The requested product was not found.',
             'not_found_back' => 'Back to catalog',
@@ -111,7 +120,8 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригінальна косметика KIKO Milano та аксесуари — перегляд і швидке замовлення онлайн.',
             'reviews' => 'відгуків',
             'rating_of' => ':rating з :max',
-            'footer' => '© Roselira — roselira.shop',
+            'footer_copy' => '© :year Roselira · каталог товарів',
+            'footer_nav_label' => 'Посилання сайту',
             'footer_privacy' => 'Конфіденційність',
             'footer_terms' => 'Умови',
             'footer_delivery' => 'Доставка',
@@ -123,8 +133,9 @@ final class LocaleDefaults
             'meta_terms_desc' => 'Умови використання сайту roselira.shop та оформлення замовлень.',
             'meta_delivery_title' => 'Доставка та повернення — Roselira',
             'meta_delivery_desc' => 'Доставка, оплата та повернення товарів Roselira.',
-            'cookie_banner_text' => 'Ми використовуємо cookies для мови, теми та аналітики (після згоди).',
-            'cookie_accept' => 'Прийняти',
+            'cookie_title' => 'Файли cookie',
+            'cookie_banner_text' => 'Ми використовуємо cookies для мови, теми та аналітики — лише після вашої згоди.',
+            'cookie_accept' => 'Прийняти все',
             'cookie_reject' => 'Лише необхідні',
             'not_found_text' => 'Запрошений товар не знайдено.',
             'not_found_back' => 'До каталогу',
@@ -177,7 +188,8 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригинальная косметика KIKO Milano и аксессуары — просмотр и быстрый заказ онлайн.',
             'reviews' => 'отзывов',
             'rating_of' => ':rating из :max',
-            'footer' => '© Roselira — roselira.shop',
+            'footer_copy' => '© :year Roselira · каталог товаров',
+            'footer_nav_label' => 'Ссылки сайта',
             'footer_privacy' => 'Конфиденциальность',
             'footer_terms' => 'Условия',
             'footer_delivery' => 'Доставка',
@@ -189,8 +201,9 @@ final class LocaleDefaults
             'meta_terms_desc' => 'Условия использования сайта roselira.shop и оформления заказов.',
             'meta_delivery_title' => 'Доставка и возврат — Roselira',
             'meta_delivery_desc' => 'Доставка, оплата и возврат товаров Roselira.',
-            'cookie_banner_text' => 'Мы используем cookies для языка, темы и аналитики (после согласия).',
-            'cookie_accept' => 'Принять',
+            'cookie_title' => 'Файлы cookie',
+            'cookie_banner_text' => 'Мы используем cookies для языка, темы и аналитики — только после вашего согласия.',
+            'cookie_accept' => 'Принять все',
             'cookie_reject' => 'Только необходимые',
             'not_found_text' => 'Запрошенный товар не найден.',
             'not_found_back' => 'В каталог',
