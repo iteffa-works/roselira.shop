@@ -136,6 +136,46 @@ final class Connection
             );
 
             CREATE INDEX IF NOT EXISTS idx_rate_limit_scope_ip ON rate_limit_hits(scope, ip, created_at DESC);
+
+            CREATE TABLE IF NOT EXISTS visitor_sessions (
+                id TEXT PRIMARY KEY NOT NULL,
+                created_at TEXT NOT NULL,
+                last_seen_at TEXT NOT NULL,
+                ip TEXT NOT NULL,
+                user_agent TEXT NOT NULL DEFAULT '',
+                browser TEXT NOT NULL DEFAULT '',
+                device_type TEXT NOT NULL DEFAULT '',
+                referrer TEXT NOT NULL DEFAULT '',
+                landing_path TEXT NOT NULL DEFAULT '/',
+                locale TEXT NOT NULL DEFAULT '',
+                screen_w INTEGER NOT NULL DEFAULT 0,
+                screen_h INTEGER NOT NULL DEFAULT 0,
+                viewport_w INTEGER NOT NULL DEFAULT 0,
+                viewport_h INTEGER NOT NULL DEFAULT 0,
+                page_views INTEGER NOT NULL DEFAULT 0,
+                events_count INTEGER NOT NULL DEFAULT 0,
+                duration_sec INTEGER NOT NULL DEFAULT 0,
+                is_bot INTEGER NOT NULL DEFAULT 0
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_visitor_sessions_created_at ON visitor_sessions(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_visitor_sessions_last_seen ON visitor_sessions(last_seen_at DESC);
+
+            CREATE TABLE IF NOT EXISTS visitor_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                path TEXT NOT NULL DEFAULT '/',
+                x_pct REAL,
+                y_pct REAL,
+                scroll_pct REAL,
+                meta TEXT NOT NULL DEFAULT '{}',
+                FOREIGN KEY (session_id) REFERENCES visitor_sessions(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_visitor_events_session ON visitor_events(session_id, created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_visitor_events_path_type ON visitor_events(path, event_type, created_at DESC);
             SQL);
     }
 
@@ -245,6 +285,8 @@ final class Connection
             'products' => (int) $pdo->query('SELECT COUNT(*) FROM products')->fetchColumn(),
             'locale_strings' => (int) $pdo->query('SELECT COUNT(*) FROM locale_strings')->fetchColumn(),
             'security_events' => (int) $pdo->query('SELECT COUNT(*) FROM security_events')->fetchColumn(),
+            'visitor_sessions' => (int) $pdo->query('SELECT COUNT(*) FROM visitor_sessions')->fetchColumn(),
+            'visitor_events' => (int) $pdo->query('SELECT COUNT(*) FROM visitor_events')->fetchColumn(),
         ];
     }
 

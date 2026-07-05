@@ -21,7 +21,9 @@ use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
 use Flowaxy\Repositories\Sqlite\SqliteOrderRepository;
 use Flowaxy\Repositories\Sqlite\SqliteSettingsRepository;
 use Flowaxy\Repositories\Contracts\SecurityRepositoryInterface;
+use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
 use Flowaxy\Repositories\Sqlite\SqliteSecurityRepository;
+use Flowaxy\Repositories\Sqlite\SqliteVisitorRepository;
 use Flowaxy\Services\AdminAuthService;
 use Flowaxy\Services\CatalogService;
 use Flowaxy\Services\CronService;
@@ -37,6 +39,7 @@ use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
+use Flowaxy\Services\VisitorAnalyticsService;
 use Flowaxy\Support\OrderRateLimiter;
 use Flowaxy\Support\LoginRateLimiter;
 
@@ -102,6 +105,12 @@ $container->singleton(LocaleService::class, static function (Container $c) use (
 $container->singleton(CatalogService::class, static fn(Container $c): CatalogService => new CatalogService(
     $c->make(CatalogRepositoryInterface::class),
     $c->make(LocaleService::class),
+));
+
+$container->singleton(VisitorRepositoryInterface::class, static fn(Container $c): SqliteVisitorRepository => new SqliteVisitorRepository($c->make(Connection::class)));
+
+$container->singleton(VisitorAnalyticsService::class, static fn(Container $c): VisitorAnalyticsService => new VisitorAnalyticsService(
+    $c->make(VisitorRepositoryInterface::class),
 ));
 
 $container->singleton(SecurityRepositoryInterface::class, static fn(Container $c): SqliteSecurityRepository => new SqliteSecurityRepository($c->make(Connection::class)));
@@ -184,6 +193,7 @@ $container->singleton(CronService::class, static fn(Container $c): CronService =
     $c->make(SystemCheckService::class),
     $c->make(SeoFilesService::class),
     $c->make(SettingsRepositoryInterface::class),
+    $c->make(VisitorAnalyticsService::class),
 ));
 
 $container->singleton(AdminAuthService::class, static function (Container $c) use ($config): AdminAuthService {

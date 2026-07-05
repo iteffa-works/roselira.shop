@@ -156,6 +156,7 @@
     <?php endif; ?>
 
     <script src="<?= asset('assets/js/flowaxy.js') ?>" defer></script>
+    <script src="<?= asset('assets/js/visitor-track.js') ?>" defer></script>
     <?php if ($hasTracking): ?>
     <script src="<?= asset('assets/js/consent.js') ?>" defer></script>
     <script src="<?= asset('assets/js/analytics.js') ?>" defer></script>

@@ -19,12 +19,13 @@ use Flowaxy\Controllers\HomeController;
 use Flowaxy\Controllers\OrderController;
 use Flowaxy\Controllers\PageController;
 use Flowaxy\Controllers\ProductController;
-use Flowaxy\Controllers\SeoController;
+use Flowaxy\Controllers\TrackController;
 use Flowaxy\Core\Router;
 
 return static function (Router $router): void {
     $router->get('/', HomeController::class . '::index');
     $router->post('/order', OrderController::class . '::store');
+    $router->post('/track', TrackController::class . '::collect');
     $router->get('/privacy', PageController::class . '::privacy');
     $router->get('/terms', PageController::class . '::terms');
     $router->get('/delivery', PageController::class . '::delivery');

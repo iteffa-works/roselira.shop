@@ -53,6 +53,8 @@ use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
 use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
 use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
+use Flowaxy\Repositories\Sqlite\SqliteVisitorRepository;
+use Flowaxy\Services\VisitorAnalyticsService;
 use Flowaxy\Support\AppState;
 
 Autoloader::boot(__DIR__);
@@ -96,7 +98,8 @@ $systemCheck = new SystemCheckService(
 );
 $sitemap = new SitemapService($catalog);
 $seoFiles = new SeoFilesService($sitemap, $config['project_root']);
-$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $settings);
+$visitorAnalytics = new VisitorAnalyticsService(new SqliteVisitorRepository($connection));
+$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $settings, $visitorAnalytics);
 
 $result = $cron->runDaily(forceDaily: true, source: $isCli ? CronService::SOURCE_CLI : CronService::SOURCE_HTTP);
 

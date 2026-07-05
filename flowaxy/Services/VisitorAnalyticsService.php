@@ -1,0 +1,162 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Flowaxy\Services;
+
+use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
+use Flowaxy\Support\RequestContext;
+
+final class VisitorAnalyticsService
+{
+    private const MAX_EVENTS_PER_REQUEST = 80;
+    private const RETENTION_DAYS = 90;
+
+    public function __construct(
+        private readonly VisitorRepositoryInterface $visitors,
+    ) {
+    }
+
+    /** @param array<string, mixed> $payload */
+    public function collect(array $payload): bool
+    {
+        $sessionId = trim((string) ($payload['session_id'] ?? ''));
+        if ($sessionId === '' || !preg_match('/^[a-f0-9-]{16,64}$/i', $sessionId)) {
+            return false;
+        }
+
+        $events = $payload['events'] ?? [];
+        if (!is_array($events) || $events === []) {
+            return false;
+        }
+
+        $events = array_slice($events, 0, self::MAX_EVENTS_PER_REQUEST);
+        $normalized = [];
+
+        foreach ($events as $event) {
+            if (!is_array($event)) {
+                continue;
+            }
+
+            $type = (string) ($event['type'] ?? $event['event_type'] ?? '');
+            $path = $this->normalizePath((string) ($event['path'] ?? '/'));
+            if ($type === '' || str_starts_with($path, '/admin')) {
+                continue;
+            }
+
+            $row = [
+                'event_type' => $type,
+                'path' => $path,
+                'meta' => is_array($event['meta'] ?? null) ? $event['meta'] : [],
+            ];
+
+            if (isset($event['x_pct'])) {
+                $row['x_pct'] = $this->clampPct((float) $event['x_pct']);
+            }
+            if (isset($event['y_pct'])) {
+                $row['y_pct'] = $this->clampPct((float) $event['y_pct']);
+            }
+            if (isset($event['scroll_pct'])) {
+                $row['scroll_pct'] = $this->clampPct((float) $event['scroll_pct']);
+            }
+            if (isset($event['duration_sec'])) {
+                $row['duration_sec'] = max(0, min(86400, (int) $event['duration_sec']));
+            }
+            if (!empty($event['tag'])) {
+                $row['meta']['tag'] = mb_substr((string) $event['tag'], 0, 32);
+            }
+
+            $normalized[] = $row;
+        }
+
+        if ($normalized === []) {
+            return false;
+        }
+
+        $ua = RequestContext::userAgent();
+        $browser = RequestContext::browserLabel($ua);
+        $isBot = $browser === 'Bot' ? 1 : 0;
+
+        $sessionMeta = [
+            'ip' => RequestContext::clientIp(),
+            'user_agent' => $ua,
+            'browser' => $browser,
+            'device_type' => $this->deviceType($ua),
+            'referrer' => mb_substr((string) ($payload['referrer'] ?? ''), 0, 512),
+            'landing_path' => $this->normalizePath((string) ($payload['landing_path'] ?? ($normalized[0]['path'] ?? '/'))),
+            'locale' => mb_substr((string) ($payload['locale'] ?? ''), 0, 8),
+            'screen_w' => max(0, (int) ($payload['screen_w'] ?? 0)),
+            'screen_h' => max(0, (int) ($payload['screen_h'] ?? 0)),
+            'viewport_w' => max(0, (int) ($payload['viewport_w'] ?? 0)),
+            'viewport_h' => max(0, (int) ($payload['viewport_h'] ?? 0)),
+            'is_bot' => $isBot,
+        ];
+
+        if ($isBot === 1) {
+            return false;
+        }
+
+        $this->visitors->ingest($sessionId, $sessionMeta, $normalized);
+
+        return true;
+    }
+
+    /** @return array<string, mixed> */
+    public function dashboard(int $days = 7, string $heatmapPath = '/'): array
+    {
+        $days = max(1, min(90, $days));
+        $heatmapPath = $this->normalizePath($heatmapPath);
+        $topPages = $this->visitors->topPages($days);
+
+        if ($heatmapPath === '/' && $topPages !== []) {
+            $heatmapPath = $topPages[0]['path'];
+        }
+
+        return [
+            'days' => $days,
+            'summary' => $this->visitors->dashboardSummary($days),
+            'chart' => $this->visitors->dailyChart($days),
+            'top_pages' => $topPages,
+            'browsers' => $this->visitors->breakdown('browser', $days),
+            'devices' => $this->visitors->breakdown('device_type', $days),
+            'locales' => $this->visitors->breakdown('locale', $days),
+            'referrers' => $this->visitors->topReferrers($days),
+            'heatmap_path' => $heatmapPath,
+            'heatmap' => $this->visitors->heatmap($heatmapPath, $days),
+            'recent_sessions' => $this->visitors->recentSessions(12),
+        ];
+    }
+
+    public function purgeOld(): int
+    {
+        return $this->visitors->purgeOlderThan(self::RETENTION_DAYS);
+    }
+
+    private function normalizePath(string $path): string
+    {
+        $path = '/' . trim($path, '/');
+        if ($path === '//') {
+            return '/';
+        }
+
+        return mb_substr($path !== '/' ? rtrim($path, '/') ?: '/' : '/', 0, 255);
+    }
+
+    private function clampPct(float $value): float
+    {
+        return max(0.0, min(100.0, round($value, 1)));
+    }
+
+    private function deviceType(string $ua): string
+    {
+        $ua = strtolower($ua);
+        if (str_contains($ua, 'mobile') || str_contains($ua, 'iphone') || str_contains($ua, 'android')) {
+            return 'Mobile';
+        }
+        if (str_contains($ua, 'ipad') || str_contains($ua, 'tablet')) {
+            return 'Tablet';
+        }
+
+        return 'Desktop';
+    }
+}

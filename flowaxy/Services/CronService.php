@@ -32,6 +32,7 @@ final class CronService
         private readonly SystemCheckService $systemCheck,
         private readonly SeoFilesService $seoFiles,
         private readonly SettingsRepositoryInterface $settings,
+        private readonly VisitorAnalyticsService $visitorAnalytics,
     ) {
     }
 
@@ -82,6 +83,11 @@ final class CronService
         if (!$seo['success']) {
             $hasError = true;
         }
+
+        $lines[] = '';
+        $lines[] = '=== Analytics retention ===';
+        $purged = $this->visitorAnalytics->purgeOld();
+        $lines[] = 'Purged sessions older than retention: ' . $purged;
 
         $output = implode("\n", $lines);
         $message = $hasError ? 'Cron завершено з помилками.' : 'Cron виконано успішно.';
