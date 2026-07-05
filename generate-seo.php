@@ -8,46 +8,16 @@ declare(strict_types=1);
  * CLI: php generate-seo.php
  */
 
-require_once __DIR__ . '/flowaxy/Support/env.php';
+$projectRoot = __DIR__;
+require_once $projectRoot . '/flowaxy/cli-bootstrap.php';
 
-flowaxy_load_env(__DIR__ . '/.env');
-require_once __DIR__ . '/flowaxy/Support/helpers.php';
-require_once __DIR__ . '/flowaxy/Support/AppState.php';
-require_once __DIR__ . '/flowaxy/Core/Autoloader.php';
+$ctx = flowaxy_cli_bootstrap($projectRoot);
 
-use Flowaxy\Core\Autoloader;
-use Flowaxy\Repositories\Sqlite\Connection;
-use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
-use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
-use Flowaxy\Services\CatalogService;
-use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\SeoFilesService;
 use Flowaxy\Services\SitemapService;
-use Flowaxy\Support\AppState;
 
-Autoloader::boot(__DIR__);
-
-$config = require __DIR__ . '/flowaxy/config.php';
-AppState::$config = $config;
-
-$connection = new Connection(
-    $config['storage_path'] . '/roselira.db',
-    $config['storage_path'] . '/roselira.sql',
-);
-$connection->restoreFromDumpIfEmpty();
-
-$localeRepo = new SqliteLocaleRepository($connection);
-$locale = new LocaleService(
-    $localeRepo,
-    $config['locales_public'],
-    $config['locale_fallback'],
-    $config['locale_default'],
-    $config['locale_cookie'],
-    $config['locale_editable'],
-);
-$catalog = new CatalogService(new SqliteCatalogRepository($connection), $locale);
-$sitemap = new SitemapService($catalog);
-$seoFiles = new SeoFilesService($sitemap, $config['project_root']);
+$sitemap = new SitemapService($ctx['catalog']);
+$seoFiles = new SeoFilesService($sitemap, $ctx['config']['project_root']);
 
 $result = $seoFiles->sync();
 

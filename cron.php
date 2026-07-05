@@ -11,11 +11,12 @@ declare(strict_types=1);
  * Crontab: 0 4 * * * /usr/bin/php /path/to/roselira.shop/cron.php
  */
 
-require_once __DIR__ . '/flowaxy/Support/env.php';
-
-flowaxy_load_env(__DIR__ . '/.env');
-
+$projectRoot = __DIR__;
 $isCli = PHP_SAPI === 'cli';
+
+require_once $projectRoot . '/flowaxy/Support/env.php';
+flowaxy_load_env($projectRoot . '/.env');
+
 $secret = trim((string) (flowaxy_env('CRON_SECRET', '') ?? ''));
 
 if (!$isCli) {
@@ -35,71 +36,41 @@ if (!$isCli) {
     }
 }
 
-require_once __DIR__ . '/flowaxy/Support/helpers.php';
-require_once __DIR__ . '/flowaxy/Support/AppState.php';
-require_once __DIR__ . '/flowaxy/Core/Autoloader.php';
+require_once $projectRoot . '/flowaxy/cli-bootstrap.php';
 
-use Flowaxy\Core\Autoloader;
-use Flowaxy\Repositories\Sqlite\Connection;
-use Flowaxy\Repositories\Sqlite\SqliteSettingsRepository;
-use Flowaxy\Services\CatalogService;
+$ctx = flowaxy_cli_bootstrap($projectRoot);
+
+use Flowaxy\Repositories\Sqlite\SqliteVisitorRepository;
 use Flowaxy\Services\CronService;
 use Flowaxy\Services\GitUpdateService;
-use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\ProductFeedService;
 use Flowaxy\Services\SeoFilesService;
 use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
-use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
-use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
-use Flowaxy\Repositories\Sqlite\SqliteVisitorRepository;
 use Flowaxy\Services\VisitorAnalyticsService;
-use Flowaxy\Support\AppState;
 
-Autoloader::boot(__DIR__);
-
-$config = require __DIR__ . '/flowaxy/config.php';
-AppState::$config = $config;
-
-$connection = new Connection(
-    $config['storage_path'] . '/roselira.db',
-    $config['storage_path'] . '/roselira.sql',
-);
-$connection->restoreFromDumpIfEmpty();
-
-$settings = new SqliteSettingsRepository($connection);
-$catalogRepo = new SqliteCatalogRepository($connection);
-$localeRepo = new SqliteLocaleRepository($connection);
-$locale = new LocaleService(
-    $localeRepo,
-    $config['locales_public'],
-    $config['locale_fallback'],
-    $config['locale_default'],
-    $config['locale_cookie'],
-    $config['locale_editable'],
-);
-$catalog = new CatalogService($catalogRepo, $locale);
-$feeds = new ProductFeedService($catalog);
-$telegram = new TelegramNotificationService($settings);
+$config = $ctx['config'];
+$feeds = new ProductFeedService($ctx['catalog']);
+$telegram = new TelegramNotificationService($ctx['settings']);
 $gitUpdate = new GitUpdateService(
-    $settings,
+    $ctx['settings'],
     $config['project_root'],
     $config['git_repo_url'],
     $config['git_branch'],
     (string) ($config['git_binary'] ?? ''),
 );
 $systemCheck = new SystemCheckService(
-    $catalog,
+    $ctx['catalog'],
     $feeds,
     $telegram,
-    $settings,
+    $ctx['settings'],
     $config['project_root'],
 );
-$sitemap = new SitemapService($catalog);
+$sitemap = new SitemapService($ctx['catalog']);
 $seoFiles = new SeoFilesService($sitemap, $config['project_root']);
-$visitorAnalytics = new VisitorAnalyticsService(new SqliteVisitorRepository($connection));
-$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $settings, $visitorAnalytics);
+$visitorAnalytics = new VisitorAnalyticsService(new SqliteVisitorRepository($ctx['connection']));
+$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $ctx['settings'], $visitorAnalytics);
 
 $result = $cron->runDaily(forceDaily: true, source: $isCli ? CronService::SOURCE_CLI : CronService::SOURCE_HTTP);
 
