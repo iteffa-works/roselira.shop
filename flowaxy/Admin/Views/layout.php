@@ -9,29 +9,47 @@
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/admin.css') ?>">
     <?php if (($template ?? '') === 'login' && recaptcha_enabled()): ?>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="<?= asset('assets/js/recaptcha.js') ?>"></script>
+    <script src="https://www.google.com/recaptcha/api.js?onload=flowaxyInitRecaptcha&render=explicit" async defer></script>
     <?php endif; ?>
 </head>
-<body class="admin<?= isset($template) && $template === 'login' ? ' admin--auth' : '' ?>"<?= ($template ?? '') !== 'login' && ($template ?? '') !== 'install' ? ' data-admin-shell' : '' ?>>
+<body class="admin<?= isset($template) && ($template === 'login' || $template === 'install') ? ' admin--auth' : '' ?>"<?= ($template ?? '') !== 'login' && ($template ?? '') !== 'install' ? ' data-admin-shell' : '' ?>>
 <?php if (!empty($flash)): ?>
 <div class="admin-flash admin-flash--<?= e($flash['type'] ?? 'info') ?>"><?= e($flash['message'] ?? '') ?></div>
 <?php endif; ?>
 
 <?php if (($template ?? '') === 'login' || ($template ?? '') === 'install'): ?>
 <main class="admin-auth">
+    <div class="admin-auth__backdrop" aria-hidden="true"></div>
+    <div class="admin-auth__panel">
     <?php if (($template ?? '') === 'login'): ?>
         <?php require __DIR__ . '/login_form.php'; ?>
     <?php else: ?>
-        <h1>Налаштування адмінки</h1>
-        <?php if (!empty($error)): ?><p class="admin-error"><?= e($error) ?></p><?php endif; ?>
-        <form method="post" class="admin-form">
-            <input type="hidden" name="csrf" value="<?= e($csrf ?? '') ?>">
-            <label>Логін <input type="text" name="username" value="admin" required></label>
-            <label>Пароль <input type="password" name="password" required minlength="6"></label>
-            <label>Підтвердження <input type="password" name="password_confirm" required minlength="6"></label>
-            <button type="submit">Створити</button>
-        </form>
+        <div class="admin-auth-card">
+            <header class="admin-auth-card__head">
+                <h1 class="admin-auth-card__title">Налаштування адмінки</h1>
+                <p class="admin-auth-card__lead">Створіть обліковий запис адміністратора</p>
+            </header>
+            <?php if (!empty($error)): ?><div class="admin-auth-card__alert" role="alert"><?= e($error) ?></div><?php endif; ?>
+            <form method="post" class="admin-auth-form">
+                <input type="hidden" name="csrf" value="<?= e($csrf ?? '') ?>">
+                <label class="admin-auth-form__field">
+                    <span class="admin-auth-form__label">Логін</span>
+                    <input type="text" name="username" value="admin" required>
+                </label>
+                <label class="admin-auth-form__field">
+                    <span class="admin-auth-form__label">Пароль</span>
+                    <input type="password" name="password" required minlength="6">
+                </label>
+                <label class="admin-auth-form__field">
+                    <span class="admin-auth-form__label">Підтвердження</span>
+                    <input type="password" name="password_confirm" required minlength="6">
+                </label>
+                <button type="submit" class="admin-btn admin-btn--block admin-auth-form__submit">Створити</button>
+            </form>
+        </div>
     <?php endif; ?>
+    </div>
 </main>
 <?php else: ?>
 <?php
