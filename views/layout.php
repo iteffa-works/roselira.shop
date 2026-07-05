@@ -70,7 +70,13 @@
     </script>
     <?php endif; ?>
 </head>
-<body<?= $heatmapPreview ? ' class="heatmap-preview"' : '' ?>>
+    <?php
+    $bodyClasses = array_filter([
+        !empty($heatmapPreview) ? 'heatmap-preview' : null,
+        $bodyClass ?? null,
+    ]);
+    ?>
+    <body<?= $bodyClasses !== [] ? ' class="' . e(implode(' ', $bodyClasses)) . '"' : '' ?>>
     <?php if ($gtmId !== '' && !$heatmapPreview): ?>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?= e($gtmId) ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <?php endif; ?>
