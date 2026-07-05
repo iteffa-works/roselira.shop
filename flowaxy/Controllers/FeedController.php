@@ -16,20 +16,21 @@ final class FeedController
 
     public function meta(Request $request): Response
     {
-        if ($denied = $this->authorize($request)) {
-            return $denied;
-        }
-
-        return Response::xml($this->feeds->buildMetaXml());
+        return $this->respond($request, ProductFeedService::CHANNEL_META);
     }
 
     public function google(Request $request): Response
+    {
+        return $this->respond($request, ProductFeedService::CHANNEL_GOOGLE);
+    }
+
+    private function respond(Request $request, string $channel): Response
     {
         if ($denied = $this->authorize($request)) {
             return $denied;
         }
 
-        return Response::xml($this->feeds->buildGoogleXml());
+        return Response::xml($this->feeds->buildXml($channel));
     }
 
     private function authorize(Request $request): ?Response

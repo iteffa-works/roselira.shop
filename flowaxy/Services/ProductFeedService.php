@@ -10,24 +10,34 @@ final class ProductFeedService
     {
     }
 
+    public const CHANNEL_GOOGLE = 'google';
+    public const CHANNEL_META = 'meta';
+
     /** @return list<array{id: string, title: string, description: string, link: string, image: string, price: string, availability: string, brand: string}> */
     public function getItems(?string $locale = null): array
     {
         return $this->catalog->getFeedItems($locale ?? 'uk');
     }
 
+    public function buildXml(string $channel = self::CHANNEL_GOOGLE, ?string $locale = null): string
+    {
+        unset($channel);
+
+        return $this->buildXmlFromItems($this->getItems($locale));
+    }
+
     public function buildGoogleXml(?string $locale = null): string
     {
-        return $this->buildXml($this->getItems($locale));
+        return $this->buildXml(self::CHANNEL_GOOGLE, $locale);
     }
 
     public function buildMetaXml(?string $locale = null): string
     {
-        return $this->buildXml($this->getItems($locale));
+        return $this->buildXml(self::CHANNEL_META, $locale);
     }
 
     /** @param list<array{id: string, title: string, description: string, link: string, image: string, price: string, availability: string, brand: string}> $items */
-    private function buildXml(array $items): string
+    private function buildXmlFromItems(array $items): string
     {
         $base = htmlspecialchars(rtrim(app_url(), '/'), ENT_XML1);
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";

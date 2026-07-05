@@ -167,7 +167,9 @@ final class GoogleAnalyticsService
                 'bounce_rate' => 0.0,
                 'active_users' => (int) ($summaryRow[0] ?? 0),
             ],
-            'chart' => $this->chartFromRealtime($chartResp ?? []),
+            'chart' => $this->chartFromGaRows($chartResp ?? [], static function (string $minutesAgo): string {
+                return $minutesAgo === '0' ? 'зараз' : $minutesAgo . ' хв';
+            }, includePageviews: false),
             'top_pages' => $this->dimensionReport($pagesResp ?? [], 'unifiedScreenName', 'activeUsers'),
             'devices' => $this->dimensionReport($devicesResp ?? [], 'deviceCategory', 'activeUsers'),
             'sources' => $this->dimensionReport($countriesResp ?? [], 'country', 'activeUsers'),
@@ -184,8 +186,10 @@ final class GoogleAnalyticsService
         return $this->postJson($url, $body, $token);
     }
 
-    /** @return list<array{date: string, sessions: int, pageviews: int}> */
-    private function chartFromRealtime(array $report): array
+    /** @param callable(string): string $labelForDimension
+     * @return list<array{date: string, sessions: int, pageviews: int}>
+     */
+    private function chartFromGaRows(array $report, callable $labelForDimension, bool $includePageviews = true): array
     {
         $rows = $report['rows'] ?? [];
         if (!is_array($rows)) {
@@ -197,15 +201,15 @@ final class GoogleAnalyticsService
             if (!is_array($row)) {
                 continue;
             }
-            $minutesAgo = (string) ($row['dimensionValues'][0]['value'] ?? '');
-            if ($minutesAgo === '') {
+            $dimension = (string) ($row['dimensionValues'][0]['value'] ?? '');
+            if ($dimension === '') {
                 continue;
             }
-            $activeUsers = (int) ($row['metricValues'][0]['value'] ?? 0);
+            $metrics = $row['metricValues'] ?? [];
             $chart[] = [
-                'date' => $minutesAgo === '0' ? 'зараз' : $minutesAgo . ' хв',
-                'sessions' => $activeUsers,
-                'pageviews' => 0,
+                'date' => $labelForDimension($dimension),
+                'sessions' => (int) ($metrics[0]['value'] ?? 0),
+                'pageviews' => $includePageviews ? (int) ($metrics[1]['value'] ?? 0) : 0,
             ];
         }
 
@@ -292,42 +296,17 @@ final class GoogleAnalyticsService
                 'bounce_rate' => round((float) ($summaryRow[3] ?? 0) * 100, 1),
                 'active_users' => (int) ($summaryRow[4] ?? 0),
             ],
-            'chart' => $this->chartFromReport($reports[1] ?? []),
+            'chart' => $this->chartFromGaRows($reports[1] ?? [], static function (string $date): string {
+                if (strlen($date) !== 8) {
+                    return $date;
+                }
+
+                return substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2);
+            }),
             'top_pages' => $this->dimensionReport($reports[2] ?? [], 'pagePath', 'screenPageViews'),
             'devices' => $this->dimensionReport($reports[3] ?? [], 'deviceCategory', 'sessions'),
             'sources' => $this->dimensionReport($reports[4] ?? [], 'sessionDefaultChannelGroup', 'sessions'),
         ], null];
-    }
-
-    /** @return list<array{date: string, sessions: int, pageviews: int}> */
-    private function chartFromReport(array $report): array
-    {
-        $rows = $report['rows'] ?? [];
-        if (!is_array($rows)) {
-            return [];
-        }
-
-        $chart = [];
-        foreach ($rows as $row) {
-            if (!is_array($row)) {
-                continue;
-            }
-            $date = (string) ($row['dimensionValues'][0]['value'] ?? '');
-            if ($date === '') {
-                continue;
-            }
-            $formatted = strlen($date) === 8
-                ? substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2)
-                : $date;
-            $metrics = $row['metricValues'] ?? [];
-            $chart[] = [
-                'date' => $formatted,
-                'sessions' => (int) ($metrics[0]['value'] ?? 0),
-                'pageviews' => (int) ($metrics[1]['value'] ?? 0),
-            ];
-        }
-
-        return $chart;
     }
 
     /** @return list<array{label: string, count: int}> */
