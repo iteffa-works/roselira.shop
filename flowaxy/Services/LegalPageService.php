@@ -7,11 +7,12 @@ namespace Flowaxy\Services;
 use Flowaxy\Repositories\Contracts\SettingsRepositoryInterface;
 use Flowaxy\Support\JsonCodec;
 use Flowaxy\Support\LegalContent;
+use Flowaxy\Support\LegalPages;
 
 final class LegalPageService
 {
     /** @var list<string> */
-    public const PAGES = ['privacy', 'terms', 'delivery'];
+    public const PAGES = LegalPages::KEYS;
 
     /** @var list<string> */
     public const LOCALES = ['uk', 'ru'];

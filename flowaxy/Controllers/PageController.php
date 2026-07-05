@@ -8,16 +8,10 @@ use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\LocaleService;
+use Flowaxy\Support\LegalPages;
 
 final class PageController
 {
-    /** @var array<string, array{title: string, desc: string}> */
-    private const PAGES = [
-        'privacy' => ['title' => 'meta_privacy_title', 'desc' => 'meta_privacy_desc'],
-        'terms' => ['title' => 'meta_terms_title', 'desc' => 'meta_terms_desc'],
-        'delivery' => ['title' => 'meta_delivery_title', 'desc' => 'meta_delivery_desc'],
-    ];
-
     public function __construct(
         private readonly View $view,
         private readonly LocaleService $locale,
@@ -42,7 +36,7 @@ final class PageController
 
     private function render(string $page): Response
     {
-        $meta = self::PAGES[$page] ?? self::PAGES['privacy'];
+        $meta = LegalPages::META[$page] ?? LegalPages::META['privacy'];
         $locale = $this->locale->current();
 
         return Response::html($this->view->render('layout', [
