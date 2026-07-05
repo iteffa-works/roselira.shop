@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Services;
 
 use Flowaxy\Repositories\Contracts\LocaleRepositoryInterface;
+use Flowaxy\Support\LocaleDefaults;
 
 final class LocaleService
 {
@@ -110,7 +111,12 @@ final class LocaleService
 
     public function t(string $key, array $replace = []): string
     {
-        $value = $this->translations[$key] ?? $key;
+        $value = $this->translations[$key] ?? null;
+        if ($value === null || $value === '') {
+            $value = LocaleDefaults::all()[$this->current][$key]
+                ?? LocaleDefaults::all()[$this->fallback][$key]
+                ?? $key;
+        }
 
         foreach ($replace as $name => $replacement) {
             $value = str_replace(':' . $name, (string) $replacement, $value);

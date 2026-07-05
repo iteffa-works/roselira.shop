@@ -33,6 +33,31 @@ final class LocaleSeeder
             return;
         }
 
+        $this->syncMissing($pdo);
+        $this->applyPatches($pdo);
+        $this->setVersion($pdo, LocaleDefaults::STRINGS_VERSION);
+    }
+
+    private function syncMissing(\PDO $pdo): void
+    {
+        $stmt = $pdo->prepare(<<<'SQL'
+            INSERT OR IGNORE INTO locale_strings (locale, key, value)
+            VALUES (:locale, :key, :value)
+            SQL);
+
+        foreach (LocaleDefaults::all() as $locale => $strings) {
+            foreach ($strings as $key => $value) {
+                $stmt->execute([
+                    'locale' => $locale,
+                    'key' => $key,
+                    'value' => $value,
+                ]);
+            }
+        }
+    }
+
+    private function applyPatches(\PDO $pdo): void
+    {
         $stmt = $pdo->prepare(<<<'SQL'
             INSERT INTO locale_strings (locale, key, value)
             VALUES (:locale, :key, :value)
@@ -52,8 +77,6 @@ final class LocaleSeeder
                 ]);
             }
         }
-
-        $this->setVersion($pdo, LocaleDefaults::STRINGS_VERSION);
     }
 
     private function currentVersion(\PDO $pdo): int

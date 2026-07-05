@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 3;
+    public const STRINGS_VERSION = 5;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -18,31 +18,21 @@ final class LocaleDefaults
         ];
     }
 
-    /** @return list<string> */
+    /** @return list<string> Keys whose default text changed and should overwrite DB on upgrade. */
     public static function patchKeys(): array
     {
         return [
-            'home_title',
-            'home_subtitle',
-            'footer',
-            'meta_home_title',
-            'meta_home_desc',
-            'footer_privacy',
-            'footer_terms',
-            'footer_delivery',
-            'footer_contact',
-            'meta_privacy_title',
-            'meta_privacy_desc',
-            'meta_terms_title',
-            'meta_terms_desc',
-            'meta_delivery_title',
-            'meta_delivery_desc',
-            'cookie_banner_text',
-            'cookie_accept',
-            'cookie_reject',
+            'order_comment_placeholder',
+            'order_error_rate_limit',
+            'order_error_product',
+            'order_error_variant',
+            'order_error_name',
+            'order_error_phone',
+            'order_error_server',
             'order_error_name_length',
             'order_error_comment_length',
             'order_error_variant_inactive',
+            'order_success',
         ];
     }
 
@@ -94,7 +84,7 @@ final class LocaleDefaults
             'order_phone' => 'Phone',
             'order_phone_placeholder' => '+380 XX XXX XX XX',
             'order_comment' => 'Comment',
-            'order_comment_placeholder' => 'Delivery or shade preference',
+            'order_comment_placeholder' => 'Convenient time for a call (optional)',
             'order_submit' => 'Submit order',
             'order_note' => 'We will contact you to confirm.',
             'order_success' => 'Thank you! Your order has been received.',
@@ -158,7 +148,7 @@ final class LocaleDefaults
             'order_phone' => 'Телефон',
             'order_phone_placeholder' => '+380 XX XXX XX XX',
             'order_comment' => 'Коментар',
-            'order_comment_placeholder' => 'Побажання щодо доставки або відтінку',
+            'order_comment_placeholder' => 'Зручний час для дзвінка (необов\'язково)',
             'order_submit' => 'Надіслати замовлення',
             'order_note' => 'Ми зв\'яжемося з вами для підтвердження.',
             'order_success' => 'Дякуємо! Замовлення отримано.',
@@ -222,7 +212,7 @@ final class LocaleDefaults
             'order_phone' => 'Телефон',
             'order_phone_placeholder' => '+380 XX XXX XX XX',
             'order_comment' => 'Комментарий',
-            'order_comment_placeholder' => 'Пожелания по доставке или оттенку',
+            'order_comment_placeholder' => 'Удобное время для звонка (необязательно)',
             'order_submit' => 'Отправить заказ',
             'order_note' => 'Мы свяжемся с вами для подтверждения.',
             'order_success' => 'Спасибо! Заказ получен.',

@@ -9,6 +9,7 @@ use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\AdminAuthService;
 use Flowaxy\Services\LocaleService;
+use Flowaxy\Support\LocaleDefaults;
 
 final class LocalesController extends AdminController
 {
@@ -34,8 +35,14 @@ final class LocalesController extends AdminController
         $content = $this->view->renderAdmin('locales', [
             'locales' => $editableLocales,
             'activeLocale' => $activeLocale,
-            'strings' => $this->locale->loadStrings($activeLocale),
-            'enStrings' => $this->locale->loadStrings('en'),
+            'strings' => array_merge(
+                LocaleDefaults::all()[$activeLocale] ?? [],
+                $this->locale->loadStrings($activeLocale),
+            ),
+            'enStrings' => array_merge(
+                LocaleDefaults::en(),
+                $this->locale->loadStrings('en'),
+            ),
             'csrf' => $this->auth->csrfToken(),
         ]);
 
