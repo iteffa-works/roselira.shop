@@ -985,3 +985,133 @@ a {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+.site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem 0 2rem;
+    text-align: center;
+}
+
+.site-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.25rem;
+}
+
+.site-footer__nav a {
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.875rem;
+    opacity: 0.85;
+}
+
+.site-footer__nav a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.site-footer__contact {
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.85;
+}
+
+.site-footer__contact a {
+    color: inherit;
+}
+
+.site-footer__copy {
+    margin: 0;
+    font-size: 0.8125rem;
+    opacity: 0.7;
+}
+
+.legal-page {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 1.5rem 0 3rem;
+}
+
+.legal-page__title {
+    margin: 0 0 1.5rem;
+    font-size: 1.75rem;
+    line-height: 1.25;
+}
+
+.legal-page__section {
+    margin-bottom: 1.5rem;
+}
+
+.legal-page__section h2 {
+    margin: 0 0 0.625rem;
+    font-size: 1.125rem;
+}
+
+.legal-page__section p {
+    margin: 0 0 0.75rem;
+    line-height: 1.6;
+    color: var(--text-muted, #52525b);
+}
+
+.cookie-banner {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--border, #e4e4e7);
+    border-radius: 12px;
+    background: var(--surface, #fff);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.cookie-banner[hidden] {
+    display: none;
+}
+
+.cookie-banner__text {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.cookie-banner__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.cookie-banner__btn {
+    flex: 1;
+    min-width: 7rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--border, #d4d4d8);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    background: var(--surface, #fff);
+}
+
+.cookie-banner__btn--accept {
+    background: #18181b;
+    border-color: #18181b;
+    color: #fff;
+}
+
+@media (min-width: 640px) {
+    .cookie-banner {
+        right: 1.5rem;
+        left: auto;
+        margin: 0;
+    }
+}

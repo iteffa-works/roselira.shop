@@ -3,6 +3,11 @@ DirectoryIndex index.php
 RewriteEngine On
 RewriteBase /
 
+RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$ [NC]
+RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:\d+)?$ [NC]
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 RewriteRule ^assets/ - [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f

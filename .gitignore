@@ -7,6 +7,7 @@ storage/roselira.db
 storage/roselira.db-wal
 storage/roselira.db-shm
 storage/*.sql
+storage/logs/
 
 # Local tooling
 .osp/

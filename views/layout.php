@@ -1,22 +1,56 @@
 <!DOCTYPE html>
 <html lang="<?= e($locale ?? currentLocale()) ?>">
 <head>
+    <?php
+    $siteConfig = app_config();
+    $canonicalPath = $canonicalPath ?? (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $canonicalUrl = absolute_url($canonicalPath);
+    $ogImageUrl = !empty($ogImage) ? absolute_url((string) $ogImage) : '';
+    $hasTracking = ($siteConfig['meta_pixel_id'] ?? '') !== ''
+        || ($siteConfig['ga4_measurement_id'] ?? '') !== ''
+        || ($siteConfig['gtm_container_id'] ?? '') !== '';
+    ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
+    <link rel="canonical" href="<?= e($canonicalUrl) ?>">
     <script src="<?= asset('assets/js/theme-init.js') ?>"></script>
     <script>window.FlowaxyTheme.applyTheme(window.FlowaxyTheme.resolveTheme());</script>
     <title><?= e($title ?? 'Roselira') ?></title>
     <meta name="description" content="<?= e($description ?? '') ?>">
-    <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
-    <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
-    <?php if (!empty($ogImage)): ?>
     <meta property="og:title" content="<?= e($title ?? '') ?>">
     <meta property="og:description" content="<?= e($description ?? '') ?>">
-    <meta property="og:image" content="<?= e($ogImage) ?>">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= e($canonicalUrl) ?>">
+    <meta property="og:locale" content="<?= ($locale ?? currentLocale()) === 'ru' ? 'ru_RU' : 'uk_UA' ?>">
+    <?php if ($ogImageUrl !== ''): ?>
+    <meta property="og:image" content="<?= e($ogImageUrl) ?>">
     <?php endif; ?>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= e($title ?? '') ?>">
+    <meta name="twitter:description" content="<?= e($description ?? '') ?>">
+    <?php if ($ogImageUrl !== ''): ?>
+    <meta name="twitter:image" content="<?= e($ogImageUrl) ?>">
+    <?php endif; ?>
+    <?php if (!empty($jsonLd)): ?>
+    <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
+    <?php endif; ?>
+    <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
+    <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/flowaxy.css') ?>">
+    <?php if ($hasTracking): ?>
+    <script>
+    window.__FLOWAXY__ = <?= json_encode([
+        'metaPixelId' => $siteConfig['meta_pixel_id'] ?? '',
+        'ga4Id' => $siteConfig['ga4_measurement_id'] ?? '',
+        'gtmId' => $siteConfig['gtm_container_id'] ?? '',
+        'trackingProduct' => $trackingProduct ?? null,
+        'cookieAccept' => t('cookie_accept'),
+        'cookieReject' => t('cookie_reject'),
+        'cookieText' => t('cookie_banner_text'),
+    ], JSON_UNESCAPED_UNICODE) ?>;
+    </script>
+    <?php endif; ?>
 </head>
 <body>
     <header class="site-header">
@@ -59,12 +93,47 @@
         <?php require __DIR__ . '/' . ($content ?? 'home') . '.php'; ?>
     </main>
 
+    <?php
+    $contactEmail = (string) ($siteConfig['contact_email'] ?? '');
+    $contactTelegram = (string) ($siteConfig['contact_telegram'] ?? '');
+    ?>
     <footer class="site-footer">
-        <div class="container">
-            <p>&copy; <?= date('Y') ?> <?= e(t('footer')) ?></p>
+        <div class="container site-footer__inner">
+            <nav class="site-footer__nav" aria-label="Legal">
+                <a href="/privacy"><?= e(t('footer_privacy')) ?></a>
+                <a href="/terms"><?= e(t('footer_terms')) ?></a>
+                <a href="/delivery"><?= e(t('footer_delivery')) ?></a>
+            </nav>
+            <?php if ($contactEmail !== '' || $contactTelegram !== ''): ?>
+            <p class="site-footer__contact">
+                <?= e(t('footer_contact')) ?>:
+                <?php if ($contactEmail !== ''): ?>
+                <a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a>
+                <?php endif; ?>
+                <?php if ($contactTelegram !== ''): ?>
+                <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener"><?= e($contactTelegram) ?></a>
+                <?php endif; ?>
+            </p>
+            <?php endif; ?>
+            <p class="site-footer__copy"><?= e(t('footer')) ?></p>
         </div>
     </footer>
+
+    <?php if ($hasTracking): ?>
+    <div class="cookie-banner" data-cookie-banner hidden>
+        <p class="cookie-banner__text" data-cookie-text></p>
+        <div class="cookie-banner__actions">
+            <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-cookie-accept></button>
+            <button type="button" class="cookie-banner__btn cookie-banner__btn--reject" data-cookie-reject></button>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <script src="<?= asset('assets/js/flowaxy.js') ?>" defer></script>
+    <?php if ($hasTracking): ?>
+    <script src="<?= asset('assets/js/consent.js') ?>" defer></script>
+    <script src="<?= asset('assets/js/analytics.js') ?>" defer></script>
+    <?php endif; ?>
     <?php if (!empty($pageScript)): ?>
     <script src="<?= asset('assets/js/' . $pageScript . '.js') ?>" defer></script>
     <?php endif; ?>

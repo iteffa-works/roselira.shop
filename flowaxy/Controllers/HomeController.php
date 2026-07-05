@@ -34,6 +34,7 @@ final class HomeController
             'locale' => $locale,
             'title' => $this->locale->t('meta_home_title'),
             'description' => $this->locale->t('meta_home_desc'),
+            'canonicalPath' => '/',
             'content' => 'home',
             'productGroups' => $productGroups,
         ]));

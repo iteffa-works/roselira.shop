@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 2;
+    public const STRINGS_VERSION = 3;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -27,6 +27,22 @@ final class LocaleDefaults
             'footer',
             'meta_home_title',
             'meta_home_desc',
+            'footer_privacy',
+            'footer_terms',
+            'footer_delivery',
+            'footer_contact',
+            'meta_privacy_title',
+            'meta_privacy_desc',
+            'meta_terms_title',
+            'meta_terms_desc',
+            'meta_delivery_title',
+            'meta_delivery_desc',
+            'cookie_banner_text',
+            'cookie_accept',
+            'cookie_reject',
+            'order_error_name_length',
+            'order_error_comment_length',
+            'order_error_variant_inactive',
         ];
     }
 
@@ -38,7 +54,20 @@ final class LocaleDefaults
             'home_subtitle' => 'Original KIKO Milano cosmetics and accessories — browse and order online.',
             'reviews' => 'reviews',
             'rating_of' => ':rating of :max',
-            'footer' => '© Roselira — roselira.com',
+            'footer' => '© Roselira — roselira.shop',
+            'footer_privacy' => 'Privacy',
+            'footer_terms' => 'Terms',
+            'footer_delivery' => 'Delivery & returns',
+            'footer_contact' => 'Contact',
+            'meta_privacy_title' => 'Privacy Policy — Roselira',
+            'meta_privacy_desc' => 'How Roselira collects and uses personal data when you place an order.',
+            'meta_terms_title' => 'Terms of Service — Roselira',
+            'meta_terms_desc' => 'Terms for using roselira.shop and placing orders.',
+            'meta_delivery_title' => 'Delivery & Returns — Roselira',
+            'meta_delivery_desc' => 'Shipping, payment and return policy for Roselira orders.',
+            'cookie_banner_text' => 'We use cookies for language, theme and analytics (after consent).',
+            'cookie_accept' => 'Accept',
+            'cookie_reject' => 'Essential only',
             'not_found_text' => 'The requested product was not found.',
             'not_found_back' => 'Back to catalog',
             'theme_toggle' => 'Toggle theme',
@@ -75,6 +104,9 @@ final class LocaleDefaults
             'order_error_phone' => 'Enter a valid phone number.',
             'order_error_server' => 'Something went wrong. Please try again.',
             'order_error_rate_limit' => 'Too many orders. Please try again later.',
+            'order_error_name_length' => 'Name is too long (max 100 characters).',
+            'order_error_comment_length' => 'Comment is too long (max 500 characters).',
+            'order_error_variant_inactive' => 'Selected shade is unavailable.',
         ];
     }
 
@@ -86,7 +118,20 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригінальна косметика KIKO Milano та аксесуари — перегляд і швидке замовлення онлайн.',
             'reviews' => 'відгуків',
             'rating_of' => ':rating з :max',
-            'footer' => '© Roselira — roselira.com',
+            'footer' => '© Roselira — roselira.shop',
+            'footer_privacy' => 'Конфіденційність',
+            'footer_terms' => 'Умови',
+            'footer_delivery' => 'Доставка',
+            'footer_contact' => 'Контакт',
+            'meta_privacy_title' => 'Політика конфіденційності — Roselira',
+            'meta_privacy_desc' => 'Як Roselira збирає та використовує персональні дані при замовленні.',
+            'meta_terms_title' => 'Умови користування — Roselira',
+            'meta_terms_desc' => 'Умови використання сайту roselira.shop та оформлення замовлень.',
+            'meta_delivery_title' => 'Доставка та повернення — Roselira',
+            'meta_delivery_desc' => 'Доставка, оплата та повернення товарів Roselira.',
+            'cookie_banner_text' => 'Ми використовуємо cookies для мови, теми та аналітики (після згоди).',
+            'cookie_accept' => 'Прийняти',
+            'cookie_reject' => 'Лише необхідні',
             'not_found_text' => 'Запрошений товар не знайдено.',
             'not_found_back' => 'До каталогу',
             'theme_toggle' => 'Перемкнути тему',
@@ -123,6 +168,9 @@ final class LocaleDefaults
             'order_error_phone' => 'Вкажіть коректний номер телефону.',
             'order_error_server' => 'Помилка. Спробуйте ще раз.',
             'order_error_rate_limit' => 'Забагато спроб. Спробуйте пізніше.',
+            'order_error_name_length' => 'Занадто довге ім\'я (макс. 100 символів).',
+            'order_error_comment_length' => 'Занадто довгий коментар (макс. 500 символів).',
+            'order_error_variant_inactive' => 'Обраний відтінок недоступний.',
         ];
     }
 
@@ -134,7 +182,20 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригинальная косметика KIKO Milano и аксессуары — просмотр и быстрый заказ онлайн.',
             'reviews' => 'отзывов',
             'rating_of' => ':rating из :max',
-            'footer' => '© Roselira — roselira.com',
+            'footer' => '© Roselira — roselira.shop',
+            'footer_privacy' => 'Конфиденциальность',
+            'footer_terms' => 'Условия',
+            'footer_delivery' => 'Доставка',
+            'footer_contact' => 'Контакт',
+            'meta_privacy_title' => 'Политика конфиденциальности — Roselira',
+            'meta_privacy_desc' => 'Как Roselira собирает и использует персональные данные при заказе.',
+            'meta_terms_title' => 'Условия использования — Roselira',
+            'meta_terms_desc' => 'Условия использования сайта roselira.shop и оформления заказов.',
+            'meta_delivery_title' => 'Доставка и возврат — Roselira',
+            'meta_delivery_desc' => 'Доставка, оплата и возврат товаров Roselira.',
+            'cookie_banner_text' => 'Мы используем cookies для языка, темы и аналитики (после согласия).',
+            'cookie_accept' => 'Принять',
+            'cookie_reject' => 'Только необходимые',
             'not_found_text' => 'Запрошенный товар не найден.',
             'not_found_back' => 'В каталог',
             'theme_toggle' => 'Переключить тему',
@@ -171,6 +232,9 @@ final class LocaleDefaults
             'order_error_phone' => 'Укажите корректный номер телефона.',
             'order_error_server' => 'Ошибка. Попробуйте ещё раз.',
             'order_error_rate_limit' => 'Слишком много попыток. Попробуйте позже.',
+            'order_error_name_length' => 'Слишком длинное имя (макс. 100 символов).',
+            'order_error_comment_length' => 'Слишком длинный комментарий (макс. 500 символов).',
+            'order_error_variant_inactive' => 'Выбранный оттенок недоступен.',
         ];
     }
 }

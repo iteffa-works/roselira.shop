@@ -24,6 +24,51 @@ function asset(string $path): string
     return '/' . ltrim($path, '/');
 }
 
+function app_url(): string
+{
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    $configured = (string) (AppState::$config['app_url'] ?? '');
+    if ($configured !== '') {
+        $cached = $configured;
+
+        return $cached;
+    }
+
+    $scheme = request_is_https() ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $cached = $scheme . '://' . $host;
+
+    return $cached;
+}
+
+function absolute_url(string $path): string
+{
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        return $path;
+    }
+
+    return rtrim(app_url(), '/') . asset($path);
+}
+
+function request_is_https(): bool
+{
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+
+    return ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+}
+
+/** @return array<string, mixed> */
+function app_config(): array
+{
+    return AppState::$config;
+}
+
 function formatPrice(float $price, string $currency = 'UAH'): string
 {
     $symbols = ['USD' => '$', 'EUR' => '€', 'UAH' => '₴'];

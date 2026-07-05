@@ -365,6 +365,22 @@
                         if (variantInput) {
                             variantInput.value = activeVariantId;
                         }
+                        if (window.FlowaxyAnalytics && window.FlowaxyConsent && window.FlowaxyConsent.hasAnalytics()) {
+                            var productData = null;
+                            try {
+                                productData = JSON.parse(landing.getAttribute('data-product') || '{}');
+                            } catch (error) {
+                                productData = null;
+                            }
+                            window.FlowaxyAnalytics.trackLead({
+                                product_id: productData && productData.slug ? productData.slug : '',
+                                product_name: productData && landing.querySelector('.landing__title')
+                                    ? landing.querySelector('.landing__title').textContent
+                                    : '',
+                                value: productData && productData.price ? productData.price : 0,
+                                currency: productData && productData.price_currency ? productData.price_currency : 'UAH',
+                            });
+                        }
                     }
                 })
                 .catch(function () {

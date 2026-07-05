@@ -42,6 +42,11 @@ final class Response
         return new self('', $status, ['Location' => $url]);
     }
 
+    public static function xml(string $content, int $status = 200): self
+    {
+        return new self($content, $status, ['Content-Type' => 'application/xml; charset=utf-8']);
+    }
+
     public function send(): void
     {
         http_response_code($this->status);

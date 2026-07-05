@@ -211,6 +211,46 @@ final class CatalogService
             || ((int) ($product['reviews_count'] ?? 0)) > 0;
     }
 
+    /** @return list<array{id: string, title: string, description: string, link: string, image: string, price: string, availability: string, brand: string}> */
+    public function getFeedItems(?string $locale = null): array
+    {
+        $items = [];
+
+        foreach ($this->getActiveProducts($locale ?? 'uk') as $product) {
+            $slug = (string) ($product['slug'] ?? '');
+            if ($slug === '') {
+                continue;
+            }
+
+            $variant = $this->getDefaultVariant($product);
+            $imagePath = $variant['images'][0] ?? ($product['image'] ?? 'assets/img/placeholder.svg');
+            $price = $variant['price'] ?? $product['price'] ?? null;
+            $currency = (string) ($variant['price_currency'] ?? $product['price_currency'] ?? 'UAH');
+
+            if ($price === null) {
+                continue;
+            }
+
+            $description = strip_tags((string) ($product['short_desc'] ?? $product['name'] ?? ''));
+            if (strlen($description) > 5000) {
+                $description = mb_substr($description, 0, 4997) . '...';
+            }
+
+            $items[] = [
+                'id' => $slug,
+                'title' => (string) ($product['name'] ?? $slug),
+                'description' => $description,
+                'link' => absolute_url('/' . rawurlencode($slug)),
+                'image' => absolute_url((string) $imagePath),
+                'price' => number_format((float) $price, 2, '.', '') . ' ' . $currency,
+                'availability' => 'in stock',
+                'brand' => (string) ($product['brand'] ?? 'Roselira'),
+            ];
+        }
+
+        return $items;
+    }
+
     private function normalizeProductVariants(array $product): array
     {
         if (!empty($product['variants'])) {
