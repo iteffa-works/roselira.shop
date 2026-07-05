@@ -98,7 +98,7 @@ $sitemap = new SitemapService($catalog);
 $seoFiles = new SeoFilesService($sitemap, $config['project_root']);
 $cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $settings);
 
-$result = $cron->runDaily(forceDaily: true);
+$result = $cron->runDaily(forceDaily: true, source: $isCli ? CronService::SOURCE_CLI : CronService::SOURCE_HTTP);
 
 header('Content-Type: text/plain; charset=utf-8');
 

@@ -264,11 +264,47 @@ rmdir roselira.shop</pre>
             <label class="admin-system__field-label">Crontab (клік — копіювати)</label>
             <pre class="admin-code admin-code--copy admin-system__cron" data-copy="<?= e($cronCommand) ?>"><?= e($cronCommand) ?></pre>
 
-            <?php if (!empty($cronStatus['last_run_at'])): ?>
-            <dl class="admin-system__meta">
-                <div><dt>Останній запуск</dt><dd><?= e((string) $cronStatus['last_run_at']) ?></dd></div>
-                <div><dt>Результат</dt><dd><?= e((string) ($cronStatus['last_status'] ?? '—')) ?></dd></div>
+            <?php
+            $cronRunLabel = static function (?string $at, ?string $status) use ($formatDt): string {
+                if ($at === null || $at === '') {
+                    return 'Ще не запускався';
+                }
+                $when = $formatDt($at) ?? $at;
+                $result = $status ?? '—';
+                if (preg_match('/^(ok|error|skipped):\s*(.+)$/i', $result, $m)) {
+                    $result = strtoupper($m[1]) . ' — ' . $m[2];
+                }
+
+                return $when . ' · ' . $result;
+            };
+            $hostingViaLabels = [
+                'cli' => 'CLI (crontab)',
+                'http' => 'HTTP (?token=)',
+            ];
+            ?>
+
+            <dl class="admin-system__meta admin-system__meta--cron">
+                <div><dt>Розклад хостингу</dt><dd><?= e((string) ($cronStatus['schedule_label'] ?? 'Щодня о 04:00')) ?></dd></div>
+                <div><dt>Наступний запуск</dt><dd><?= e($formatDt((string) ($cronStatus['next_scheduled_at'] ?? '')) ?? '—') ?></dd></div>
+                <div><dt>Останній — адмінка</dt><dd><?= e($cronRunLabel($cronStatus['admin']['at'] ?? null, $cronStatus['admin']['status'] ?? null)) ?></dd></div>
+                <div><dt>Останній — хостинг</dt><dd>
+                    <?php
+                    $hosting = $cronStatus['hosting'] ?? [];
+                    echo e($cronRunLabel($hosting['at'] ?? null, $hosting['status'] ?? null));
+                    if (!empty($hosting['via'])) {
+                        echo ' · ' . e($hostingViaLabels[$hosting['via']] ?? $hosting['via']);
+                    }
+                    ?>
+                </dd></div>
+                <?php if (!empty($cronStatus['cli']['at']) && !empty($cronStatus['http']['at'])): ?>
+                <div><dt>CLI / HTTP окремо</dt><dd><?= e($cronRunLabel($cronStatus['cli']['at'] ?? null, $cronStatus['cli']['status'] ?? null)) ?> · <?= e($cronRunLabel($cronStatus['http']['at'] ?? null, $cronStatus['http']['status'] ?? null)) ?></dd></div>
+                <?php endif; ?>
             </dl>
+
+            <?php if (!empty($cronStatus['hosting_stale'])): ?>
+            <div class="admin-callout admin-callout--warn admin-system__callout">
+                Cron на хостингу давно не запускався (&gt;25 год). Перевірте crontab або запустіть команду вручну.
+            </div>
             <?php endif; ?>
 
             <div class="admin-system__actions admin-system__actions--row">

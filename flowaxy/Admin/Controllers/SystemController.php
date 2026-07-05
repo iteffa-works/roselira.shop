@@ -92,7 +92,7 @@ final class SystemController extends AdminController
             return $response;
         }
 
-        $result = $this->cron->runDaily(forceDaily: false);
+        $result = $this->cron->runDaily(forceDaily: false, source: CronService::SOURCE_ADMIN);
         $this->auth->flash($result['success'] ? 'success' : 'error', $result['message']);
 
         return $this->redirect(admin_url('system'));
