@@ -14,7 +14,11 @@
     var placeholder = landing.getAttribute('data-placeholder') || '/assets/img/placeholder.svg';
     var mainImage = landing.querySelector('.gallery__main-image');
     var mainVideo = landing.querySelector('.gallery__main-video');
-    var thumbsWrap = landing.querySelector('.gallery__thumbs');
+    var thumbsWrap = landing.querySelector('[data-gallery-thumbs]');
+    var thumbsTrack = landing.querySelector('.gallery__thumbs-track');
+    var galleryCounter = landing.querySelector('[data-gallery-counter]');
+    var galleryPrev = landing.querySelector('[data-gallery-prev]');
+    var galleryNext = landing.querySelector('[data-gallery-next]');
     var variantNameEl = landing.querySelector('[data-variant-name]');
     var variantInput = landing.querySelector('[data-variant-input]');
     var priceBlock = landing.querySelector('[data-price-block]');
@@ -22,6 +26,7 @@
     var priceOld = landing.querySelector('[data-price-old]');
     var orderForm = landing.querySelector('[data-order-form]');
     var orderMessage = landing.querySelector('[data-order-message]');
+    var orderSubmit = orderForm ? orderForm.querySelector('.order-form__submit') : null;
     var swatches = landing.querySelectorAll('.variant-swatch');
     var swatchesWrap = landing.querySelector('[data-variant-swatches]');
     var swatchesTrack = landing.querySelector('.variant-picker__track');
@@ -35,6 +40,21 @@
         return (product.variants || []).find(function (variant) {
             return variant.id === id;
         });
+    }
+
+    function isVariantAvailable(variant) {
+        return Boolean(variant) && variant.active !== false;
+    }
+
+    function findFirstAvailableVariantId() {
+        var variants = product.variants || [];
+        for (var i = 0; i < variants.length; i++) {
+            if (isVariantAvailable(variants[i])) {
+                return variants[i].id;
+            }
+        }
+
+        return product.default_variant;
     }
 
     function buildGalleryItems(variant) {
@@ -100,13 +120,88 @@
         mainVideo.hidden = true;
     }
 
+    function updateGalleryChrome() {
+        var hasMany = galleryItems.length > 1;
+
+        if (galleryCounter) {
+            if (!hasMany) {
+                galleryCounter.hidden = true;
+            } else {
+                galleryCounter.hidden = false;
+                galleryCounter.textContent = String(activeImageIndex + 1) + ' / ' + String(galleryItems.length);
+            }
+        }
+
+        if (galleryPrev) {
+            galleryPrev.hidden = !hasMany;
+        }
+
+        if (galleryNext) {
+            galleryNext.hidden = !hasMany;
+        }
+    }
+
+    function setActiveThumb(index) {
+        if (!thumbsWrap) {
+            return;
+        }
+
+        thumbsWrap.querySelectorAll('.gallery__thumb').forEach(function (thumb, thumbIndex) {
+            var isActive = thumbIndex === index;
+            thumb.classList.toggle('is-active', isActive);
+            thumb.setAttribute('aria-current', isActive ? 'true' : 'false');
+        });
+
+        scrollActiveThumbIntoView();
+        updateThumbTrackFade();
+    }
+
+    function updateThumbTrackFade() {
+        if (!thumbsTrack || !thumbsWrap || thumbsWrap.classList.contains('is-hidden')) {
+            if (thumbsTrack) {
+                thumbsTrack.classList.remove('is-scrollable', 'is-scrolled-start', 'is-scrolled-end');
+            }
+            return;
+        }
+
+        var maxScroll = thumbsWrap.scrollWidth - thumbsWrap.clientWidth;
+        var canScroll = maxScroll > 4;
+
+        thumbsTrack.classList.toggle('is-scrollable', canScroll);
+        thumbsTrack.classList.toggle('is-scrolled-start', thumbsWrap.scrollLeft <= 4);
+        thumbsTrack.classList.toggle('is-scrolled-end', thumbsWrap.scrollLeft >= maxScroll - 4);
+    }
+
+    function scrollActiveThumbIntoView() {
+        if (!thumbsWrap || thumbsWrap.classList.contains('is-hidden')) {
+            return;
+        }
+
+        var activeThumb = thumbsWrap.querySelector('.gallery__thumb.is-active');
+        if (activeThumb && typeof activeThumb.scrollIntoView === 'function') {
+            activeThumb.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+        }
+    }
+
     function showGalleryItem(index) {
+        if (!galleryItems.length) {
+            return;
+        }
+
+        if (index < 0) {
+            index = galleryItems.length - 1;
+        } else if (index >= galleryItems.length) {
+            index = 0;
+        }
+
         var item = galleryItems[index];
         if (!item) {
             return;
         }
 
         activeImageIndex = index;
+        updateGalleryChrome();
+        setActiveThumb(index);
 
         if (item.type === 'video' && mainVideo) {
             if (mainImage) {
@@ -143,26 +238,22 @@
     function renderGallery(variant) {
         galleryItems = buildGalleryItems(variant || {});
         activeImageIndex = 0;
-        showGalleryItem(0);
 
         if (!thumbsWrap) {
-            if (galleryItems.length > 1) {
-                thumbsWrap = document.createElement('div');
-                thumbsWrap.className = 'gallery__thumbs';
-                landing.querySelector('.landing__gallery').appendChild(thumbsWrap);
-            } else {
-                return;
-            }
+            showGalleryItem(0);
+            return;
         }
 
         thumbsWrap.innerHTML = '';
 
         if (galleryItems.length <= 1) {
-            thumbsWrap.hidden = true;
+            thumbsWrap.classList.add('is-hidden');
+            showGalleryItem(0);
+            updateThumbTrackFade();
             return;
         }
 
-        thumbsWrap.hidden = false;
+        thumbsWrap.classList.remove('is-hidden');
 
         galleryItems.forEach(function (item, index) {
             var button = document.createElement('button');
@@ -174,7 +265,8 @@
             }
 
             button.setAttribute('data-index', String(index));
-            button.setAttribute('aria-label', item.type === 'video' ? 'Video' : 'Photo');
+            button.setAttribute('aria-label', item.type === 'video' ? 'Video ' + String(index + 1) : 'Photo ' + String(index + 1));
+            button.setAttribute('aria-current', index === 0 ? 'true' : 'false');
 
             var image = document.createElement('img');
             image.loading = 'lazy';
@@ -195,13 +287,13 @@
 
             button.addEventListener('click', function () {
                 showGalleryItem(index);
-                thumbsWrap.querySelectorAll('.gallery__thumb').forEach(function (thumb, thumbIndex) {
-                    thumb.classList.toggle('is-active', thumbIndex === index);
-                });
             });
 
             thumbsWrap.appendChild(button);
         });
+
+        showGalleryItem(0);
+        updateThumbTrackFade();
     }
 
     function updatePrice(variant) {
@@ -281,6 +373,18 @@
         }
     }
 
+    function updateOrderState(variant) {
+        var available = isVariantAvailable(variant);
+
+        if (variantInput) {
+            variantInput.value = available ? (variant.id || '') : '';
+        }
+
+        if (orderSubmit) {
+            orderSubmit.disabled = !available;
+        }
+    }
+
     function selectVariant(id) {
         var variant = getVariant(id);
         if (!variant) {
@@ -293,10 +397,6 @@
             variantNameEl.textContent = variant.name || id;
         }
 
-        if (variantInput) {
-            variantInput.value = id;
-        }
-
         swatches.forEach(function (swatch) {
             var isActive = swatch.getAttribute('data-variant-id') === id;
             swatch.classList.toggle('is-active', isActive);
@@ -305,6 +405,7 @@
 
         renderGallery(variant);
         updatePrice(variant);
+        updateOrderState(variant);
         scrollActiveSwatchIntoView();
     }
 
@@ -316,14 +417,51 @@
 
     if (swatchesWrap) {
         swatchesWrap.addEventListener('scroll', updateSwatchTrackFade, { passive: true });
-        window.addEventListener('resize', updateSwatchTrackFade);
     }
+
+    if (thumbsWrap) {
+        thumbsWrap.addEventListener('scroll', updateThumbTrackFade, { passive: true });
+    }
+
+    window.addEventListener('resize', function () {
+        updateSwatchTrackFade();
+        updateThumbTrackFade();
+    });
 
     swatches.forEach(function (swatch) {
         swatch.addEventListener('click', function () {
             selectVariant(swatch.getAttribute('data-variant-id') || '');
         });
     });
+
+    if (galleryPrev) {
+        galleryPrev.addEventListener('click', function () {
+            showGalleryItem(activeImageIndex - 1);
+        });
+    }
+
+    if (galleryNext) {
+        galleryNext.addEventListener('click', function () {
+            showGalleryItem(activeImageIndex + 1);
+        });
+    }
+
+    var galleryMain = landing.querySelector('[data-gallery-main]');
+    if (galleryMain) {
+        galleryMain.addEventListener('keydown', function (event) {
+            if (galleryItems.length <= 1) {
+                return;
+            }
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                showGalleryItem(activeImageIndex - 1);
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                showGalleryItem(activeImageIndex + 1);
+            }
+        });
+    }
 
     if (orderForm) {
         orderForm.addEventListener('submit', function (event) {
@@ -332,6 +470,11 @@
             if (orderMessage) {
                 orderMessage.hidden = true;
                 orderMessage.className = 'order-form__message';
+            }
+
+            var previewVariant = getVariant(activeVariantId);
+            if (!isVariantAvailable(previewVariant)) {
+                return;
             }
 
             if (orderForm.querySelector('[data-recaptcha-sitekey]')) {
@@ -374,7 +517,7 @@
 
                     if (result.ok) {
                         orderForm.reset();
-                        if (variantInput) {
+                        if (variantInput && isVariantAvailable(getVariant(activeVariantId))) {
                             variantInput.value = activeVariantId;
                         }
                         if (window.FlowaxyAnalytics && window.FlowaxyConsent && window.FlowaxyConsent.hasAnalytics()) {
@@ -413,7 +556,12 @@
         });
     }
 
-    selectVariant(activeVariantId);
+    var initialVariantId = product.default_variant;
+    if (!isVariantAvailable(getVariant(initialVariantId))) {
+        initialVariantId = findFirstAvailableVariantId();
+    }
+
+    selectVariant(initialVariantId);
     updateSwatchTrackFade();
 
     document.querySelectorAll('[data-product-tabs]').forEach(function (root) {

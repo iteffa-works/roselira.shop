@@ -24,6 +24,7 @@ $productJson = json_encode([
         return [
             'id' => $variant['id'] ?? '',
             'name' => $variant['name'] ?? '',
+            'active' => ($variant['active'] ?? true) !== false,
             'swatch' => $variant['swatch'] ?? '#d4d4d4',
             'swatch_image' => !empty($variant['swatch_image']) ? asset((string) $variant['swatch_image']) : null,
             'images' => array_map(static fn(string $image): string => asset($image), $variant['images'] ?? []),
@@ -42,64 +43,100 @@ $productJson = json_encode([
     >
         <div class="landing__hero">
             <div class="landing__gallery">
-                <div class="gallery__main" data-gallery-main>
-                    <img
-                        class="gallery__main-image"
-                        src="<?= e(asset($defaultImages[0])) ?>"
-                        alt="<?= e($product['name']) ?>"
-                        onerror="this.src='<?= e($placeholder) ?>'"
-                    >
-                    <video
-                        class="gallery__main-video"
-                        playsinline
-                        controls
-                        preload="none"
-                        hidden
-                    ></video>
+                <div class="gallery">
+                    <div class="gallery__main" data-gallery-main tabindex="0">
+                        <button type="button" class="gallery__nav gallery__nav--prev" data-gallery-prev aria-label="Previous" hidden>
+                            <span aria-hidden="true"></span>
+                        </button>
+                        <img
+                            class="gallery__main-image"
+                            src="<?= e(asset($defaultImages[0])) ?>"
+                            alt="<?= e($product['name']) ?>"
+                            onerror="this.src='<?= e($placeholder) ?>'"
+                        >
+                        <video
+                            class="gallery__main-video"
+                            playsinline
+                            controls
+                            preload="none"
+                            hidden
+                        ></video>
+                        <button type="button" class="gallery__nav gallery__nav--next" data-gallery-next aria-label="Next" hidden>
+                            <span aria-hidden="true"></span>
+                        </button>
+                        <span class="gallery__counter" data-gallery-counter hidden></span>
+                    </div>
+                    <div class="gallery__thumbs-track">
+                        <div
+                            class="gallery__thumbs<?= count($defaultImages) <= 1 ? ' is-hidden' : '' ?>"
+                            data-gallery-thumbs
+                        >
+                        <?php foreach ($defaultImages as $index => $image): ?>
+                        <button
+                            type="button"
+                            class="gallery__thumb<?= $index === 0 ? ' is-active' : '' ?>"
+                            data-index="<?= (int) $index ?>"
+                        >
+                            <img src="<?= e(asset($image)) ?>" alt="" onerror="this.src='<?= e($placeholder) ?>'">
+                        </button>
+                        <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
-                <?php if (count($defaultImages) > 1): ?>
-                <div class="gallery__thumbs">
-                    <?php foreach ($defaultImages as $index => $image): ?>
-                    <button
-                        type="button"
-                        class="gallery__thumb<?= $index === 0 ? ' is-active' : '' ?>"
-                        data-index="<?= (int) $index ?>"
-                    >
-                        <img src="<?= e(asset($image)) ?>" alt="" onerror="this.src='<?= e($placeholder) ?>'">
-                    </button>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
             </div>
 
             <div class="landing__info">
-                <span class="landing__brand"><?= e($product['brand'] ?? 'Roselira') ?></span>
-                <span class="landing__category"><?= e($product['category'] ?? '') ?></span>
-                <h1 class="landing__title"><?= e($product['name']) ?></h1>
+                <div class="landing__summary">
+                    <div class="landing__header">
+                        <div class="landing__meta-row">
+                            <div class="landing__meta">
+                                <span class="landing__brand"><?= e($product['brand'] ?? 'Roselira') ?></span>
+                                <?php if (!empty($product['category'])): ?>
+                                <span class="landing__category"><?= e($product['category']) ?></span>
+                                <?php endif; ?>
+                            </div>
 
-                <?php if (!empty($hasRating)): ?>
-                <div class="landing__rating">
-                    <?= renderStars((float) ($product['rating'] ?? 0)) ?>
-                    <span class="rating-value"><?= e(number_format((float) ($product['rating'] ?? 0), 1)) ?>/5</span>
-                    <span class="rating-count">(<?= e((string) ($product['reviews_count'] ?? 0)) ?> <?= e(t('reviews')) ?>)</span>
-                </div>
-                <?php endif; ?>
+                            <?php if (!empty($hasRating)): ?>
+                            <div class="landing__rating">
+                                <?= renderStars((float) ($product['rating'] ?? 0)) ?>
+                                <span class="rating-value"><?= e(number_format((float) ($product['rating'] ?? 0), 1)) ?>/5</span>
+                                <span class="rating-count">(<?= e((string) ($product['reviews_count'] ?? 0)) ?>)</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="landing__headline">
+                            <h1 class="landing__title"><?= e($product['name']) ?></h1>
+                            <?php if (!$hasMultipleVariants): ?>
+                            <div class="landing__price<?= empty($product['price']) ? ' is-hidden' : '' ?>" data-price-block>
+                                <span class="price" data-price-current><?= !empty($product['price']) ? e(formatPrice((float) $product['price'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
+                                <span class="price price--old<?= empty($product['price_old']) ? ' is-hidden' : '' ?>" data-price-old><?= !empty($product['price_old']) ? e(formatPrice((float) $product['price_old'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
                 <?php if ($hasMultipleVariants): ?>
                 <?php $variantCount = count($product['variants']); ?>
-                <div class="variant-picker">
+                <div class="variant-picker variant-picker--embedded">
                     <div class="variant-picker__head">
                         <p class="variant-picker__selected" data-variant-name><?= e($defaultVariant['name'] ?? '') ?></p>
-                        <?php if ($variantCount > 1): ?>
-                        <button
-                            type="button"
-                            class="variant-picker__toggle"
-                            data-variant-toggle
-                            aria-expanded="false"
-                            data-label-expand="<?= e(t('variant_all', ['count' => (string) $variantCount])) ?>"
-                            data-label-collapse="<?= e(t('variant_collapse')) ?>"
-                        ><?= e(t('variant_all', ['count' => (string) $variantCount])) ?></button>
-                        <?php endif; ?>
+                        <div class="variant-picker__aside">
+                            <div class="landing__price variant-picker__price<?= empty($product['price']) ? ' is-hidden' : '' ?>" data-price-block>
+                                <span class="price" data-price-current><?= !empty($product['price']) ? e(formatPrice((float) $product['price'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
+                                <span class="price price--old<?= empty($product['price_old']) ? ' is-hidden' : '' ?>" data-price-old><?= !empty($product['price_old']) ? e(formatPrice((float) $product['price_old'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
+                            </div>
+                            <?php if ($variantCount > 1): ?>
+                            <button
+                                type="button"
+                                class="variant-picker__toggle"
+                                data-variant-toggle
+                                aria-expanded="false"
+                                data-label-expand="<?= e(t('variant_all', ['count' => (string) $variantCount])) ?>"
+                                data-label-collapse="<?= e(t('variant_collapse')) ?>"
+                            ><?= e(t('variant_all', ['count' => (string) $variantCount])) ?></button>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div class="variant-picker__track">
                         <div
@@ -109,29 +146,30 @@ $productJson = json_encode([
                             aria-label="<?= e(t('variant_label')) ?>"
                         >
                         <?php foreach ($product['variants'] as $variant): ?>
+                        <?php $variantAvailable = ($variant['active'] ?? true) !== false; ?>
                         <button
                             type="button"
-                            class="variant-swatch<?= ($variant['id'] ?? '') === ($product['default_variant'] ?? '') ? ' is-active' : '' ?>"
+                            class="variant-swatch<?= ($variant['id'] ?? '') === ($product['default_variant'] ?? '') ? ' is-active' : '' ?><?= !$variantAvailable ? ' is-unavailable' : '' ?>"
                             role="option"
                             data-variant-id="<?= e($variant['id'] ?? '') ?>"
                             aria-selected="<?= ($variant['id'] ?? '') === ($product['default_variant'] ?? '') ? 'true' : 'false' ?>"
-                            title="<?= e($variant['name'] ?? '') ?>"
+                            title="<?= e($variant['name'] ?? '') ?><?= !$variantAvailable ? ' — ' . e(t('variant_unavailable')) : '' ?>"
                         >
                             <span class="variant-swatch__color"<?php if (!empty($variant['swatch_image'])): ?> style="background-image: url('<?= e(asset((string) $variant['swatch_image'])) ?>'); background-size: cover; background-position: center"<?php else: ?> style="background-color: <?= e($variant['swatch'] ?? '#d4d4d4') ?>"<?php endif; ?>></span>
-                            <span class="variant-swatch__name"><?= e($variant['name'] ?? '') ?></span>
+                            <span class="variant-swatch__name"><?= e($variant['name'] ?? '') ?><?php if (!$variantAvailable): ?><span class="variant-swatch__status"><?= e(t('variant_unavailable')) ?></span><?php endif; ?></span>
                         </button>
                         <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
                 <?php endif; ?>
-
-                <div class="landing__price<?= empty($product['price']) ? ' is-hidden' : '' ?>" data-price-block>
-                    <span class="price" data-price-current><?= !empty($product['price']) ? e(formatPrice((float) $product['price'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
-                    <span class="price price--old<?= empty($product['price_old']) ? ' is-hidden' : '' ?>" data-price-old><?= !empty($product['price_old']) ? e(formatPrice((float) $product['price_old'], (string) ($product['price_currency'] ?? 'USD'))) : '' ?></span>
                 </div>
 
-                <p class="landing__desc"><?= e($product['short_desc'] ?? '') ?></p>
+                <?php if (!empty($product['short_desc']) || !empty($product['benefits'])): ?>
+                <div class="landing__pitch">
+                <?php if (!empty($product['short_desc'])): ?>
+                <p class="landing__desc"><?= e($product['short_desc']) ?></p>
+                <?php endif; ?>
 
                 <?php if (!empty($product['benefits'])): ?>
                 <ul class="landing__benefits">
@@ -139,6 +177,8 @@ $productJson = json_encode([
                     <li><?= e($benefit) ?></li>
                     <?php endforeach; ?>
                 </ul>
+                <?php endif; ?>
+                </div>
                 <?php endif; ?>
 
                 <?php if (!empty($showOrderForm)): ?>
