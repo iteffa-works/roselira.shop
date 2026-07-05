@@ -6,24 +6,10 @@ namespace Flowaxy\Support;
 
 use Flowaxy\Services\SecurityLogService;
 
-final class LoginRateLimiter
+final class LoginRateLimiter extends SecurityRateLimiter
 {
-    public function __construct(private readonly SecurityLogService $security)
+    public function __construct(SecurityLogService $security)
     {
-    }
-
-    public function isLimited(): bool
-    {
-        return $this->security->isLoginLimited();
-    }
-
-    public function hit(): void
-    {
-        $this->security->hitLogin();
-    }
-
-    public function clear(): void
-    {
-        $this->security->clearLoginLimit();
+        parent::__construct($security, self::SCOPE_LOGIN);
     }
 }
