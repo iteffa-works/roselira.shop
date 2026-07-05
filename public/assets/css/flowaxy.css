@@ -765,11 +765,24 @@ a {
     display: flex;
     justify-content: center;
     min-height: 78px;
+    line-height: 0;
+}
+
+.recaptcha-widget__slot > div {
+    line-height: 0;
+}
+
+[data-theme="dark"] .recaptcha-widget--order {
+    margin: 0.375rem 0 1rem;
 }
 
 [data-theme="dark"] .recaptcha-widget--order .recaptcha-widget__frame {
-    background: #2a2a2a;
-    border-color: #404040;
+    display: contents;
+}
+
+[data-theme="dark"] .recaptcha-widget--order .recaptcha-widget__slot {
+    justify-content: flex-start;
+    min-height: 0;
 }
 
 @media (max-width: 400px) {
@@ -777,7 +790,12 @@ a {
         padding: 0.5rem;
     }
 
-    .recaptcha-widget__slot > div {
+    [data-theme="dark"] .recaptcha-widget--order .recaptcha-widget__slot > div {
+        transform: scale(0.94);
+        transform-origin: left center;
+    }
+
+    .recaptcha-widget:not(.recaptcha-widget--order) .recaptcha-widget__slot > div {
         transform: scale(0.92);
         transform-origin: center center;
     }
