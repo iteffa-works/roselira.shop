@@ -3480,6 +3480,61 @@ body.admin {
     width: 5rem;
 }
 
+.admin-db-cleanup {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #fecaca;
+}
+
+.admin-db-cleanup__summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    list-style: none;
+    margin-bottom: 0.5rem;
+}
+
+.admin-db-cleanup__summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-db-cleanup__presets {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.admin-db-cleanup__action,
+.admin-db-cleanup__custom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem 0.75rem;
+    background: #fef2f2;
+    border-radius: 8px;
+}
+
+.admin-db-cleanup__filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: #57534e;
+}
+
+.admin-db-cleanup__custom-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.admin-db-cleanup__days {
+    width: 5rem;
+}
+
 @media (max-width: 900px) {
     .admin-heatmap-toolbar {
         flex-direction: column;

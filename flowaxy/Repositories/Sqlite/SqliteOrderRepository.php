@@ -93,6 +93,47 @@ final class SqliteOrderRepository implements OrderRepositoryInterface
         return $count;
     }
 
+    /** @param list<string>|null $statuses */
+    public function deleteByPeriod(string $scope, int $periodDays = 0, ?array $statuses = null): int
+    {
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            throw new \InvalidArgumentException('Invalid purge scope: ' . $scope);
+        }
+
+        $conditions = [];
+        $params = [];
+
+        if ($scope === 'within_last') {
+            $periodDays = max(1, $periodDays);
+            $conditions[] = 'created_at >= :cutoff';
+            $params['cutoff'] = date('c', strtotime('-' . $periodDays . ' days'));
+        } elseif ($scope === 'older_than') {
+            $periodDays = max(1, $periodDays);
+            $conditions[] = 'created_at < :cutoff';
+            $params['cutoff'] = date('c', strtotime('-' . $periodDays . ' days'));
+        }
+
+        if ($statuses !== null && $statuses !== []) {
+            $placeholders = [];
+            foreach (array_values($statuses) as $index => $status) {
+                $key = 'status_' . $index;
+                $placeholders[] = ':' . $key;
+                $params[$key] = $status;
+            }
+            $conditions[] = 'status IN (' . implode(', ', $placeholders) . ')';
+        }
+
+        $sql = 'DELETE FROM orders';
+        if ($conditions !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $stmt = $this->connection->pdo()->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->rowCount();
+    }
+
     public function countByStatus(): array
     {
         $rows = $this->connection->pdo()->query('SELECT status, COUNT(*) AS cnt FROM orders GROUP BY status')->fetchAll();

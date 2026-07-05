@@ -20,6 +20,12 @@ interface OrderRepositoryInterface
 
     public function deleteAll(): int;
 
+    /**
+     * @param 'all'|'within_last'|'older_than' $scope
+     * @param list<string>|null $statuses
+     */
+    public function deleteByPeriod(string $scope, int $periodDays = 0, ?array $statuses = null): int;
+
     /** @return array<string, int> */
     public function countByStatus(): array;
 }

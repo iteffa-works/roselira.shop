@@ -67,6 +67,25 @@ final class OrderService
         return $this->orders->deleteAll();
     }
 
+    /**
+     * @param 'all'|'within_last'|'older_than' $scope
+     * @param list<string>|null $statuses
+     */
+    public function deleteByPeriod(string $scope, int $periodDays = 0, ?array $statuses = null): int
+    {
+        if ($statuses !== null) {
+            $statuses = array_values(array_filter(
+                $statuses,
+                fn(string $status): bool => $this->isValidStatus($status),
+            ));
+            if ($statuses === []) {
+                $statuses = null;
+            }
+        }
+
+        return $this->orders->deleteByPeriod($scope, $periodDays, $statuses);
+    }
+
     /** @return array<string, int> */
     public function countByStatus(): array
     {

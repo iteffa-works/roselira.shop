@@ -10,6 +10,7 @@ use Flowaxy\Core\View;
 use Flowaxy\Repositories\Sqlite\Connection;
 use Flowaxy\Services\AdminAuthService;
 use Flowaxy\Services\OrderService;
+use Flowaxy\Services\VisitorAnalyticsService;
 
 final class DatabaseController extends AdminController
 {
@@ -18,6 +19,7 @@ final class DatabaseController extends AdminController
         AdminAuthService $auth,
         private readonly OrderService $orders,
         private readonly Connection $connection,
+        private readonly VisitorAnalyticsService $analytics,
     ) {
         parent::__construct($view, $auth);
     }
@@ -73,6 +75,23 @@ final class DatabaseController extends AdminController
                 $this->auth->flash('success', "Видалено всі замовлення ({$deleted}).");
                 break;
 
+            case 'purge_orders':
+                $deleted = $this->purgeOrders($request);
+                if ($deleted !== null) {
+                    $this->auth->flash('success', "Видалено {$deleted} замовлень.");
+                }
+                break;
+
+            case 'purge_analytics':
+                $result = $this->purgeAnalytics($request);
+                if ($result !== null) {
+                    $this->auth->flash(
+                        'success',
+                        sprintf('Видалено %d подій та %d сесій.', $result['events'], $result['sessions']),
+                    );
+                }
+                break;
+
             case 'vacuum':
                 $this->connection->vacuum();
                 $this->auth->flash('success', 'Базу даних оптимізовано (VACUUM).');
@@ -83,5 +102,71 @@ final class DatabaseController extends AdminController
         }
 
         return $this->redirect(admin_url('database'));
+    }
+
+    private function purgeOrders(Request $request): ?int
+    {
+        $scope = (string) $request->post('scope', '');
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            $this->auth->flash('error', 'Невідомий параметр очистки замовлень.');
+
+            return null;
+        }
+
+        $periodDays = max(1, min(3650, (int) $request->post('period_days', 7)));
+        $statuses = $this->selectedStatuses($request);
+
+        try {
+            return $this->orders->deleteByPeriod($scope, $periodDays, $statuses);
+        } catch (\Throwable) {
+            $this->auth->flash('error', 'Не вдалося очистити замовлення.');
+
+            return null;
+        }
+    }
+
+    /** @return array{events: int, sessions: int}|null */
+    private function purgeAnalytics(Request $request): ?array
+    {
+        $scope = (string) $request->post('scope', '');
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            $this->auth->flash('error', 'Невідомий параметр очистки аналітики.');
+
+            return null;
+        }
+
+        $periodDays = max(1, min(3650, (int) $request->post('period_days', 7)));
+        $path = $request->post('filter_page') === '1'
+            ? (string) $request->post('page', '/')
+            : null;
+        $viewport = $request->post('filter_viewport') === '1'
+            ? (string) $request->post('viewport', '')
+            : null;
+        $eventTypes = $request->post('clicks_only') === '1' ? ['click'] : null;
+
+        try {
+            return $this->analytics->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
+        } catch (\Throwable) {
+            $this->auth->flash('error', 'Не вдалося очистити дані аналітики.');
+
+            return null;
+        }
+    }
+
+    /** @return list<string>|null */
+    private function selectedStatuses(Request $request): ?array
+    {
+        if ($request->post('filter_status') !== '1') {
+            return null;
+        }
+
+        $statuses = [];
+        foreach ($this->orders->statuses() as $status) {
+            if ($request->post('status_' . $status) === '1') {
+                $statuses[] = $status;
+            }
+        }
+
+        return $statuses === [] ? null : $statuses;
     }
 }
