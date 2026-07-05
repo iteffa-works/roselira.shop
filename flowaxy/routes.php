@@ -34,6 +34,7 @@ return static function (Router $router): void {
     $router->get('/feeds/google.xml', FeedController::class . '::google');
 
     $router->get('/admin', DashboardController::class . '::index');
+    $router->get('/admin/api/google-analytics', DashboardController::class . '::googleAnalytics');
     $router->get('/admin/heatmap', DashboardController::class . '::heatmap');
     $router->get('/admin/login', AuthController::class . '::loginForm');
     $router->post('/admin/login', AuthController::class . '::login');

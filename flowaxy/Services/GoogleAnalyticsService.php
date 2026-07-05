@@ -51,7 +51,7 @@ final class GoogleAnalyticsService
             return array_merge($base, ['mode' => 'links']);
         }
 
-        [$reports, $error] = $this->fetchReports($days);
+        [$reports, $error] = $days === 1 ? $this->fetchRealtimeReports() : $this->fetchReports($days);
         if ($reports === null) {
             return array_merge($base, [
                 'mode' => 'links',
@@ -59,7 +59,157 @@ final class GoogleAnalyticsService
             ]);
         }
 
+        if ($days === 1) {
+            $reports['realtime'] = true;
+        } else {
+            $token = $this->resolveAccessToken();
+            if ($token !== null) {
+                $reports['live'] = $this->fetchLiveSnapshot($token);
+            }
+        }
+
         return array_merge($base, $reports, ['mode' => 'api']);
+    }
+
+    /** @return array{active_users: int, event_count: int}|null */
+    public function liveSnapshot(): ?array
+    {
+        $token = $this->resolveAccessToken();
+
+        return $token !== null ? $this->fetchLiveSnapshot($token) : null;
+    }
+
+    /** @return array{active_users: int, event_count: int} */
+    private function fetchLiveSnapshot(string $token): array
+    {
+        [$response] = $this->runRealtimeReport([
+            'metrics' => [
+                ['name' => 'activeUsers'],
+                ['name' => 'eventCount'],
+            ],
+        ], $token);
+
+        $row = $this->metricValues($response ?? [])[0] ?? [];
+
+        return [
+            'active_users' => (int) ($row[0] ?? 0),
+            'event_count' => (int) ($row[1] ?? 0),
+        ];
+    }
+
+    private function resolveAccessToken(): ?string
+    {
+        $path = $this->resolvedServiceAccountPath();
+        if ($path === null) {
+            return null;
+        }
+
+        return GoogleServiceAccount::accessToken($path);
+    }
+
+    /** @return array{0: array<string, mixed>|null, 1: string|null} */
+    private function fetchRealtimeReports(): array
+    {
+        $path = $this->resolvedServiceAccountPath();
+        if ($path === null) {
+            return [null, 'JSON service account не знайдено або PHP не може його прочитати (перевірте шлях і chmod 644).'];
+        }
+
+        $token = GoogleServiceAccount::accessToken($path);
+        if ($token === null) {
+            return [null, 'OAuth-токен не отримано — ключ JSON недійсний або відкликаний у Google Cloud.'];
+        }
+
+        [$summaryResp, $summaryError] = $this->runRealtimeReport([
+            'metrics' => [
+                ['name' => 'activeUsers'],
+                ['name' => 'eventCount'],
+            ],
+        ], $token);
+        if ($summaryResp === null) {
+            return [null, $summaryError ?? 'GA4 Realtime API не відповіла.'];
+        }
+
+        [$chartResp] = $this->runRealtimeReport([
+            'dimensions' => [['name' => 'minutesAgo']],
+            'metrics' => [['name' => 'activeUsers']],
+            'orderBys' => [['dimension' => ['dimensionName' => 'minutesAgo'], 'desc' => true]],
+        ], $token);
+
+        [$pagesResp] = $this->runRealtimeReport([
+            'dimensions' => [['name' => 'unifiedScreenName']],
+            'metrics' => [['name' => 'activeUsers']],
+            'orderBys' => [['metric' => ['metricName' => 'activeUsers'], 'desc' => true]],
+            'limit' => 10,
+        ], $token);
+
+        [$devicesResp] = $this->runRealtimeReport([
+            'dimensions' => [['name' => 'deviceCategory']],
+            'metrics' => [['name' => 'activeUsers']],
+            'orderBys' => [['metric' => ['metricName' => 'activeUsers'], 'desc' => true]],
+            'limit' => 8,
+        ], $token);
+
+        [$countriesResp] = $this->runRealtimeReport([
+            'dimensions' => [['name' => 'country']],
+            'metrics' => [['name' => 'activeUsers']],
+            'orderBys' => [['metric' => ['metricName' => 'activeUsers'], 'desc' => true]],
+            'limit' => 8,
+        ], $token);
+
+        $summaryRow = $this->metricValues($summaryResp)[0] ?? [];
+
+        return [[
+            'summary' => [
+                'sessions' => (int) ($summaryRow[0] ?? 0),
+                'page_views' => (int) ($summaryRow[1] ?? 0),
+                'avg_duration_sec' => 0,
+                'bounce_rate' => 0.0,
+                'active_users' => (int) ($summaryRow[0] ?? 0),
+            ],
+            'chart' => $this->chartFromRealtime($chartResp ?? []),
+            'top_pages' => $this->dimensionReport($pagesResp ?? [], 'unifiedScreenName', 'activeUsers'),
+            'devices' => $this->dimensionReport($devicesResp ?? [], 'deviceCategory', 'activeUsers'),
+            'sources' => $this->dimensionReport($countriesResp ?? [], 'country', 'activeUsers'),
+        ], null];
+    }
+
+    /** @param array<string, mixed> $body
+     * @return array{0: array<string, mixed>|null, 1: string|null}
+     */
+    private function runRealtimeReport(array $body, string $token): array
+    {
+        $url = 'https://analyticsdata.googleapis.com/v1beta/properties/' . rawurlencode($this->propertyId) . ':runRealtimeReport';
+
+        return $this->postJson($url, $body, $token);
+    }
+
+    /** @return list<array{date: string, sessions: int, pageviews: int}> */
+    private function chartFromRealtime(array $report): array
+    {
+        $rows = $report['rows'] ?? [];
+        if (!is_array($rows)) {
+            return [];
+        }
+
+        $chart = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $minutesAgo = (string) ($row['dimensionValues'][0]['value'] ?? '');
+            if ($minutesAgo === '') {
+                continue;
+            }
+            $activeUsers = (int) ($row['metricValues'][0]['value'] ?? 0);
+            $chart[] = [
+                'date' => $minutesAgo === '0' ? 'зараз' : $minutesAgo . ' хв',
+                'sessions' => $activeUsers,
+                'pageviews' => 0,
+            ];
+        }
+
+        return $chart;
     }
 
     /** @return array{0: array<string, mixed>|null, 1: string|null} */
@@ -222,6 +372,23 @@ final class GoogleAnalyticsService
                 $line[] = (string) ($metric['value'] ?? '0');
             }
             $values[] = $line;
+        }
+
+        if ($values !== []) {
+            return $values;
+        }
+
+        foreach ($report['totals'] ?? [] as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $line = [];
+            foreach ($row['metricValues'] ?? [] as $metric) {
+                $line[] = (string) ($metric['value'] ?? '0');
+            }
+            if ($line !== []) {
+                $values[] = $line;
+            }
         }
 
         return $values;

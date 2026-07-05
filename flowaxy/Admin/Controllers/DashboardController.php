@@ -87,4 +87,27 @@ final class DashboardController extends CatalogAdminController
             'flash' => $this->auth->getFlash(),
         ]));
     }
+
+    public function googleAnalytics(Request $request): Response
+    {
+        if ($response = $this->requireAuth()) {
+            return $response;
+        }
+
+        if (!$this->googleAnalytics->hasApiAccess()) {
+            return Response::json(['error' => 'GA4 API не налаштовано'], 400);
+        }
+
+        if ($request->query('live') === '1') {
+            $live = $this->googleAnalytics->liveSnapshot();
+
+            return Response::json([
+                'live' => $live ?? ['active_users' => 0, 'event_count' => 0],
+            ]);
+        }
+
+        $days = max(1, min(90, (int) $request->query('days', 1)));
+
+        return Response::json($this->googleAnalytics->dashboard($days));
+    }
 }
