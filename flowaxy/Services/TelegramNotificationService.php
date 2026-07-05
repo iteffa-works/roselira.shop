@@ -45,7 +45,12 @@ final class TelegramNotificationService
 
     public function sendTestMessage(): bool
     {
-        return $this->sendMessage('Тестове сповіщення Roselira. Telegram підключено.');
+        $lines = ['Тестове сповіщення Roselira. Telegram підключено.'];
+        if ($site = $this->siteLabel()) {
+            $lines[] = 'Сайт: ' . $site;
+        }
+
+        return $this->sendMessage(implode("\n", $lines));
     }
 
     /** @param array<string, mixed> $order */
@@ -74,7 +79,23 @@ final class TelegramNotificationService
             $lines[] = 'Коментар: ' . (string) $order['comment'];
         }
 
+        if ($site = $this->siteLabel()) {
+            $lines[] = 'Сайт: ' . $site;
+        }
+
         return $this->sendMessage(implode("\n", $lines));
+    }
+
+    private function siteLabel(): ?string
+    {
+        $url = rtrim((string) (app_config()['app_url'] ?? ''), '/');
+        if ($url === '') {
+            return null;
+        }
+
+        $label = preg_replace('#^https?://#i', '', $url);
+
+        return is_string($label) && $label !== '' ? $label : null;
     }
 
     private function sendMessage(string $text): bool
