@@ -8,7 +8,7 @@ storage/roselira.db-wal
 storage/roselira.db-shm
 storage/*.sql
 storage/logs/
-storage/ga4-service-account.json
+storage/service/accounts/
 
 # Local tooling
 .osp/
@@ -19,4 +19,4 @@ storage/ga4-service-account.json
 *.swp
 Thumbs.db
 Desktop.ini
-storage/service/accounts/
+
