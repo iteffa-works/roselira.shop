@@ -39,6 +39,7 @@ use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
+use Flowaxy\Services\GoogleAnalyticsService;
 use Flowaxy\Services\VisitorAnalyticsService;
 use Flowaxy\Support\OrderRateLimiter;
 use Flowaxy\Support\LoginRateLimiter;
@@ -112,6 +113,17 @@ $container->singleton(VisitorRepositoryInterface::class, static fn(Container $c)
 $container->singleton(VisitorAnalyticsService::class, static fn(Container $c): VisitorAnalyticsService => new VisitorAnalyticsService(
     $c->make(VisitorRepositoryInterface::class),
 ));
+
+$container->singleton(GoogleAnalyticsService::class, static function (Container $c) use ($config): GoogleAnalyticsService {
+    return new GoogleAnalyticsService(
+        (string) ($config['ga4_property_id'] ?? ''),
+        (string) ($config['ga4_service_account_json'] ?? ''),
+        (string) ($config['ga4_looker_embed_url'] ?? ''),
+        (string) ($config['ga4_measurement_id'] ?? ''),
+        (string) ($config['gtm_container_id'] ?? ''),
+        (string) ($config['project_root'] ?? ''),
+    );
+});
 
 $container->singleton(SecurityRepositoryInterface::class, static fn(Container $c): SqliteSecurityRepository => new SqliteSecurityRepository($c->make(Connection::class)));
 

@@ -8,6 +8,7 @@ storage/roselira.db-wal
 storage/roselira.db-shm
 storage/*.sql
 storage/logs/
+storage/ga4-service-account.json
 
 # Local tooling
 .osp/
