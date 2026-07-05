@@ -43,7 +43,6 @@
             }
             return;
         }
-
         var textEl = banner.querySelector('[data-cookie-text]');
         var acceptBtn = banner.querySelector('[data-cookie-accept]');
         var rejectBtn = banner.querySelector('[data-cookie-reject]');

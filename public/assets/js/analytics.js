@@ -44,13 +44,24 @@
     }
 
     function initGtm(containerId) {
-        if (!containerId || document.querySelector('[data-gtm-id="' + containerId + '"]')) {
+        if (!containerId || document.querySelector('script[src*="googletagmanager.com/gtm.js"]')) {
             return;
         }
 
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
         loadScript('https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(containerId));
+    }
+
+    function grantConsent() {
+        if (typeof window.gtag === 'function') {
+            window.gtag('consent', 'update', {
+                analytics_storage: 'granted',
+                ad_storage: 'granted',
+                ad_user_data: 'granted',
+                ad_personalization: 'granted',
+            });
+        }
     }
 
     window.FlowaxyAnalytics = {
@@ -61,6 +72,8 @@
 
             loaded = true;
             config = config || window.__FLOWAXY__ || {};
+
+            grantConsent();
 
             if (config.gtmId) {
                 initGtm(config.gtmId);

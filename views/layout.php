@@ -9,6 +9,7 @@
     $hasTracking = ($siteConfig['meta_pixel_id'] ?? '') !== ''
         || ($siteConfig['ga4_measurement_id'] ?? '') !== ''
         || ($siteConfig['gtm_container_id'] ?? '') !== '';
+    $gtmId = (string) ($siteConfig['gtm_container_id'] ?? '');
     ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,6 +39,20 @@
     <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/flowaxy.css') ?>">
+    <?php if ($gtmId !== ''): ?>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500
+    });
+    </script>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?= e($gtmId) ?>');</script>
+    <?php endif; ?>
     <?php if ($hasTracking): ?>
     <script>
     window.__FLOWAXY__ = <?= json_encode([
@@ -53,6 +68,9 @@
     <?php endif; ?>
 </head>
 <body>
+    <?php if ($gtmId !== ''): ?>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?= e($gtmId) ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <?php endif; ?>
     <header class="site-header">
         <div class="container site-header__inner">
             <a href="/" class="site-logo">
