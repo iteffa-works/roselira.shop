@@ -62,7 +62,7 @@ $formatDt = static function (?string $value): string {
             <h2 class="admin-card__title">Аналітика відвідувачів</h2>
             <p class="admin-muted">
                 <?php if ($analyticsSource === 'google'): ?>
-                Google Analytics · дані з GA4
+                Google Analytics · <?= $days === 1 ? 'realtime GA4' : 'дані з GA4' ?>
                 <?php else: ?>
                 Локальний трекінг · кліки, scroll, сесії
                 <?php endif; ?>
@@ -154,3 +154,7 @@ $formatDt = static function (?string $value): string {
         <?php endif; ?>
     </section>
 </div>
+
+<?php if ($analyticsSource === 'google' && is_array($googleReport) && ($googleReport['mode'] ?? '') === 'api'): ?>
+<script src="<?= asset('assets/js/admin-dashboard.js') ?>" defer></script>
+<?php endif; ?>

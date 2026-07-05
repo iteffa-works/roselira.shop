@@ -259,7 +259,165 @@
         iframe.src = pagePreviewUrl(pagePath);
     }
 
+    function initGaRealtime(root) {
+        var apiUrl = root.getAttribute('data-ga-api-url');
+        var liveUrl = root.getAttribute('data-ga-live-url');
+        var pollMode = root.getAttribute('data-ga-poll-mode') || 'full';
+        if (!apiUrl && !liveUrl) {
+            return;
+        }
+
+        var intervalMs = 30000;
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function renderBars(items) {
+            if (!items || !items.length) {
+                return '<p class="admin-empty">Немає даних</p>';
+            }
+
+            var max = 1;
+            items.forEach(function (item) {
+                max = Math.max(max, item.count || 0);
+            });
+
+            var html = '<ul class="admin-analytics__bars">';
+            items.forEach(function (item) {
+                var count = item.count || 0;
+                var width = Math.max(6, Math.round((count / max) * 100));
+                html += '<li>'
+                    + '<span class="admin-analytics__bar-label">' + escapeHtml(item.label || '—') + '</span>'
+                    + '<span class="admin-analytics__bar-track"><span class="admin-analytics__bar-fill" style="width:' + width + '%"></span></span>'
+                    + '<span class="admin-analytics__bar-value">' + count + '</span>'
+                    + '</li>';
+            });
+            html += '</ul>';
+
+            return html;
+        }
+
+        function renderChart(chart) {
+            var chartRoot = root.querySelector('[data-ga-chart]');
+            if (!chartRoot) {
+                return;
+            }
+
+            if (!chart || !chart.length) {
+                chartRoot.innerHTML = '<p class="admin-empty">Немає даних за обраний період</p>';
+                return;
+            }
+
+            var chartMax = 1;
+            chart.forEach(function (point) {
+                chartMax = Math.max(chartMax, point.sessions || 0, point.pageviews || 0);
+            });
+
+            var bars = '';
+            chart.forEach(function (point) {
+                var sessions = point.sessions || 0;
+                var sessionH = Math.max(4, Math.round((sessions / chartMax) * 100));
+                bars += '<div class="admin-analytics__chart-col" title="' + escapeHtml((point.date || '') + ': ' + sessions + ' активних') + '">'
+                    + '<div class="admin-analytics__chart-bars">'
+                    + '<span class="admin-analytics__chart-bar admin-analytics__chart-bar--sessions" style="height:' + sessionH + '%"></span>'
+                    + '</div>'
+                    + '<span class="admin-analytics__chart-label">' + escapeHtml(point.date || '') + '</span>'
+                    + '</div>';
+            });
+
+            chartRoot.innerHTML = ''
+                + '<div class="admin-analytics__chart">' + bars + '</div>'
+                + '<div class="admin-analytics__legend">'
+                + '<span><i class="admin-analytics__dot admin-analytics__dot--sessions"></i> Активні користувачі</span>'
+                + '</div>';
+        }
+
+        function applyLive(live) {
+            if (!live) {
+                return;
+            }
+            var node = root.querySelector('[data-ga-live-active]');
+            if (node && live.active_users !== undefined) {
+                node.textContent = String(live.active_users);
+            }
+        }
+
+        function applyReport(report) {
+            if (!report || report.mode !== 'api' || report.error) {
+                return;
+            }
+
+            var summary = report.summary || {};
+            root.querySelectorAll('[data-ga-stat]').forEach(function (node) {
+                var key = node.getAttribute('data-ga-stat');
+                if (key && summary[key] !== undefined) {
+                    node.textContent = String(summary[key]);
+                }
+            });
+
+            renderChart(report.chart || []);
+            applyLive(report.live || null);
+
+            var breakdowns = {
+                'Топ сторінки': report.top_pages || [],
+                'Пристрої': report.devices || [],
+                'Країни': report.sources || [],
+            };
+
+            Object.keys(breakdowns).forEach(function (title) {
+                var panel = root.querySelector('[data-ga-breakdown="' + title + '"]');
+                if (!panel) {
+                    return;
+                }
+                var heading = panel.querySelector('h3');
+                panel.querySelectorAll('.admin-analytics__bars, .admin-empty').forEach(function (node) {
+                    node.remove();
+                });
+                if (heading) {
+                    heading.insertAdjacentHTML('afterend', renderBars(breakdowns[title]));
+                }
+            });
+        }
+
+        function refresh() {
+            var url = pollMode === 'full' ? apiUrl : liveUrl;
+            if (!url) {
+                return;
+            }
+
+            fetch(url, {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('bad response');
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    if (pollMode === 'full') {
+                        applyReport(payload);
+                        return;
+                    }
+                    applyLive(payload.live || null);
+                })
+                .catch(function () {
+                    /* ignore transient errors */
+                });
+        }
+
+        refresh();
+        window.setInterval(refresh, intervalMs);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-analytics-heatmap]').forEach(initHeatmap);
+        document.querySelectorAll('[data-ga-poll]').forEach(initGaRealtime);
     });
 })();

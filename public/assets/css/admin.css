@@ -2818,6 +2818,60 @@ body.admin {
     font-size: 0.875rem;
 }
 
+.admin-analytics__realtime-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.admin-analytics__realtime-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #10b981;
+    animation: admin-realtime-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes admin-realtime-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.admin-analytics__live-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.8125rem;
+}
+
+.admin-analytics__ga-notice {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    color: var(--admin-muted-text, #475569);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.admin-analytics__ga-notice a {
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
 .admin-analytics__embed-wrap {
     min-height: 520px;
     border-radius: 0.75rem;
