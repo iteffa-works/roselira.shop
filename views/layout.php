@@ -6,10 +6,13 @@
     $canonicalPath = $canonicalPath ?? (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
     $canonicalUrl = absolute_url($canonicalPath);
     $ogImageUrl = !empty($ogImage) ? absolute_url((string) $ogImage) : '';
-    $hasTracking = ($siteConfig['meta_pixel_id'] ?? '') !== ''
-        || ($siteConfig['ga4_measurement_id'] ?? '') !== ''
-        || ($siteConfig['gtm_container_id'] ?? '') !== '';
     $gtmId = (string) ($siteConfig['gtm_container_id'] ?? '');
+    $heatmapPreview = (($_GET['heatmap_preview'] ?? '') === '1');
+    $hasTracking = !$heatmapPreview && (
+        ($siteConfig['meta_pixel_id'] ?? '') !== ''
+        || ($siteConfig['ga4_measurement_id'] ?? '') !== ''
+        || ($siteConfig['gtm_container_id'] ?? '') !== ''
+    );
     ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,7 +42,7 @@
     <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/flowaxy.css') ?>">
-    <?php if ($gtmId !== ''): ?>
+    <?php if ($gtmId !== '' && !$heatmapPreview): ?>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -67,8 +70,8 @@
     </script>
     <?php endif; ?>
 </head>
-<body>
-    <?php if ($gtmId !== ''): ?>
+<body<?= $heatmapPreview ? ' class="heatmap-preview"' : '' ?>>
+    <?php if ($gtmId !== '' && !$heatmapPreview): ?>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?= e($gtmId) ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <?php endif; ?>
     <header class="site-header">
@@ -117,27 +120,23 @@
     ?>
     <footer class="site-footer">
         <div class="container site-footer__bar">
-            <div class="site-footer__start">
-                <nav class="site-footer__nav" aria-label="Legal">
+            <div class="site-footer__col site-footer__col--copy">
+                <span class="site-footer__copy"><?= e(t('footer_copy', ['year' => date('Y')])) ?></span>
+            </div>
+            <div class="site-footer__col site-footer__col--nav">
+                <nav class="site-footer__nav" aria-label="<?= e(t('footer_nav_label')) ?>">
                     <a href="/privacy"><?= e(t('footer_privacy')) ?></a>
                     <a href="/terms"><?= e(t('footer_terms')) ?></a>
                     <a href="/delivery"><?= e(t('footer_delivery')) ?></a>
-                </nav>
-                <?php if ($contactEmail !== '' || $contactTelegram !== ''): ?>
-                <span class="site-footer__contact">
-                    <?= e(t('footer_contact')) ?>:
                     <?php if ($contactEmail !== ''): ?>
-                    <a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a>
+                    <a href="mailto:<?= e($contactEmail) ?>" class="site-footer__nav-contact"><?= e($contactEmail) ?></a>
                     <?php endif; ?>
                     <?php if ($contactTelegram !== ''): ?>
-                    <?php if ($contactEmail !== ''): ?><span class="site-footer__contact-sep">·</span><?php endif; ?>
-                    <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener"><?= e($contactTelegram) ?></a>
+                    <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener" class="site-footer__nav-contact"><?= e($contactTelegram) ?></a>
                     <?php endif; ?>
-                </span>
-                <?php endif; ?>
+                </nav>
             </div>
-            <div class="site-footer__end">
-                <span class="site-footer__copy">© <?= date('Y') ?> Roselira · roselira.shop</span>
+            <div class="site-footer__col site-footer__col--credit">
                 <span class="site-footer__credit">
                     <?= e(t('footer_credit')) ?> <a href="https://flowaxy.com" target="_blank" rel="noopener">Flowaxy Digital Studio</a>
                 </span>
@@ -146,17 +145,23 @@
     </footer>
 
     <?php if ($hasTracking): ?>
-    <div class="cookie-banner" data-cookie-banner hidden>
-        <p class="cookie-banner__text" data-cookie-text></p>
+    <div class="cookie-banner" data-cookie-banner hidden role="dialog" aria-live="polite" aria-label="Cookie consent">
+        <div class="cookie-banner__head">
+            <span class="cookie-banner__icon" aria-hidden="true">🍪</span>
+            <strong class="cookie-banner__title"><?= e(t('cookie_title')) ?></strong>
+        </div>
+        <p class="cookie-banner__text" data-cookie-text><?= e(t('cookie_banner_text')) ?></p>
         <div class="cookie-banner__actions">
-            <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-cookie-accept></button>
-            <button type="button" class="cookie-banner__btn cookie-banner__btn--reject" data-cookie-reject></button>
+            <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-cookie-accept><?= e(t('cookie_accept')) ?></button>
+            <button type="button" class="cookie-banner__btn cookie-banner__btn--reject" data-cookie-reject><?= e(t('cookie_reject')) ?></button>
         </div>
     </div>
     <?php endif; ?>
 
     <script src="<?= asset('assets/js/flowaxy.js') ?>" defer></script>
+    <?php if (!$heatmapPreview): ?>
     <script src="<?= asset('assets/js/visitor-track.js') ?>" defer></script>
+    <?php endif; ?>
     <?php if ($hasTracking): ?>
     <script src="<?= asset('assets/js/consent.js') ?>" defer></script>
     <script src="<?= asset('assets/js/analytics.js') ?>" defer></script>

@@ -118,17 +118,35 @@
         var body = document.body;
         var scrollX = window.pageXOffset || doc.scrollLeft || 0;
         var scrollY = window.pageYOffset || doc.scrollTop || 0;
-        var docW = Math.max(doc.scrollWidth, body ? body.scrollWidth : 0, doc.clientWidth);
-        var docH = Math.max(doc.scrollHeight, body ? body.scrollHeight : 0, doc.clientHeight);
+        var docW = Math.max(doc.scrollWidth, body ? body.scrollWidth : 0, 1);
+        var docH = Math.max(doc.scrollHeight, body ? body.scrollHeight : 0, 1);
         var x = event.pageX ?? (event.clientX + scrollX);
         var y = event.pageY ?? (event.clientY + scrollY);
         var target = event.target && event.target.closest ? event.target.closest('a,button,[role="button"],input,select,textarea,.product-card,.site-logo') : event.target;
+        var meta = {
+            vw: window.innerWidth || doc.clientWidth || 0,
+            vh: window.innerHeight || doc.clientHeight || 0,
+            scroll_y: scrollY,
+            scroll_x: scrollX,
+            doc_w: docW,
+            doc_h: docH,
+            page_x: x,
+            page_y: y,
+        };
+
+        if (target && target.tagName === 'A') {
+            var href = target.getAttribute('href') || '';
+            if (href) {
+                meta.href = href;
+            }
+        }
 
         pushEvent({
             type: 'click',
             x_pct: pct(x, docW),
             y_pct: pct(y, docH),
             tag: target && target.tagName ? target.tagName : '',
+            meta: meta,
         });
     }
 

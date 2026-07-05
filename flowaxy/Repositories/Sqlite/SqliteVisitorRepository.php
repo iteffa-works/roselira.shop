@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Repositories\Sqlite;
 
 use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
+use Flowaxy\Support\HeatmapViewport;
 use Flowaxy\Support\JsonCodec;
 
 final class SqliteVisitorRepository implements VisitorRepositoryInterface
@@ -224,6 +225,45 @@ final class SqliteVisitorRepository implements VisitorRepositoryInterface
         return $rows;
     }
 
+    /** @return list<array{path: string, clicks: int}> */
+    public function topClickPages(int $days, int $limit = 12, ?string $viewport = null): array
+    {
+        $since = $this->since($days);
+        $pdo = $this->connection->pdo();
+        $vwExpr = $this->effectiveViewportWidthExpression();
+        $viewportFilter = $this->viewportSqlFilter($viewport, $vwExpr);
+
+        $stmt = $pdo->prepare(<<<SQL
+            SELECT e.path,
+                   COUNT(*) AS clicks
+            FROM visitor_events e
+            INNER JOIN visitor_sessions s ON s.id = e.session_id
+            WHERE e.event_type = 'click'
+              AND s.is_bot = 0
+              AND e.created_at >= :since
+              AND e.x_pct IS NOT NULL
+              AND e.y_pct IS NOT NULL
+              {$viewportFilter}
+            GROUP BY e.path
+            ORDER BY clicks DESC
+            LIMIT :limit
+            SQL);
+        $stmt->bindValue('since', $since);
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $this->bindViewportRange($stmt, $viewport);
+        $stmt->execute();
+
+        $rows = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $rows[] = [
+                'path' => (string) $row['path'],
+                'clicks' => (int) $row['clicks'],
+            ];
+        }
+
+        return $rows;
+    }
+
     /** @return list<array{label: string, count: int}> */
     public function breakdown(string $field, int $days, int $limit = 6): array
     {
@@ -286,38 +326,126 @@ final class SqliteVisitorRepository implements VisitorRepositoryInterface
         return $rows;
     }
 
-    /** @return list<array{x_pct: float, y_pct: float, weight: int}> */
-    public function heatmap(string $path, int $days): array
+    /** @return list<array<string, mixed>> */
+    public function heatmap(string $path, int $days, string $viewport = 'desktop'): array
     {
         $since = $this->since($days);
         $pdo = $this->connection->pdo();
+        $vwExpr = $this->effectiveViewportWidthExpression();
+        $viewportFilter = $this->viewportSqlFilter($viewport, $vwExpr);
 
-        $stmt = $pdo->prepare(<<<'SQL'
-            SELECT ROUND(x_pct, 0) AS x_pct,
-                   ROUND(y_pct, 0) AS y_pct,
-                   COUNT(*) AS weight
-            FROM visitor_events
-            WHERE event_type = 'click'
-              AND path = :path
-              AND created_at >= :since
-              AND x_pct IS NOT NULL
-              AND y_pct IS NOT NULL
-            GROUP BY ROUND(x_pct, 0), ROUND(y_pct, 0)
-            ORDER BY weight DESC
-            LIMIT 400
+        $stmt = $pdo->prepare(<<<SQL
+            SELECT e.x_pct, e.y_pct, e.meta
+            FROM visitor_events e
+            INNER JOIN visitor_sessions s ON s.id = e.session_id
+            WHERE e.event_type = 'click'
+              AND s.is_bot = 0
+              AND e.path = :path
+              AND e.created_at >= :since
+              AND e.x_pct IS NOT NULL
+              AND e.y_pct IS NOT NULL
+              {$viewportFilter}
+            ORDER BY e.created_at DESC
+            LIMIT 300
             SQL);
-        $stmt->execute(['path' => $path, 'since' => $since]);
+        $stmt->bindValue('path', $path);
+        $stmt->bindValue('since', $since);
+        $this->bindViewportRange($stmt, $viewport);
+        $stmt->execute();
 
         $rows = [];
         foreach ($stmt->fetchAll() as $row) {
+            $meta = JsonCodec::decode((string) ($row['meta'] ?? '{}'));
             $rows[] = [
                 'x_pct' => (float) $row['x_pct'],
                 'y_pct' => (float) $row['y_pct'],
-                'weight' => (int) $row['weight'],
+                'weight' => 1,
+                'href' => (string) ($meta['href'] ?? ''),
+                'page_x' => (float) ($meta['page_x'] ?? 0),
+                'page_y' => (float) ($meta['page_y'] ?? 0),
+                'doc_w' => (float) ($meta['doc_w'] ?? 0),
+                'doc_h' => (float) ($meta['doc_h'] ?? 0),
+                'vw' => (int) ($meta['vw'] ?? 0),
             ];
         }
 
         return $rows;
+    }
+
+    public function heatmapPreviewWidth(string $path, int $days, string $viewport = 'desktop'): int
+    {
+        return HeatmapViewport::profile($viewport)['preview'];
+    }
+
+    public function heatmapClickCount(string $path, int $days, string $viewport = 'desktop'): int
+    {
+        $since = $this->since($days);
+        $pdo = $this->connection->pdo();
+        $vwExpr = $this->effectiveViewportWidthExpression();
+        $viewportFilter = $this->viewportSqlFilter($viewport, $vwExpr);
+
+        $stmt = $pdo->prepare(<<<SQL
+            SELECT COUNT(*)
+            FROM visitor_events e
+            INNER JOIN visitor_sessions s ON s.id = e.session_id
+            WHERE e.event_type = 'click'
+              AND s.is_bot = 0
+              AND e.path = :path
+              AND e.created_at >= :since
+              AND e.x_pct IS NOT NULL
+              AND e.y_pct IS NOT NULL
+              {$viewportFilter}
+            SQL);
+        $stmt->execute(['path' => $path, 'since' => $since] + $this->viewportRangeParams($viewport));
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** @return array<string, int> */
+    public function heatmapViewportCounts(string $path, int $days): array
+    {
+        $since = $this->since($days);
+        $pdo = $this->connection->pdo();
+        $vwExpr = $this->effectiveViewportWidthExpression();
+        $counts = [];
+
+        foreach (HeatmapViewport::ids() as $profileId) {
+            $profile = HeatmapViewport::profile($profileId);
+            $stmt = $pdo->prepare(<<<SQL
+                SELECT COUNT(*)
+                FROM visitor_events e
+                INNER JOIN visitor_sessions s ON s.id = e.session_id
+                WHERE e.event_type = 'click'
+                  AND s.is_bot = 0
+                  AND e.path = :path
+                  AND e.created_at >= :since
+                  AND e.x_pct IS NOT NULL
+                  AND e.y_pct IS NOT NULL
+                  AND {$vwExpr} >= :min_vw
+                  AND {$vwExpr} <= :max_vw
+                SQL);
+            $stmt->bindValue('path', $path);
+            $stmt->bindValue('since', $since);
+            $stmt->bindValue('min_vw', $profile['min'], \PDO::PARAM_INT);
+            $stmt->bindValue('max_vw', $profile['max'], \PDO::PARAM_INT);
+            $stmt->execute();
+            $counts[$profileId] = (int) $stmt->fetchColumn();
+        }
+
+        return $counts;
+    }
+
+    public function guessHeatmapViewport(string $path, int $days): string
+    {
+        $counts = $this->heatmapViewportCounts($path, $days);
+        arsort($counts);
+        foreach ($counts as $profileId => $count) {
+            if ($count > 0) {
+                return (string) $profileId;
+            }
+        }
+
+        return 'desktop';
     }
 
     /** @return list<array<string, mixed>> */
@@ -383,5 +511,44 @@ final class SqliteVisitorRepository implements VisitorRepositoryInterface
         $host = parse_url($referrer, PHP_URL_HOST);
 
         return is_string($host) && $host !== '' ? $host : mb_substr($referrer, 0, 48);
+    }
+
+    private function effectiveViewportWidthExpression(string $eventAlias = 'e', string $sessionAlias = 's'): string
+    {
+        $metaVw = "NULLIF(CAST(json_extract({$eventAlias}.meta, '$.vw') AS INTEGER), 0)";
+        $sessionVw = "NULLIF({$sessionAlias}.viewport_w, 0)";
+
+        return "COALESCE({$metaVw}, {$sessionVw}, CASE {$sessionAlias}.device_type WHEN 'Mobile' THEN 390 WHEN 'Tablet' THEN 768 ELSE 1280 END)";
+    }
+
+    private function viewportSqlFilter(?string $viewport, string $vwExpr): string
+    {
+        if ($viewport === null || $viewport === '') {
+            return '';
+        }
+
+        return " AND {$vwExpr} >= :min_vw AND {$vwExpr} <= :max_vw";
+    }
+
+    /** @return array<string, int> */
+    private function viewportRangeParams(?string $viewport): array
+    {
+        if ($viewport === null || $viewport === '') {
+            return [];
+        }
+
+        $profile = HeatmapViewport::profile($viewport);
+
+        return [
+            'min_vw' => $profile['min'],
+            'max_vw' => $profile['max'],
+        ];
+    }
+
+    private function bindViewportRange(\PDOStatement $stmt, ?string $viewport): void
+    {
+        foreach ($this->viewportRangeParams($viewport) as $key => $value) {
+            $stmt->bindValue($key, $value, \PDO::PARAM_INT);
+        }
     }
 }

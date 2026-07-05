@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Services;
 
 use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
+use Flowaxy\Support\HeatmapViewport;
 use Flowaxy\Support\RequestContext;
 
 final class VisitorAnalyticsService
@@ -65,6 +66,14 @@ final class VisitorAnalyticsService
             if (!empty($event['tag'])) {
                 $row['meta']['tag'] = mb_substr((string) $event['tag'], 0, 32);
             }
+            if ($type === 'click') {
+                if (empty($row['meta']['vw'])) {
+                    $row['meta']['vw'] = max(0, (int) ($payload['viewport_w'] ?? 0));
+                }
+                if (empty($row['meta']['vh'])) {
+                    $row['meta']['vh'] = max(0, (int) ($payload['viewport_h'] ?? 0));
+                }
+            }
 
             $normalized[] = $row;
         }
@@ -106,19 +115,72 @@ final class VisitorAnalyticsService
     {
         $days = max(1, min(90, $days));
         $topPages = $this->visitors->topPages($days);
+        $clickPages = $this->visitors->topClickPages($days);
 
         return [
             'days' => $days,
             'summary' => $this->visitors->dashboardSummary($days),
             'chart' => $this->visitors->dailyChart($days),
             'top_pages' => $topPages,
-            'click_pages' => [],
+            'click_pages' => $clickPages,
             'browsers' => $this->visitors->breakdown('browser', $days),
             'devices' => $this->visitors->breakdown('device_type', $days),
             'locales' => $this->visitors->breakdown('locale', $days),
             'referrers' => $this->visitors->topReferrers($days),
             'recent_sessions' => $this->visitors->recentSessions(12),
         ];
+    }
+
+    /** @return array<string, mixed> */
+    public function heatmapPage(int $days = 7, string $heatmapPath = '/', string $viewport = ''): array
+    {
+        $days = max(1, min(90, $days));
+        $heatmapPath = $this->normalizePath($heatmapPath);
+        $topPages = $this->visitors->topPages($days);
+
+        if ($heatmapPath === '/' && $topPages !== []) {
+            $heatmapPath = $this->normalizePath($topPages[0]['path']);
+        }
+
+        if ($viewport === '') {
+            $viewport = $this->visitors->guessHeatmapViewport($heatmapPath, $days);
+        } else {
+            $viewport = HeatmapViewport::normalize($viewport);
+        }
+
+        $clickPages = $this->visitors->topClickPages($days, 12, $viewport);
+        if ($clickPages !== [] && !$this->pathInClickPages($heatmapPath, $clickPages)) {
+            $heatmapPath = $this->normalizePath($clickPages[0]['path']);
+        }
+
+        $heatmap = $this->visitors->heatmap($heatmapPath, $days, $viewport);
+        $profile = HeatmapViewport::profile($viewport);
+
+        return [
+            'days' => $days,
+            'viewport' => $viewport,
+            'viewport_label' => $profile['label'],
+            'viewport_preview_w' => $profile['preview'],
+            'viewport_counts' => $this->visitors->heatmapViewportCounts($heatmapPath, $days),
+            'heatmap_path' => $heatmapPath,
+            'heatmap' => $heatmap,
+            'heatmap_preview_w' => $this->visitors->heatmapPreviewWidth($heatmapPath, $days, $viewport),
+            'heatmap_click_count' => count($heatmap),
+            'click_pages' => $clickPages,
+            'top_pages' => $topPages,
+        ];
+    }
+
+    /** @param list<array{path: string, clicks: int}> $clickPages */
+    private function pathInClickPages(string $path, array $clickPages): bool
+    {
+        foreach ($clickPages as $row) {
+            if ($this->normalizePath((string) ($row['path'] ?? '')) === $path) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function purgeOld(): int

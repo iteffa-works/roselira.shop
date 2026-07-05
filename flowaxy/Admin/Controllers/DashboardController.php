@@ -65,4 +65,26 @@ final class DashboardController extends CatalogAdminController
 
         return $this->renderPage($content, 'Dashboard', 'dashboard');
     }
+
+    public function heatmap(Request $request): Response
+    {
+        if ($response = $this->requireAuth()) {
+            return $response;
+        }
+
+        $days = max(1, min(90, (int) $request->query('days', 7)));
+        $heatmapPath = (string) $request->query('page', '/');
+        $viewport = (string) $request->query('viewport', '');
+        $analytics = $this->analytics->heatmapPage($days, $heatmapPath, $viewport);
+
+        $content = $this->view->renderAdmin('heatmap', [
+            'analytics' => $analytics,
+        ]);
+
+        return Response::html($this->view->renderAdmin('layout_tool', [
+            'content' => $content,
+            'title' => 'Heatmap кліків',
+            'flash' => $this->auth->getFlash(),
+        ]));
+    }
 }
