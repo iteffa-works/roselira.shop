@@ -139,7 +139,8 @@
     <script src="<?= asset('assets/js/' . $pageScript . '.js') ?>" defer></script>
     <?php endif; ?>
     <?php if (!empty($loadRecaptcha)): ?>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="<?= asset('assets/js/recaptcha.js') ?>"></script>
+    <script src="https://www.google.com/recaptcha/api.js?onload=flowaxyInitRecaptcha&render=explicit" async defer></script>
     <?php endif; ?>
 </body>
 </html>

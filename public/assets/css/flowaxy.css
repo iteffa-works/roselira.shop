@@ -746,16 +746,40 @@ a {
 }
 
 .recaptcha-widget {
-    margin: 0.25rem 0 0.75rem;
+    margin: 0.25rem 0 1rem;
 }
 
-.recaptcha-widget--order {
-    transform-origin: 0 0;
+.recaptcha-widget__frame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 78px;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-control-bg);
+    overflow: hidden;
+}
+
+.recaptcha-widget__slot {
+    display: flex;
+    justify-content: center;
+    min-height: 78px;
+}
+
+[data-theme="dark"] .recaptcha-widget--order .recaptcha-widget__frame {
+    background: #2a2a2a;
+    border-color: #404040;
 }
 
 @media (max-width: 400px) {
-    .recaptcha-widget--order {
+    .recaptcha-widget__frame {
+        padding: 0.5rem;
+    }
+
+    .recaptcha-widget__slot > div {
         transform: scale(0.92);
+        transform-origin: center center;
     }
 }
 

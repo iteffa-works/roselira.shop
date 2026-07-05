@@ -166,7 +166,11 @@ $productJson = json_encode([
                     </label>
 
                     <?php if (recaptcha_enabled()): ?>
-                    <?php $recaptchaClass = 'recaptcha-widget--order'; require __DIR__ . '/partials/recaptcha.php'; ?>
+                    <?php
+                    $recaptchaClass = 'recaptcha-widget--order';
+                    $recaptchaTheme = 'auto';
+                    require __DIR__ . '/partials/recaptcha.php';
+                    ?>
                     <?php endif; ?>
 
                     <button type="submit" class="cta-button order-form__submit"><?= e(t('order_submit')) ?></button>

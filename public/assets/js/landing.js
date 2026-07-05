@@ -334,7 +334,7 @@
                 orderMessage.className = 'order-form__message';
             }
 
-            if (orderForm.querySelector('.g-recaptcha')) {
+            if (orderForm.querySelector('[data-recaptcha-sitekey]')) {
                 var captchaField = orderForm.querySelector('[name="g-recaptcha-response"]');
                 if (!captchaField || !captchaField.value) {
                     if (orderMessage) {
@@ -406,7 +406,7 @@
                     if (submitButton) {
                         submitButton.disabled = false;
                     }
-                    if (window.grecaptcha && orderForm.querySelector('.g-recaptcha')) {
+                    if (window.grecaptcha && orderForm.querySelector('[data-recaptcha-sitekey]')) {
                         grecaptcha.reset();
                     }
                 });
