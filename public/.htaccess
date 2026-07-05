@@ -1,5 +1,10 @@
 DirectoryIndex index.php
 
+<IfModule mod_negotiation.c>
+Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
@@ -11,8 +16,11 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteRule ^assets/ - [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^admin(?:/.*)?$ index.php [L,QSA]
-
-RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+<IfModule mod_dir.c>
+DirectoryIndex index.php
+FallbackResource /index.php
+</IfModule>

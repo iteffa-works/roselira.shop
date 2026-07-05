@@ -146,7 +146,7 @@ final class AuthController extends AdminController
 
     private function installUnavailableResponse(): ?Response
     {
-        if (flowaxy_env('APP_ENV', 'local') === 'production') {
+        if (flowaxy_env('APP_ENV', 'local') === 'production' && $this->auth->isConfigured()) {
             return Response::html('Not found', 404);
         }
 
