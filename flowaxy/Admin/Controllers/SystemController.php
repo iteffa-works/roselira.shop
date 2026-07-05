@@ -40,7 +40,7 @@ final class SystemController extends AdminController
             'csrf' => $this->auth->csrfToken(),
             'projectRoot' => (string) ($config['project_root'] ?? ''),
             'feedSecret' => (string) ($config['feed_secret'] ?? ''),
-            'appUrl' => (string) ($config['app_url'] ?? ''),
+            'gitRepoUrl' => (string) ($config['git_repo_url'] ?? ''),
         ]);
 
         return $this->renderPage($content, 'Система', 'system');
@@ -56,7 +56,7 @@ final class SystemController extends AdminController
             return $response;
         }
 
-        $result = $this->gitUpdate->pull();
+        $result = $this->gitUpdate->pull(forcePull: true);
         $this->auth->flash($result['success'] ? 'success' : 'error', $result['message']);
 
         return $this->redirect(admin_url('system'));

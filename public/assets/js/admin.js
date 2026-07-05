@@ -57,4 +57,26 @@
         forumToggle.addEventListener('change', syncThreadField);
         syncThreadField();
     }
+
+    document.querySelectorAll('[data-copy]').forEach(function (el) {
+        el.addEventListener('click', function () {
+            var text = el.getAttribute('data-copy') || el.textContent || '';
+            if (!text) {
+                return;
+            }
+
+            function markCopied() {
+                el.classList.add('is-copied');
+                window.setTimeout(function () {
+                    el.classList.remove('is-copied');
+                }, 1500);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(markCopied).catch(function () {
+                    /* ignore */
+                });
+            }
+        });
+    });
 })();
