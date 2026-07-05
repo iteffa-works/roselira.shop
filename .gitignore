@@ -1,0 +1,19 @@
+# Environment
+.env
+.env.local
+
+# SQLite runtime
+storage/roselira.db
+storage/roselira.db-wal
+storage/roselira.db-shm
+storage/*.sql
+
+# Local tooling
+.osp/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
