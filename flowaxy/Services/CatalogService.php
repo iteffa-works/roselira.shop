@@ -267,15 +267,29 @@ final class CatalogService
                 }
             }
 
+            $availableVariants = [];
+            $unavailableVariants = [];
+            foreach ($variants as $variant) {
+                if (($variant['active'] ?? true) !== false) {
+                    $availableVariants[] = $variant;
+                } else {
+                    $unavailableVariants[] = $variant;
+                }
+            }
+            $variants = array_merge($availableVariants, $unavailableVariants);
+
             $defaultExists = false;
+            $defaultIsActive = false;
             foreach ($variants as $variant) {
                 if (($variant['id'] ?? '') === $defaultId) {
                     $defaultExists = true;
+                    $defaultIsActive = ($variant['active'] ?? true) !== false;
                     break;
                 }
             }
 
-            if (!$defaultExists) {
+            if (!$defaultExists || !$defaultIsActive) {
+                $defaultId = '';
                 foreach ($variants as $variant) {
                     if (($variant['active'] ?? true) !== false) {
                         $defaultId = (string) ($variant['id'] ?? '');
