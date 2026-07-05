@@ -51,28 +51,28 @@ final class GoogleAnalyticsService
             return array_merge($base, ['mode' => 'links']);
         }
 
-        $reports = $this->fetchReports($days);
+        [$reports, $error] = $this->fetchReports($days);
         if ($reports === null) {
             return array_merge($base, [
                 'mode' => 'links',
-                'error' => 'Не вдалося отримати дані GA4. Перевірте Property ID, service account і права Viewer у GA4.',
+                'error' => $error ?? 'Не вдалося отримати дані GA4. Перевірте Property ID, service account і права Viewer у GA4.',
             ]);
         }
 
         return array_merge($base, $reports, ['mode' => 'api']);
     }
 
-    /** @return array<string, mixed>|null */
-    private function fetchReports(int $days): ?array
+    /** @return array{0: array<string, mixed>|null, 1: string|null} */
+    private function fetchReports(int $days): array
     {
         $path = $this->resolvedServiceAccountPath();
         if ($path === null) {
-            return null;
+            return [null, 'JSON service account не знайдено або PHP не може його прочитати (перевірте шлях і chmod 644).'];
         }
 
         $token = GoogleServiceAccount::accessToken($path);
         if ($token === null) {
-            return null;
+            return [null, 'OAuth-токен не отримано — ключ JSON недійсний або відкликаний у Google Cloud.'];
         }
 
         $range = [
@@ -126,15 +126,15 @@ final class GoogleAnalyticsService
         ];
 
         $url = 'https://analyticsdata.googleapis.com/v1beta/properties/' . rawurlencode($this->propertyId) . ':batchRunReports';
-        $response = $this->postJson($url, $payload, $token);
+        [$response, $apiError] = $this->postJson($url, $payload, $token);
         if ($response === null || !isset($response['reports']) || !is_array($response['reports'])) {
-            return null;
+            return [null, $apiError ?? 'GA4 Data API не відповіла. Перевірте allow_url_fopen і доступ до googleapis.com.'];
         }
 
         $reports = $response['reports'];
         $summaryRow = $this->metricValues($reports[0] ?? [])[0] ?? [];
 
-        return [
+        return [[
             'summary' => [
                 'sessions' => (int) ($summaryRow[0] ?? 0),
                 'page_views' => (int) ($summaryRow[1] ?? 0),
@@ -146,7 +146,7 @@ final class GoogleAnalyticsService
             'top_pages' => $this->dimensionReport($reports[2] ?? [], 'pagePath', 'screenPageViews'),
             'devices' => $this->dimensionReport($reports[3] ?? [], 'deviceCategory', 'sessions'),
             'sources' => $this->dimensionReport($reports[4] ?? [], 'sessionDefaultChannelGroup', 'sessions'),
-        ];
+        ], null];
     }
 
     /** @return list<array{date: string, sessions: int, pageviews: int}> */
@@ -227,8 +227,10 @@ final class GoogleAnalyticsService
         return $values;
     }
 
-    /** @param array<string, mixed> $payload */
-    private function postJson(string $url, array $payload, string $token): ?array
+    /** @param array<string, mixed> $payload
+     * @return array{0: array<string, mixed>|null, 1: string|null}
+     */
+    private function postJson(string $url, array $payload, string $token): array
     {
         $body = json_encode($payload, JSON_THROW_ON_ERROR);
         $context = stream_context_create([
@@ -243,12 +245,24 @@ final class GoogleAnalyticsService
 
         $raw = @file_get_contents($url, false, $context);
         if ($raw === false) {
-            return null;
+            return [null, null];
         }
 
         $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return [null, null];
+        }
 
-        return is_array($decoded) ? $decoded : null;
+        if (isset($decoded['error']) && is_array($decoded['error'])) {
+            $message = trim((string) ($decoded['error']['message'] ?? ''));
+            $status = trim((string) ($decoded['error']['status'] ?? ''));
+
+            return [null, $message !== ''
+                ? ($status !== '' ? "{$status}: {$message}" : $message)
+                : 'GA4 API повернула помилку.'];
+        }
+
+        return [$decoded, null];
     }
 
     private function resolvedServiceAccountPath(): ?string

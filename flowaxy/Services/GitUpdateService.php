@@ -228,9 +228,19 @@ final class GitUpdateService
             '/usr/bin/git',
             '/usr/local/bin/git',
             '/bin/git',
+            'C:\\Program Files\\Git\\cmd\\git.exe',
             'C:\\Program Files\\Git\\bin\\git.exe',
+            'C:\\Program Files (x86)\\Git\\cmd\\git.exe',
             'C:\\Program Files (x86)\\Git\\bin\\git.exe',
+            'C:\\OSPanel\\modules\\Git\\bin\\git.exe',
         ]);
+
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $fromPath = $this->resolveGitFromWindowsPath();
+            if ($fromPath !== null) {
+                array_unshift($candidates, $fromPath);
+            }
+        }
 
         foreach ($candidates as $candidate) {
             if ($this->binaryWorks($candidate)) {
@@ -287,13 +297,13 @@ final class GitUpdateService
             2 => ['pipe', 'w'],
         ];
 
-        $process = proc_open(
+        $process = @proc_open(
             $command,
             $descriptors,
             $pipes,
             $this->projectRoot,
             null,
-            ['bypass_shell' => true],
+            ['bypass_shell' => $this->shouldBypassShell($binary)],
         );
         if (!is_resource($process)) {
             return ['ok' => false, 'output' => ['Не вдалося запустити git.']];
@@ -331,5 +341,35 @@ final class GitUpdateService
     private function firstLine(array $lines): string
     {
         return $lines[0] ?? '';
+    }
+
+    private function shouldBypassShell(string $binary): bool
+    {
+        if (DIRECTORY_SEPARATOR !== '\\') {
+            return true;
+        }
+
+        return preg_match('/^[A-Za-z]:[\\\\\\/].*\.exe$/i', $binary) === 1
+            || str_contains($binary, '\\')
+            || str_contains($binary, '/');
+    }
+
+    private function resolveGitFromWindowsPath(): ?string
+    {
+        $output = [];
+        $code = 1;
+        @exec('where git 2>nul', $output, $code);
+        if ($code !== 0 || $output === []) {
+            return null;
+        }
+
+        foreach ($output as $line) {
+            $line = trim($line);
+            if ($line !== '' && is_file($line)) {
+                return $line;
+            }
+        }
+
+        return null;
     }
 }
