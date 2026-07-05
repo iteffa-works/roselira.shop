@@ -1,0 +1,13 @@
+---
+description: Frontend assets without build step
+globs: public/assets/**
+alwaysApply: false
+---
+
+# Assets
+
+- No npm/webpack — plain CSS/JS in `public/assets/`
+- Use `asset()` helper for URLs in PHP templates
+- Scripts: prefer `defer`; no inline secrets
+- Separate contexts: `analytics.js`+`consent.js` (storefront), `admin-analytics.js` (admin GTM), `visitor-track.js` (local tracking)
+- Do not merge unrelated JS bundles without explicit need

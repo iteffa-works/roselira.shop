@@ -1,0 +1,17 @@
+---
+description: Core project conventions for roselira.shop
+alwaysApply: true
+---
+
+# Roselira Shop
+
+- PHP 8.2 monolith, Flowaxy framework, SQLite, no Composer
+- Web root is `public/` — never expose `flowaxy/` or `storage/` directly
+- Admin UI text in Ukrainian
+- Minimal focused diffs; reuse existing Services/Repositories
+- Do not commit `.env`, service account JSON, or database files
+- Detailed docs: `.docs/` (UA), entry `README.md` (EN)
+
+## Commit style
+
+`fix:`, `feat:`, `refactor:`, `docs:`, `chore:` — one logical change per commit.

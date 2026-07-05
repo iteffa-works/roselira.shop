@@ -1,0 +1,23 @@
+---
+description: PHP Flowaxy conventions
+globs: flowaxy/**/*.php
+alwaysApply: false
+---
+
+# PHP / Flowaxy
+
+- Always `declare(strict_types=1);`
+- Namespace: `Flowaxy\` for app code
+- Put business logic in `Services/`, data access in `Repositories/`
+- Controllers: validate input, delegate to services, return `Response`
+- Config via `app_config()` / `flowaxy_env_value()` — not raw `$_ENV`
+- Shared view helpers: `e()`, `format_duration()`, `format_datetime()`, `admin_url()`
+- CLI scripts use `flowaxy/cli-bootstrap.php`
+
+```php
+// Good
+return Response::json($this->service->dashboard($days));
+
+// Avoid
+$pdo->query('SELECT ...'); // in controller
+```

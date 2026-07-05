@@ -1,0 +1,14 @@
+---
+description: Admin view templates
+globs: flowaxy/Admin/Views/**
+alwaysApply: false
+---
+
+# Admin Views
+
+- User-facing copy in **Ukrainian**
+- Escape with `e()` for all dynamic output
+- Reuse partials in `partials/` (e.g. `dashboard_analytics_*.php`)
+- Use global helpers instead of inline `$formatDuration` closures
+- Layout: `layout.php`; tool pages (heatmap): `layout_tool.php`
+- Assets: `public/assets/css/admin.css`, load JS only where needed
