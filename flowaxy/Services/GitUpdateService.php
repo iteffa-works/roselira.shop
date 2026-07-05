@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Services;
 
 use Flowaxy\Repositories\Contracts\SettingsRepositoryInterface;
+use Flowaxy\Support\CronInterval;
 use Flowaxy\Support\Logger;
 
 final class GitUpdateService
@@ -197,7 +198,7 @@ final class GitUpdateService
             return true;
         }
 
-        return (time() - $lastTime) >= 82800;
+        return (time() - $lastTime) >= CronInterval::DAILY_SECONDS;
     }
 
     private function recordResult(bool $success, string $message, string $output, string $commit): void

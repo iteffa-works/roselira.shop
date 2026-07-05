@@ -1,7 +1,5 @@
 <?php
 /** @var array<string, mixed> $googleReport */
-/** @var callable $formatDuration */
-/** @var callable $analyticsUrl */
 
 $mode = (string) ($googleReport['mode'] ?? 'links');
 $days = (int) ($googleReport['days'] ?? 7);
@@ -73,7 +71,7 @@ foreach ($chart as $point) {
     </div>
     <?php if (!$isRealtime): ?>
     <div class="admin-stat">
-        <span class="admin-stat__value"><?= e($formatDuration((int) ($summary['avg_duration_sec'] ?? 0))) ?></span>
+        <span class="admin-stat__value"><?= e(format_duration((int) ($summary['avg_duration_sec'] ?? 0))) ?></span>
         <span class="admin-stat__label">Сер. тривалість</span>
     </div>
     <div class="admin-stat admin-stat--warn">

@@ -33,18 +33,6 @@ if ($otherChecks !== []) {
 $checkedAt = !empty($checks['checked_at']) ? (string) $checks['checked_at'] : null;
 $statusLabels = ['ok' => 'OK', 'warn' => 'Увага', 'error' => 'Помилка'];
 
-$formatDt = static function (?string $value): ?string {
-    if ($value === null || $value === '') {
-        return null;
-    }
-    $ts = strtotime($value);
-    if ($ts === false) {
-        return $value;
-    }
-
-    return date('d.m.Y H:i', $ts);
-};
-
 $gitHubWebUrl = static function (string $repoUrl): string {
     $url = preg_replace('#\.git$#', '', trim($repoUrl)) ?? $repoUrl;
     if (str_starts_with($url, 'git@github.com:')) {
@@ -61,9 +49,9 @@ $gitCommitUrl = $gitLocalCommit !== '' && $gitRepoWeb !== '' ? $gitRepoWeb . '/c
 $gitCompareUrl = $gitUpdates && $gitLocalCommit !== '' && $gitRemoteCommit !== '' && $gitRepoWeb !== ''
     ? $gitRepoWeb . '/compare/' . substr($gitLocalCommit, 0, 7) . '...' . substr($gitRemoteCommit, 0, 7)
     : '';
-$gitCommitDate = $formatDt((string) ($gitStatus['local_date'] ?? ''));
-$gitRemoteDate = $formatDt((string) ($gitStatus['remote_date'] ?? ''));
-$gitLastPullAt = $formatDt((string) ($gitStatus['last_update_at'] ?? ''));
+$gitCommitDate = format_datetime_or_null((string) ($gitStatus['local_date'] ?? ''));
+$gitRemoteDate = format_datetime_or_null((string) ($gitStatus['remote_date'] ?? ''));
+$gitLastPullAt = format_datetime_or_null((string) ($gitStatus['last_update_at'] ?? ''));
 $gitLastPullStatus = (string) ($gitStatus['last_update_status'] ?? '');
 $gitSubject = trim((string) ($gitStatus['local_subject'] ?? ''));
 
@@ -265,11 +253,11 @@ rmdir roselira.shop</pre>
             <pre class="admin-code admin-code--copy admin-system__cron" data-copy="<?= e($cronCommand) ?>"><?= e($cronCommand) ?></pre>
 
             <?php
-            $cronRunLabel = static function (?string $at, ?string $status) use ($formatDt): string {
+            $cronRunLabel = static function (?string $at, ?string $status): string {
                 if ($at === null || $at === '') {
                     return 'Ще не запускався';
                 }
-                $when = $formatDt($at) ?? $at;
+                $when = format_datetime_or_null($at) ?? $at;
                 $result = $status ?? '—';
                 if (preg_match('/^(ok|error|skipped):\s*(.+)$/i', $result, $m)) {
                     $result = strtoupper($m[1]) . ' — ' . $m[2];
@@ -285,7 +273,7 @@ rmdir roselira.shop</pre>
 
             <dl class="admin-system__meta admin-system__meta--cron">
                 <div><dt>Розклад хостингу</dt><dd><?= e((string) ($cronStatus['schedule_label'] ?? 'Щодня о 04:00')) ?></dd></div>
-                <div><dt>Наступний запуск</dt><dd><?= e($formatDt((string) ($cronStatus['next_scheduled_at'] ?? '')) ?? '—') ?></dd></div>
+                <div><dt>Наступний запуск</dt><dd><?= e(format_datetime_or_null((string) ($cronStatus['next_scheduled_at'] ?? '')) ?? '—') ?></dd></div>
                 <div><dt>Останній — адмінка</dt><dd><?= e($cronRunLabel($cronStatus['admin']['at'] ?? null, $cronStatus['admin']['status'] ?? null)) ?></dd></div>
                 <div><dt>Останній — хостинг</dt><dd>
                     <?php

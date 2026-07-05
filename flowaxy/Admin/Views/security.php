@@ -1,9 +1,4 @@
 <?php
-$formatDt = static function (string $iso): string {
-    $ts = strtotime($iso);
-
-    return $ts !== false ? date('d.m.Y H:i:s', $ts) : $iso;
-};
 
 $total = (int) ($stats['total'] ?? 0);
 $ok = (int) ($stats['ok'] ?? 0);
@@ -211,7 +206,7 @@ $hasFilters = array_filter($filters, static fn(string $v): bool => $v !== '') !=
                     }
                 ?>
                     <tr class="admin-security__row admin-security__row--<?= e($verdict) ?>">
-                        <td class="admin-security__time"><?= e($formatDt((string) ($event['created_at'] ?? ''))) ?></td>
+                        <td class="admin-security__time"><?= e(format_datetime((string) ($event['created_at'] ?? ''), '—', true)) ?></td>
                         <td><span class="admin-security__verdict admin-security__verdict--<?= e($verdict) ?>"><?= e($verdictLabels[$verdict] ?? $verdict) ?></span></td>
                         <td><span class="admin-security__event admin-security__event--<?= e($eventType) ?>"><?= e($eventLabels[$eventType] ?? $eventType) ?></span></td>
                         <td>

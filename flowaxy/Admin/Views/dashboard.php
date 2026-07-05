@@ -9,25 +9,6 @@ $days = (int) ($analytics['days'] ?? 7);
 $analyticsUrl = static function (string $source) use ($days): string {
     return admin_url('?source=' . rawurlencode($source) . '&days=' . (int) $days);
 };
-
-$formatDuration = static function (int $seconds): string {
-    if ($seconds < 60) {
-        return $seconds . ' с';
-    }
-    $minutes = intdiv($seconds, 60);
-    $rest = $seconds % 60;
-
-    return $minutes . ' хв ' . $rest . ' с';
-};
-
-$formatDt = static function (?string $value): string {
-    if ($value === null || $value === '') {
-        return '—';
-    }
-    $ts = strtotime($value);
-
-    return $ts === false ? $value : date('d.m.Y H:i', $ts);
-};
 ?>
 
 <div class="admin-page-header">

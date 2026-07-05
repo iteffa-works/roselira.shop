@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Services;
 
 use Flowaxy\Repositories\Contracts\SettingsRepositoryInterface;
+use Flowaxy\Support\CronInterval;
 use Flowaxy\Support\Logger;
 
 final class CronService
@@ -198,7 +199,7 @@ final class CronService
         $last = $this->settings->get(self::KEY_LAST_AT);
         $time = $this->parseTime($last);
 
-        return $time !== null && (time() - $time) < 82800;
+        return $time !== null && (time() - $time) < CronInterval::DAILY_SECONDS;
     }
 
     private function record(string $source, string $status, string $message, string $output = ''): void

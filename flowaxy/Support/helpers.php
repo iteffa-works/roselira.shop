@@ -152,3 +152,43 @@ function admin_url(string $path = '', array $query = []): string
 
     return $url;
 }
+
+function format_duration(int $seconds): string
+{
+    if ($seconds < 60) {
+        return $seconds . ' с';
+    }
+
+    $minutes = intdiv($seconds, 60);
+    $rest = $seconds % 60;
+
+    return $minutes . ' хв ' . $rest . ' с';
+}
+
+function format_datetime(?string $value, string $empty = '—', bool $withSeconds = false): string
+{
+    if ($value === null || $value === '') {
+        return $empty;
+    }
+
+    $timestamp = strtotime($value);
+    if ($timestamp === false) {
+        return $value;
+    }
+
+    return date($withSeconds ? 'd.m.Y H:i:s' : 'd.m.Y H:i', $timestamp);
+}
+
+function format_datetime_or_null(?string $value, bool $withSeconds = false): ?string
+{
+    if ($value === null || $value === '') {
+        return null;
+    }
+
+    $timestamp = strtotime($value);
+    if ($timestamp === false) {
+        return $value;
+    }
+
+    return date($withSeconds ? 'd.m.Y H:i:s' : 'd.m.Y H:i', $timestamp);
+}

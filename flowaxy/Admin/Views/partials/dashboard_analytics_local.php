@@ -1,7 +1,5 @@
 <?php
 /** @var array<string, mixed> $analytics */
-/** @var callable $formatDuration */
-/** @var callable $formatDt */
 
 $summary = $analytics['summary'] ?? ['sessions' => 0, 'page_views' => 0, 'avg_duration_sec' => 0, 'bounce_rate' => 0, 'clicks' => 0];
 $chart = $analytics['chart'] ?? [];
@@ -29,7 +27,7 @@ foreach ($chart as $point) {
         <span class="admin-stat__label">Перегляди</span>
     </div>
     <div class="admin-stat">
-        <span class="admin-stat__value"><?= e($formatDuration((int) ($summary['avg_duration_sec'] ?? 0))) ?></span>
+        <span class="admin-stat__value"><?= e(format_duration((int) ($summary['avg_duration_sec'] ?? 0))) ?></span>
         <span class="admin-stat__label">Сер. час на сайті</span>
     </div>
     <div class="admin-stat admin-stat--warn">
@@ -154,12 +152,12 @@ foreach ($chart as $point) {
             <tbody>
             <?php foreach ($recentSessions as $session): ?>
                 <tr>
-                    <td><?= e($formatDt((string) ($session['last_seen_at'] ?? ''))) ?></td>
+                    <td><?= e(format_datetime((string) ($session['last_seen_at'] ?? ''))) ?></td>
                     <td><code><?= e((string) ($session['ip'] ?? '')) ?></code></td>
                     <td><?= e((string) (($session['device_type'] ?? '') . ' · ' . ($session['browser'] ?? ''))) ?></td>
                     <td><code><?= e((string) ($session['landing_path'] ?? '/')) ?></code></td>
                     <td><?= (int) ($session['page_views'] ?? 0) ?></td>
-                    <td><?= e($formatDuration((int) ($session['duration_sec'] ?? 0))) ?></td>
+                    <td><?= e(format_duration((int) ($session['duration_sec'] ?? 0))) ?></td>
                     <td><?= e($session['referrer'] !== '' ? parse_url((string) $session['referrer'], PHP_URL_HOST) ?: $session['referrer'] : 'Прямий') ?></td>
                 </tr>
             <?php endforeach; ?>
