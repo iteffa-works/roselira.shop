@@ -1,3 +1,4 @@
+// Early theme bootstrap shared with flowaxy.js (anti-FOUC).
 window.FlowaxyTheme = (function () {
     var storageKey = 'flowaxy_theme';
 
