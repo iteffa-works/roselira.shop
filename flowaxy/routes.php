@@ -19,6 +19,7 @@ use Flowaxy\Controllers\HomeController;
 use Flowaxy\Controllers\OrderController;
 use Flowaxy\Controllers\PageController;
 use Flowaxy\Controllers\ProductController;
+use Flowaxy\Controllers\SeoController;
 use Flowaxy\Controllers\TrackController;
 use Flowaxy\Core\Router;
 
