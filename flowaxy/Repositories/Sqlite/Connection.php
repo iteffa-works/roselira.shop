@@ -111,6 +111,31 @@ final class Connection
                 key TEXT PRIMARY KEY NOT NULL,
                 value TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS security_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                verdict TEXT NOT NULL,
+                ip TEXT NOT NULL,
+                user_agent TEXT NOT NULL DEFAULT '',
+                path TEXT NOT NULL DEFAULT '',
+                method TEXT NOT NULL DEFAULT '',
+                meta TEXT NOT NULL DEFAULT '{}'
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_security_events_created_at ON security_events(created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_security_events_ip ON security_events(ip);
+            CREATE INDEX IF NOT EXISTS idx_security_events_verdict ON security_events(verdict);
+
+            CREATE TABLE IF NOT EXISTS rate_limit_hits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                scope TEXT NOT NULL,
+                ip TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_rate_limit_scope_ip ON rate_limit_hits(scope, ip, created_at DESC);
             SQL);
     }
 
@@ -210,7 +235,7 @@ final class Connection
         ]);
     }
 
-    /** @return array{orders: int, products: int, locale_strings: int} */
+    /** @return array{orders: int, products: int, locale_strings: int, security_events: int} */
     public function tableCounts(): array
     {
         $pdo = $this->pdo();
@@ -219,6 +244,7 @@ final class Connection
             'orders' => (int) $pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn(),
             'products' => (int) $pdo->query('SELECT COUNT(*) FROM products')->fetchColumn(),
             'locale_strings' => (int) $pdo->query('SELECT COUNT(*) FROM locale_strings')->fetchColumn(),
+            'security_events' => (int) $pdo->query('SELECT COUNT(*) FROM security_events')->fetchColumn(),
         ];
     }
 

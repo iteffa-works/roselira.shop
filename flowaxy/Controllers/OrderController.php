@@ -8,6 +8,7 @@ use Flowaxy\Core\Request;
 use Flowaxy\Core\Response;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\OrderService;
+use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Support\AppState;
 use Flowaxy\Support\OrderRateLimiter;
 
@@ -16,6 +17,7 @@ final class OrderController
     public function __construct(
         private readonly OrderService $orders,
         private readonly OrderRateLimiter $rateLimiter,
+        private readonly SecurityLogService $security,
     ) {
     }
 
@@ -26,6 +28,10 @@ final class OrderController
         }
 
         if ($this->rateLimiter->isLimited()) {
+            $this->security->log('order_rate_limited', 'fraud', [
+                'message' => 'IP rate limit',
+            ]);
+
             return Response::json([
                 'success' => false,
                 'message' => AppState::$locale->t('order_error_rate_limit'),

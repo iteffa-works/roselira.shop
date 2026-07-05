@@ -673,6 +673,85 @@ body.admin {
     background: linear-gradient(135deg, #fff 0%, #eff6ff 100%);
 }
 
+.admin-stat--ok {
+    border-color: #bbf7d0;
+    background: linear-gradient(135deg, #fff 0%, #f0fdf4 100%);
+}
+
+.admin-stat--warn {
+    border-color: #fde68a;
+    background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+}
+
+.admin-stat--error {
+    border-color: #fecaca;
+    background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+}
+
+.admin-security__stats {
+    margin-bottom: 1.25rem;
+}
+
+.admin-security__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: end;
+}
+
+.admin-security__filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8125rem;
+    color: #71717a;
+}
+
+.admin-security__filters input,
+.admin-security__filters select {
+    padding: 0.5rem 0.625rem;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.admin-security__filters-wide {
+    grid-column: span 2;
+}
+
+.admin-security__clear-ip {
+    margin-bottom: 1rem;
+    align-items: end;
+}
+
+.admin-security__table code {
+    font-size: 0.8125rem;
+}
+
+.admin-security__verdict {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.admin-security__verdict--ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-security__verdict--suspect {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-security__verdict--fraud {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 .admin-stat__value {
     display: block;
     font-size: 2rem;

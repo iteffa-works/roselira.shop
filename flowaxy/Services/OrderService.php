@@ -7,6 +7,7 @@ namespace Flowaxy\Services;
 use Flowaxy\Core\Request;
 use Flowaxy\Repositories\Contracts\OrderRepositoryInterface;
 use Flowaxy\Support\Logger;
+use Flowaxy\Services\SecurityLogService;
 
 final class OrderService
 {
@@ -16,6 +17,7 @@ final class OrderService
         private readonly CatalogService $catalog,
         private readonly LocaleService $locale,
         private readonly TelegramNotificationService $telegram,
+        private readonly SecurityLogService $security,
         private readonly array $statuses,
     ) {
     }
@@ -82,6 +84,11 @@ final class OrderService
         $honeypot = trim((string) $request->post('website', ''));
 
         if ($honeypot !== '') {
+            $this->security->log('order_honeypot', 'fraud', [
+                'message' => 'Honeypot filled',
+                'product_slug' => $slug,
+            ]);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_server'),
@@ -93,6 +100,8 @@ final class OrderService
         $product = $this->catalog->findProduct($slug, $locale);
 
         if ($product === null) {
+            $this->logValidation('order_validation', 'Unknown product', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_product'),
@@ -102,6 +111,8 @@ final class OrderService
 
         $variant = $this->catalog->findVariant($product, $variantId);
         if ($variant === null) {
+            $this->logValidation('order_validation', 'Invalid variant', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_variant'),
@@ -110,6 +121,8 @@ final class OrderService
         }
 
         if (($variant['active'] ?? true) === false) {
+            $this->logValidation('order_validation', 'Inactive variant', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_variant_inactive'),
@@ -118,6 +131,8 @@ final class OrderService
         }
 
         if ($name === '' || mb_strlen($name) < 2) {
+            $this->logValidation('order_validation', 'Invalid name', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_name'),
@@ -126,6 +141,8 @@ final class OrderService
         }
 
         if (mb_strlen($name) > 100) {
+            $this->logValidation('order_validation', 'Name too long', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_name_length'),
@@ -134,6 +151,8 @@ final class OrderService
         }
 
         if (mb_strlen($comment) > 500) {
+            $this->logValidation('order_validation', 'Comment too long', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_comment_length'),
@@ -143,6 +162,8 @@ final class OrderService
 
         $phoneDigits = preg_replace('/\D+/', '', $phone) ?? '';
         if (strlen($phoneDigits) < 10) {
+            $this->logValidation('order_validation', 'Invalid phone', $slug, $phone);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_phone'),
@@ -168,6 +189,11 @@ final class OrderService
 
         if (!$this->orders->save($order)) {
             Logger::error('Order save failed', ['order_id' => $order['id']]);
+            $this->security->log('order_save_failed', 'suspect', [
+                'message' => 'DB save failed',
+                'product_slug' => $slug,
+                'phone' => $phone,
+            ]);
 
             return [
                 'success' => false,
@@ -180,11 +206,26 @@ final class OrderService
             Logger::error('Telegram notification failed', ['order_id' => $order['id']]);
         }
 
+        $this->security->log('order_success', 'ok', [
+            'order_id' => $order['id'],
+            'product_slug' => $slug,
+            'phone' => $phone,
+        ]);
+
         return [
             'success' => true,
             'message' => $this->locale->t('order_success'),
             'order_id' => $order['id'],
             'status' => 200,
         ];
+    }
+
+    private function logValidation(string $type, string $message, string $slug, string $phone): void
+    {
+        $this->security->log($type, 'suspect', [
+            'message' => $message,
+            'product_slug' => $slug,
+            'phone' => $phone,
+        ]);
     }
 }

@@ -41,6 +41,7 @@ $nav = [
     'rates' => ['label' => 'Курси', 'url' => admin_url('rates')],
     'notifications' => ['label' => 'Сповіщення', 'url' => admin_url('notifications')],
     'database' => ['label' => 'База даних', 'url' => admin_url('database')],
+    'security' => ['label' => 'Безпека', 'url' => admin_url('security')],
     'system' => ['label' => 'Система', 'url' => admin_url('system')],
 ];
 ?>

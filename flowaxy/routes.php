@@ -11,6 +11,7 @@ use Flowaxy\Admin\Controllers\ProductController as AdminProductController;
 use Flowaxy\Admin\Controllers\DatabaseController;
 use Flowaxy\Admin\Controllers\NotificationsController;
 use Flowaxy\Admin\Controllers\RatesController;
+use Flowaxy\Admin\Controllers\SecurityController;
 use Flowaxy\Admin\Controllers\SystemController;
 use Flowaxy\Controllers\FeedController;
 use Flowaxy\Controllers\HomeController;
@@ -52,6 +53,8 @@ return static function (Router $router): void {
     $router->post('/admin/notifications', NotificationsController::class . '::save');
     $router->post('/admin/notifications/test', NotificationsController::class . '::test');
     $router->get('/admin/system', SystemController::class . '::index');
+    $router->get('/admin/security', SecurityController::class . '::index');
+    $router->post('/admin/security/action', SecurityController::class . '::action');
     $router->post('/admin/system/git-pull', SystemController::class . '::gitPull');
     $router->post('/admin/system/checks', SystemController::class . '::runChecks');
     $router->post('/admin/system/cron', SystemController::class . '::runCron');

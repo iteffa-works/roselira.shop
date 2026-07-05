@@ -20,6 +20,8 @@ use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
 use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
 use Flowaxy\Repositories\Sqlite\SqliteOrderRepository;
 use Flowaxy\Repositories\Sqlite\SqliteSettingsRepository;
+use Flowaxy\Repositories\Contracts\SecurityRepositoryInterface;
+use Flowaxy\Repositories\Sqlite\SqliteSecurityRepository;
 use Flowaxy\Services\AdminAuthService;
 use Flowaxy\Services\CatalogService;
 use Flowaxy\Services\CronService;
@@ -28,6 +30,7 @@ use Flowaxy\Services\GitUpdateService;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\OrderService;
 use Flowaxy\Services\ProductFeedService;
+use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
 use Flowaxy\Support\OrderRateLimiter;
@@ -97,9 +100,19 @@ $container->singleton(CatalogService::class, static fn(Container $c): CatalogSer
     $c->make(LocaleService::class),
 ));
 
-$container->singleton(OrderRateLimiter::class, static fn(): OrderRateLimiter => new OrderRateLimiter());
+$container->singleton(SecurityRepositoryInterface::class, static fn(Container $c): SqliteSecurityRepository => new SqliteSecurityRepository($c->make(Connection::class)));
 
-$container->singleton(LoginRateLimiter::class, static fn(): LoginRateLimiter => new LoginRateLimiter());
+$container->singleton(SecurityLogService::class, static fn(Container $c): SecurityLogService => new SecurityLogService(
+    $c->make(SecurityRepositoryInterface::class),
+));
+
+$container->singleton(OrderRateLimiter::class, static fn(Container $c): OrderRateLimiter => new OrderRateLimiter(
+    $c->make(SecurityLogService::class),
+));
+
+$container->singleton(LoginRateLimiter::class, static fn(Container $c): LoginRateLimiter => new LoginRateLimiter(
+    $c->make(SecurityLogService::class),
+));
 
 $container->singleton(OrderService::class, static function (Container $c) use ($config): OrderService {
     return new OrderService(
@@ -107,6 +120,7 @@ $container->singleton(OrderService::class, static function (Container $c) use ($
         $c->make(CatalogService::class),
         $c->make(LocaleService::class),
         $c->make(TelegramNotificationService::class),
+        $c->make(SecurityLogService::class),
         $config['order_statuses'],
     );
 });

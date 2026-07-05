@@ -8,6 +8,7 @@ use Flowaxy\Core\Request;
 use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\AdminAuthService;
+use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Support\LoginRateLimiter;
 
 final class AuthController extends AdminController
@@ -16,6 +17,7 @@ final class AuthController extends AdminController
         View $view,
         AdminAuthService $auth,
         private readonly LoginRateLimiter $loginRateLimiter,
+        private readonly SecurityLogService $security,
     ) {
         parent::__construct($view, $auth);
     }
@@ -49,6 +51,10 @@ final class AuthController extends AdminController
         }
 
         if ($this->loginRateLimiter->isLimited()) {
+            $this->security->log('login_rate_limited', 'fraud', [
+                'message' => 'IP rate limit',
+            ]);
+
             return Response::html($this->view->renderAdmin('layout', [
                 'template' => 'login',
                 'title' => 'Вхід',
@@ -57,16 +63,20 @@ final class AuthController extends AdminController
             ]));
         }
 
+        $username = trim((string) $request->post('username', ''));
+
         if ($this->auth->login(
-            trim((string) $request->post('username', '')),
+            $username,
             (string) $request->post('password', ''),
         )) {
             $this->loginRateLimiter->clear();
+            $this->security->log('login_success', 'ok', ['username' => $username]);
 
             return $this->redirect(admin_url());
         }
 
         $this->loginRateLimiter->hit();
+        $this->security->log('login_failed', 'suspect', ['username' => $username]);
 
         return Response::html($this->view->renderAdmin('layout', [
             'template' => 'login',
