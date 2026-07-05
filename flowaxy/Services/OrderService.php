@@ -6,6 +6,7 @@ namespace Flowaxy\Services;
 
 use Flowaxy\Core\Request;
 use Flowaxy\Repositories\Contracts\OrderRepositoryInterface;
+use Flowaxy\Support\Logger;
 
 final class OrderService
 {
@@ -108,10 +109,34 @@ final class OrderService
             ];
         }
 
+        if (($variant['active'] ?? true) === false) {
+            return [
+                'success' => false,
+                'message' => $this->locale->t('order_error_variant_inactive'),
+                'status' => 422,
+            ];
+        }
+
         if ($name === '' || mb_strlen($name) < 2) {
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_name'),
+                'status' => 422,
+            ];
+        }
+
+        if (mb_strlen($name) > 100) {
+            return [
+                'success' => false,
+                'message' => $this->locale->t('order_error_name_length'),
+                'status' => 422,
+            ];
+        }
+
+        if (mb_strlen($comment) > 500) {
+            return [
+                'success' => false,
+                'message' => $this->locale->t('order_error_comment_length'),
                 'status' => 422,
             ];
         }
@@ -142,6 +167,8 @@ final class OrderService
         ];
 
         if (!$this->orders->save($order)) {
+            Logger::error('Order save failed', ['order_id' => $order['id']]);
+
             return [
                 'success' => false,
                 'message' => $this->locale->t('order_error_server'),
@@ -149,7 +176,9 @@ final class OrderService
             ];
         }
 
-        $this->telegram->notifyNewOrder($order);
+        if (!$this->telegram->notifyNewOrder($order)) {
+            Logger::error('Telegram notification failed', ['order_id' => $order['id']]);
+        }
 
         return [
             'success' => true,

@@ -6,9 +6,20 @@ namespace Flowaxy\Admin\Controllers;
 
 use Flowaxy\Core\Request;
 use Flowaxy\Core\Response;
+use Flowaxy\Core\View;
+use Flowaxy\Services\AdminAuthService;
+use Flowaxy\Support\LoginRateLimiter;
 
 final class AuthController extends AdminController
 {
+    public function __construct(
+        View $view,
+        AdminAuthService $auth,
+        private readonly LoginRateLimiter $loginRateLimiter,
+    ) {
+        parent::__construct($view, $auth);
+    }
+
     public function loginForm(): Response
     {
         if ($response = $this->auth->ensureConfigured()) {
@@ -37,12 +48,25 @@ final class AuthController extends AdminController
             return $response;
         }
 
+        if ($this->loginRateLimiter->isLimited()) {
+            return Response::html($this->view->renderAdmin('layout', [
+                'template' => 'login',
+                'title' => 'Вхід',
+                'error' => 'Забагато спроб. Спробуйте через 15 хвилин.',
+                'csrf' => $this->auth->csrfToken(),
+            ]));
+        }
+
         if ($this->auth->login(
             trim((string) $request->post('username', '')),
             (string) $request->post('password', ''),
         )) {
+            $this->loginRateLimiter->clear();
+
             return $this->redirect(admin_url());
         }
+
+        $this->loginRateLimiter->hit();
 
         return Response::html($this->view->renderAdmin('layout', [
             'template' => 'login',

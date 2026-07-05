@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title><?= e($title ?? 'Admin') ?> — Roselira</title>
     <link rel="icon" type="image/svg+xml" href="<?= asset('assets/img/brand/favicon.svg') ?>">
     <link rel="apple-touch-icon" href="<?= asset('assets/img/brand/favicon.svg') ?>">
@@ -40,6 +41,7 @@ $nav = [
     'rates' => ['label' => 'Курси', 'url' => admin_url('rates')],
     'notifications' => ['label' => 'Сповіщення', 'url' => admin_url('notifications')],
     'database' => ['label' => 'База даних', 'url' => admin_url('database')],
+    'system' => ['label' => 'Система', 'url' => admin_url('system')],
 ];
 ?>
 <div class="admin-shell">

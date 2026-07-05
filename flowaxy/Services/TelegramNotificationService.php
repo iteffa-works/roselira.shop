@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flowaxy\Services;
 
 use Flowaxy\Repositories\Contracts\SettingsRepositoryInterface;
+use Flowaxy\Support\Logger;
 
 final class TelegramNotificationService
 {
@@ -109,11 +110,19 @@ final class TelegramNotificationService
 
         $raw = @file_get_contents($url, false, $context);
         if ($raw === false) {
+            Logger::error('Telegram API request failed');
+
             return false;
         }
 
         $response = json_decode($raw, true);
 
-        return is_array($response) && ($response['ok'] ?? false) === true;
+        if (!is_array($response) || ($response['ok'] ?? false) !== true) {
+            Logger::error('Telegram API error', ['response' => $raw]);
+
+            return false;
+        }
+
+        return true;
     }
 }

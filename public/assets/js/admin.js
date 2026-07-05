@@ -5,46 +5,56 @@
     var toggle = document.querySelector('[data-sidebar-toggle]');
     var closeBtn = document.querySelector('[data-sidebar-close]');
 
-    if (!shell || !sidebar || !overlay || !toggle) {
-        return;
-    }
+    if (shell && sidebar && overlay && toggle) {
+        function setOpen(open) {
+            shell.classList.toggle('admin-sidebar-open', open);
+            sidebar.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            toggle.setAttribute('aria-label', open ? 'Закрити меню' : 'Відкрити меню');
+        }
 
-    function setOpen(open) {
-        shell.classList.toggle('admin-sidebar-open', open);
-        sidebar.classList.toggle('is-open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        toggle.setAttribute('aria-label', open ? 'Закрити меню' : 'Відкрити меню');
-    }
+        toggle.addEventListener('click', function () {
+            setOpen(!shell.classList.contains('admin-sidebar-open'));
+        });
 
-    toggle.addEventListener('click', function () {
-        setOpen(!shell.classList.contains('admin-sidebar-open'));
-    });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                setOpen(false);
+            });
+        }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
+        overlay.addEventListener('click', function () {
             setOpen(false);
+        });
+
+        sidebar.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                setOpen(false);
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                setOpen(false);
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.matchMedia('(min-width: 901px)').matches) {
+                setOpen(false);
+            }
         });
     }
 
-    overlay.addEventListener('click', function () {
-        setOpen(false);
-    });
+    var forumToggle = document.querySelector('[data-forum-toggle]');
+    var threadField = document.querySelector('[data-thread-field]');
 
-    sidebar.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-            setOpen(false);
-        });
-    });
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            setOpen(false);
+    if (forumToggle && threadField) {
+        function syncThreadField() {
+            threadField.hidden = !forumToggle.checked;
         }
-    });
 
-    window.addEventListener('resize', function () {
-        if (window.matchMedia('(min-width: 901px)').matches) {
-            setOpen(false);
-        }
-    });
+        forumToggle.addEventListener('change', syncThreadField);
+        syncThreadField();
+    }
 })();
