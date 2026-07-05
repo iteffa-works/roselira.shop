@@ -47,6 +47,9 @@ cp .env.example .env
 | `META_PIXEL_ID` | no | Meta Pixel ID from [Events Manager](https://business.facebook.com/events_manager) |
 | `GA4_MEASUREMENT_ID` | no | Google Analytics 4 ID, e.g. `G-XXXXXXXXXX` |
 | `GTM_CONTAINER_ID` | no | Google Tag Manager ID, e.g. `GTM-XXXXXXX` |
+| `GA4_PROPERTY_ID` | no | Numeric GA4 Property ID (Admin → Property settings) — for Dashboard **Google** tab via Data API |
+| `GA4_SERVICE_ACCOUNT_JSON` | no | Path to service account JSON (e.g. `storage/ga4-service-account.json`) — pair with `GA4_PROPERTY_ID` |
+| `GA4_LOOKER_EMBED_URL` | no | Looker Studio embed URL — alternative to Data API for Dashboard **Google** tab |
 | `FEED_SECRET` | prod | Random secret to protect product XML feeds |
 | `CONTACT_EMAIL` | no | Email shown in site footer |
 | `CONTACT_TELEGRAM` | no | Telegram username for footer, e.g. `@roselira` |
@@ -58,6 +61,32 @@ cp .env.example .env
 | `RECAPTCHA_SECRET_KEY` | yes | reCAPTCHA v2 secret key |
 
 Analytics scripts load **only after cookie consent**. At least one of `META_PIXEL_ID`, `GA4_MEASUREMENT_ID`, or `GTM_CONTAINER_ID` is needed for tracking.
+
+### Google Analytics у Dashboard (`/admin` → вкладка **Google**)
+
+Базовий трекінг: `GA4_MEASUREMENT_ID` або `GTM_CONTAINER_ID` (див. вище).
+
+Щоб звіти відкривались **прямо в адмінці**, додайте в `.env` **один** із варіантів:
+
+**Варіант A — Looker Studio (простіше):**
+
+1. Створіть звіт у [Looker Studio](https://lookerstudio.google.com/) на базі GA4.
+2. **Share → Embed report** → скопіюйте embed URL.
+3. У `.env`: `GA4_LOOKER_EMBED_URL=https://lookerstudio.google.com/embed/...`
+
+**Варіант B — GA4 Data API:**
+
+1. У [GA4 Admin](https://analytics.google.com/) → Property settings скопіюйте **Property ID** (число) → `GA4_PROPERTY_ID`.
+2. У [Google Cloud Console](https://console.cloud.google.com/) створіть service account, завантажте JSON-ключ.
+3. Збережіть файл поза web root, напр. `storage/ga4-service-account.json`.
+4. У GA4 Admin → Property access management додайте email service account з роллю **Viewer**.
+5. У `.env`:
+   ```env
+   GA4_PROPERTY_ID=123456789
+   GA4_SERVICE_ACCOUNT_JSON=storage/ga4-service-account.json
+   ```
+
+Без цих змінних вкладка **Google** показує статус трекінгу та посилання в GA/GTM. Локальна аналітика (heatmaps, кліки) працює без GA4 API — вкладка **Локальна**.
 
 ### Production `.env` example
 
