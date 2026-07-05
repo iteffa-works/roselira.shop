@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 9;
+    public const STRINGS_VERSION = 10;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -33,6 +33,7 @@ final class LocaleDefaults
             'order_error_comment_length',
             'order_error_variant_inactive',
             'order_error_captcha',
+            'variant_unavailable',
             'footer_credit',
             'footer_copy',
             'footer_nav_label',
@@ -79,6 +80,7 @@ final class LocaleDefaults
             'variant_label' => 'Shade',
             'variant_all' => 'All shades (:count)',
             'variant_collapse' => 'Collapse',
+            'variant_unavailable' => 'Unavailable',
             'description_title' => 'Description',
             'section_description' => 'Description',
             'section_results' => 'Results',
@@ -147,6 +149,7 @@ final class LocaleDefaults
             'variant_label' => 'Відтінок',
             'variant_all' => 'Усі відтінки (:count)',
             'variant_collapse' => 'Згорнути',
+            'variant_unavailable' => 'Недоступний',
             'description_title' => 'Опис',
             'section_description' => 'Опис',
             'section_results' => 'Результат',
@@ -215,6 +218,7 @@ final class LocaleDefaults
             'variant_label' => 'Оттенок',
             'variant_all' => 'Все оттенки (:count)',
             'variant_collapse' => 'Свернуть',
+            'variant_unavailable' => 'Недоступен',
             'description_title' => 'Описание',
             'section_description' => 'Описание',
             'section_results' => 'Результат',
