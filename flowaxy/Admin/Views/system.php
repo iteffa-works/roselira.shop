@@ -5,7 +5,7 @@ $gitUpdates = !empty($gitStatus['updates_available']);
 $summary = $checks['summary'] ?? ['ok' => 0, 'warn' => 0, 'error' => 0];
 $checkItems = $checks['items'] ?? [];
 $feedToken = $feedSecret !== '' ? rawurlencode($feedSecret) : '';
-$base = rtrim($appUrl, '/');
+$base = rtrim(app_url(), '/');
 $projectPath = rtrim($projectRoot, '/\\');
 $cronCommand = '0 4 * * * /usr/bin/php ' . $projectPath . '/cron.php';
 
