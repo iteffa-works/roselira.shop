@@ -102,27 +102,21 @@ final class VisitorAnalyticsService
     }
 
     /** @return array<string, mixed> */
-    public function dashboard(int $days = 7, string $heatmapPath = '/'): array
+    public function dashboard(int $days = 7): array
     {
         $days = max(1, min(90, $days));
-        $heatmapPath = $this->normalizePath($heatmapPath);
         $topPages = $this->visitors->topPages($days);
-
-        if ($heatmapPath === '/' && $topPages !== []) {
-            $heatmapPath = $topPages[0]['path'];
-        }
 
         return [
             'days' => $days,
             'summary' => $this->visitors->dashboardSummary($days),
             'chart' => $this->visitors->dailyChart($days),
             'top_pages' => $topPages,
+            'click_pages' => [],
             'browsers' => $this->visitors->breakdown('browser', $days),
             'devices' => $this->visitors->breakdown('device_type', $days),
             'locales' => $this->visitors->breakdown('locale', $days),
             'referrers' => $this->visitors->topReferrers($days),
-            'heatmap_path' => $heatmapPath,
-            'heatmap' => $this->visitors->heatmap($heatmapPath, $days),
             'recent_sessions' => $this->visitors->recentSessions(12),
         ];
     }

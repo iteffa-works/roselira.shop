@@ -11,6 +11,7 @@ use Flowaxy\Services\AdminAuthService;
 use Flowaxy\Services\CatalogService;
 use Flowaxy\Services\ExchangeService;
 use Flowaxy\Services\OrderService;
+use Flowaxy\Services\GoogleAnalyticsService;
 use Flowaxy\Services\VisitorAnalyticsService;
 
 final class DashboardController extends CatalogAdminController
@@ -22,6 +23,7 @@ final class DashboardController extends CatalogAdminController
         private readonly OrderService $orders,
         private readonly ExchangeService $exchange,
         private readonly VisitorAnalyticsService $analytics,
+        private readonly GoogleAnalyticsService $googleAnalytics,
     ) {
         parent::__construct($view, $auth, $catalog);
     }
@@ -38,8 +40,16 @@ final class DashboardController extends CatalogAdminController
         $activeCount = count(array_filter($products, static fn(array $p): bool => ($p['active'] ?? false) === true));
 
         $days = max(1, min(90, (int) $request->query('days', 7)));
-        $heatmapPath = (string) $request->query('page', '/');
-        $analytics = $this->analytics->dashboard($days, $heatmapPath);
+        $source = (string) $request->query('source', 'local');
+        if (!in_array($source, ['local', 'google'], true)) {
+            $source = 'local';
+        }
+        if ($source === 'google' && !$this->googleAnalytics->canShowGoogleTab()) {
+            $source = 'local';
+        }
+
+        $analytics = $this->analytics->dashboard($days);
+        $googleReport = $source === 'google' ? $this->googleAnalytics->dashboard($days) : null;
 
         $content = $this->view->renderAdmin('dashboard', [
             'newCount' => $newCount,
@@ -48,6 +58,9 @@ final class DashboardController extends CatalogAdminController
             'rates' => $this->exchange->getRates(),
             'recentOrders' => array_slice($orders, 0, 5),
             'analytics' => $analytics,
+            'analyticsSource' => $source,
+            'googleReport' => $googleReport,
+            'googleTabAvailable' => $this->googleAnalytics->canShowGoogleTab(),
         ]);
 
         return $this->renderPage($content, 'Dashboard', 'dashboard');
