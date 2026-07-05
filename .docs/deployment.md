@@ -1,21 +1,21 @@
-# Деплой на хостинг
+# Deployment
 
 ## Document root
 
-**Обов'язково** `public/`, не корінь репозиторію.
+Must be **`public/`**, not the repository root.
 
-## Перший deploy
+## First deploy
 
 ```bash
 cd /home/roselira/roselira.com/shop
 git clone https://github.com/iteffa-works/roselira.shop.git .
 cp .env.example .env
-# відредагувати .env, chmod storage/
+# edit .env, ensure storage/ is writable
 ```
 
-Крапка `.` в кінці `git clone` обов'язкова — інакше створиться підпапка.
+The trailing `.` in `git clone` is required — otherwise Git creates a subfolder.
 
-## Якщо вже склоновано в підпапку
+## If already cloned into a subfolder
 
 ```bash
 mv roselira.shop/* .
@@ -23,24 +23,24 @@ mv roselira.shop/.git .
 rmdir roselira.shop
 ```
 
-## Після deploy
+## After deploy
 
-1. Завантажити service account JSON у `storage/service/accounts/` (не в git)
-2. `storage/` writable для PHP (логи, SQLite)
-3. `/admin/install` — один раз, потім 404 на prod
-4. Backup `storage/roselira.db`
+1. Upload service account JSON to `storage/service/accounts/` (not in git)
+2. Make `storage/` writable for PHP (logs, SQLite)
+3. Run `/admin/install` once, then block/404 on production
+4. Back up `storage/roselira.db`
 
-## Оновлення
+## Updates
 
 - **Admin → System → Git pull**
-- Cron також робить git pull щодня
+- Cron also runs git pull daily
 
-`.env` і `storage/` зберігаються при оновленні (gitignore).
+`.env` and `storage/` are gitignored and preserved on update.
 
 ## Production checklist
 
 - HTTPS + `SESSION_SECURE=true`
-- `FEED_SECRET`, `CRON_SECRET` задані
-- Feeds підключені в Merchant Center / Meta Commerce
-- Meta Pixel / GA4 у `.env`, тест замовлення
-- **Перевірити все** на `/admin/system`
+- `FEED_SECRET`, `CRON_SECRET` set
+- Feeds connected in Merchant Center / Meta Commerce
+- Meta Pixel / GA4 in `.env`, test an order
+- Run **Check all** on `/admin/system`

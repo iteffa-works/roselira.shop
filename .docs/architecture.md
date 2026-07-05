@@ -1,33 +1,33 @@
-# Архітектура
+# Architecture
 
-## Стек
+## Stack
 
-- PHP 8.2+, без Composer/npm
+- PHP 8.2+, no Composer/npm
 - SQLite (`storage/roselira.db`)
 - Apache + `mod_rewrite`, document root = **`public/`**
-- Custom MVC у `flowaxy/`
+- Custom MVC in `flowaxy/`
 
-## Структура каталогів
+## Directory layout
 
 ```
-public/          → index.php, assets, robots/sitemap (копії)
-views/           → шаблони вітрини (storefront)
-flowaxy/         → додаток
+public/          → index.php, assets, robots/sitemap (copies)
+views/           → storefront templates
+flowaxy/         → application code
   Core/          → Router, Container, Request, Response, View
-  Controllers/   → публічні контролери
-  Admin/         → адмін-контролери та Views/
-  Services/      → бізнес-логіка
-  Repositories/  → SQLite + інтерфейси
+  Controllers/   → public controllers
+  Admin/         → admin controllers and Views/
+  Services/      → business logic
+  Repositories/  → SQLite + interfaces
   Support/       → helpers, env, limiters
-storage/         → БД, логи, service account JSON (не в git)
+storage/         → DB, logs, service account JSON (not in git)
 ```
 
-## Запит
+## Request flow
 
 1. `public/index.php` → `flowaxy/bootstrap.php`
-2. DI-контейнер реєструє сервіси
+2. DI container registers services
 3. `flowaxy/routes.php` → `Router::dispatch()`
-4. Контролер повертає `Response`
+4. Controller returns `Response`
 
 ## Views
 
@@ -36,11 +36,11 @@ storage/         → БД, логи, service account JSON (не в git)
 
 ## CLI
 
-- `cron.php` — щоденні задачі (git pull, SEO, перевірки)
-- `generate-seo.php` — ручна регенерація sitemap/robots
-- Спільний bootstrap: `flowaxy/cli-bootstrap.php`
+- `cron.php` — daily tasks (git pull, SEO, system checks)
+- `generate-seo.php` — manual sitemap/robots regeneration
+- Shared bootstrap: `flowaxy/cli-bootstrap.php`
 
-## Навмисні дублікати
+## Intentional duplicates
 
-- `robots.txt` / `sitemap.xml` у корені **і** `public/` — синхронізує `SeoFilesService`
-- Два `ProductController` (storefront vs admin) — різні namespace
+- `robots.txt` / `sitemap.xml` in project root **and** `public/` — synced by `SeoFilesService`
+- Two `ProductController` classes (storefront vs admin) — different namespaces

@@ -14,7 +14,7 @@ PHP 8.2+ e-commerce monolith. **Document root:** `public/`. **DB:** SQLite in `s
 | SQLite | `flowaxy/Repositories/Sqlite/` |
 | Helpers | `flowaxy/Support/helpers.php` |
 | CLI | `cron.php`, `generate-seo.php`, `flowaxy/cli-bootstrap.php` |
-| Docs (UA) | `.docs/` |
+| Docs | `.docs/` |
 
 ## Conventions
 

@@ -2,7 +2,7 @@
 
 PHP storefront and admin panel for [roselira.shop](https://roselira.shop) (Flowaxy framework, SQLite).
 
-**Documentation (UA):** [.docs/](.docs/) — architecture, env, GA4, admin, deploy, cron.
+**Documentation:** [.docs/](.docs/) — architecture, env, GA4, admin, deploy, cron.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ Values starting with `[ТУТ` in `.env.example` are treated as empty placeholde
 - `views/` — storefront templates
 - `flowaxy/` — application (core, services, admin)
 - `storage/` — SQLite, logs, keys (not committed)
-- `.docs/` — detailed documentation (Ukrainian)
+- `.docs/` — detailed documentation (English)
 
 ## Admin
 

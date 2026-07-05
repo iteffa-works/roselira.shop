@@ -1,17 +1,17 @@
-# Документація Roselira Shop
+# Roselira Shop Documentation
 
-PHP-магазин [roselira.shop](https://roselira.shop) на Flowaxy + SQLite.
+PHP storefront for [roselira.shop](https://roselira.shop) built on Flowaxy + SQLite.
 
-## Зміст
+## Contents
 
-| Документ | Опис |
-|----------|------|
-| [architecture.md](architecture.md) | Структура проєкту, Flowaxy, DI, маршрути |
-| [environment.md](environment.md) | `.env`, змінні, секрети, placeholders |
+| Document | Description |
+|----------|-------------|
+| [architecture.md](architecture.md) | Project structure, Flowaxy, DI, routes |
+| [environment.md](environment.md) | `.env`, variables, secrets, placeholders |
 | [analytics-ga4.md](analytics-ga4.md) | GTM/GA4, Dashboard Local/Google, Realtime API |
-| [admin.md](admin.md) | Адмін-панель `/admin/*` |
-| [deployment.md](deployment.md) | Хостинг, git clone, document root |
+| [admin.md](admin.md) | Admin panel `/admin/*` |
+| [deployment.md](deployment.md) | Hosting, git clone, document root |
 | [cron-and-seo.md](cron-and-seo.md) | cron.php, SEO, product feeds |
-| [development.md](development.md) | Локальна розробка, OSPanel, GIT_BINARY |
+| [development.md](development.md) | Local setup, OSPanel, GIT_BINARY |
 
-Короткий огляд англійською — у [README.md](../README.md) в корені репозиторію.
+Quick overview: [README.md](../README.md) in the repository root.

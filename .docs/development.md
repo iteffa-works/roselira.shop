@@ -1,9 +1,9 @@
-# Локальна розробка
+# Local development
 
 ## OSPanel / OpenServer
 
 - Document root → `public/`
-- Домен: `shop.roselira.local`
+- Domain: `shop.roselira.local`
 - `.env`:
   ```env
   APP_ENV=local
@@ -12,33 +12,33 @@
   APP_URL=https://shop.roselira.local
   ```
 
-## Git на Windows
+## Git on Windows
 
-Якщо **Admin → System → Git pull** не знаходить git:
+If **Admin → System → Git pull** cannot find git:
 
 ```env
 GIT_BINARY=C:\Program Files\Git\cmd\git.exe
 ```
 
-Або OSPanel: `C:\OSPanel\modules\Git\bin\git.exe`
+Or OSPanel: `C:\OSPanel\modules\Git\bin\git.exe`
 
-## GA4 локально
+## GA4 locally
 
-1. JSON service account у `storage/service/accounts/`
-2. `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT_JSON` у `.env`
-3. Dashboard → Google → Сьогодні (Realtime)
+1. Service account JSON in `storage/service/accounts/`
+2. `GA4_PROPERTY_ID` + `GA4_SERVICE_ACCOUNT_JSON` in `.env`
+3. Dashboard → Google → **Today** (Realtime)
 
-## Структура для змін
+## Where to change things
 
-| Задача | Де шукати |
-|--------|-----------|
-| Новий route | `flowaxy/routes.php` |
+| Task | Location |
+|------|----------|
+| New route | `flowaxy/routes.php` |
 | Storefront UI | `views/`, `public/assets/` |
 | Admin UI | `flowaxy/Admin/Views/`, `admin.css` |
-| Бізнес-логіка | `flowaxy/Services/` |
-| БД | `flowaxy/Repositories/Sqlite/` |
+| Business logic | `flowaxy/Services/` |
+| Database | `flowaxy/Repositories/Sqlite/` |
 
 ## IDE
 
-`.vscode/` — локальні налаштування (gitignored).  
-Проєктні правила Cursor — `.cursor/rules/`, див. [AGENTS.md](../AGENTS.md).
+`.vscode/` — local settings (gitignored).  
+Cursor rules: `.cursor/rules/`, see [AGENTS.md](../AGENTS.md).

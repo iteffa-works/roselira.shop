@@ -1,48 +1,48 @@
-# Змінні оточення (.env)
+# Environment variables (.env)
 
 ```bash
 cp .env.example .env
 ```
 
-Placeholder `[ТУТ …]` у `.env.example` трактується як **порожнє** значення (будь-який рядок, що починається з `[ТУТ`).
+Placeholder values like `[ТУТ …]` in `.env.example` are treated as **empty** (any value starting with `[ТУТ`).
 
-## Обов'язкові
+## Required
 
-| Змінна | Локально | Production |
-|--------|----------|------------|
+| Variable | Local | Production |
+|----------|-------|------------|
 | `APP_ENV` | `local` | `production` |
 | `APP_DEBUG` | `true` | `false` |
 | `SESSION_SECURE` | `false` | `true` |
 | `APP_URL` | `https://shop.roselira.local` | `https://roselira.shop` |
-| `RECAPTCHA_SITE_KEY` | так | так |
-| `RECAPTCHA_SECRET_KEY` | так | так |
+| `RECAPTCHA_SITE_KEY` | yes | yes |
+| `RECAPTCHA_SECRET_KEY` | yes | yes |
 
-## Аналітика (опційно)
+## Analytics (optional)
 
-| Змінна | Опис |
-|--------|------|
+| Variable | Description |
+|----------|-------------|
 | `META_PIXEL_ID` | Meta Pixel |
 | `GA4_MEASUREMENT_ID` | GA4 Measurement ID (`G-…`) |
 | `GTM_CONTAINER_ID` | Google Tag Manager |
-| `GA4_PROPERTY_ID` | Числовий Property ID для Data API |
-| `GA4_SERVICE_ACCOUNT_JSON` | Шлях до JSON, напр. `storage/service/accounts/….json` |
-| `GA4_LOOKER_EMBED_URL` | Embed Looker Studio (альтернатива API) |
+| `GA4_PROPERTY_ID` | Numeric Property ID for Data API |
+| `GA4_SERVICE_ACCOUNT_JSON` | Path to JSON, e.g. `storage/service/accounts/….json` |
+| `GA4_LOOKER_EMBED_URL` | Looker Studio embed (API alternative) |
 
-Скрипти аналітики завантажуються **лише після cookie consent**.
+Analytics scripts load **only after cookie consent**.
 
 ## Production
 
-| Змінна | Опис |
-|--------|------|
-| `FEED_SECRET` | Захист XML feeds (`?token=`) |
-| `CRON_SECRET` | HTTP-тригер cron |
+| Variable | Description |
+|----------|-------------|
+| `FEED_SECRET` | Protects XML feeds (`?token=`) |
+| `CRON_SECRET` | HTTP cron trigger |
 | `GIT_REPO_URL` / `GIT_BRANCH` | Auto-update |
-| `GIT_BINARY` | Шлях до git, якщо не в PATH PHP |
+| `GIT_BINARY` | Path to git if not in PHP PATH |
 
-## Секрети
+## Secrets
 
 ```powershell
-# PowerShell — 32 байти hex
+# PowerShell — 32-byte hex
 $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
 $bytes = New-Object byte[] 32
 $rng.GetBytes($bytes)
@@ -53,9 +53,9 @@ $rng.GetBytes($bytes)
 openssl rand -hex 32
 ```
 
-`FEED_SECRET` і `CRON_SECRET` мають бути **різними** на кожному середовищі.
+Use **different** values for `FEED_SECRET` and `CRON_SECRET` on each environment.
 
-## Не комітити
+## Never commit
 
 - `.env`, `.env.local`
 - `storage/service/accounts/*.json`

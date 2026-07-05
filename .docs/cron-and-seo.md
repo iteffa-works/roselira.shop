@@ -1,39 +1,39 @@
-# Cron, SEO та Feeds
+# Cron, SEO & Feeds
 
 ## Cron
 
-**CLI (рекомендовано):**
+**CLI (recommended):**
 
 ```bash
 0 4 * * * /usr/bin/php /path/to/roselira.shop/cron.php
 ```
 
-**HTTP (якщо немає CLI cron):**
+**HTTP (if CLI cron unavailable):**
 
 ```
 https://roselira.shop/cron.php?token=CRON_SECRET
 ```
 
-Cron виконує: git pull, SEO sync, system checks, retention локальної аналітики.
+Cron runs: git pull, SEO sync, system checks, local analytics retention.
 
-Інтервал повторного запуску: `CronInterval::DAILY_SECONDS` (~23 год).
+Repeat interval: `CronInterval::DAILY_SECONDS` (~23 hours).
 
 ## SEO
 
-| Файл | Маршрут | Примітка |
-|------|---------|----------|
-| `sitemap.xml` | `/sitemap.xml` | PHP route або статичний файл у `public/` |
-| `robots.txt` | `/robots.txt` | Те саме |
+| File | Route | Notes |
+|------|-------|-------|
+| `sitemap.xml` | `/sitemap.xml` | PHP route or static file in `public/` |
+| `robots.txt` | `/robots.txt` | Same |
 
-Apache віддає існуючий файл з `public/` напряму; якщо файлу немає — route через `SeoController`.
+Apache serves an existing file from `public/` directly; if missing, the route hits `SeoController`.
 
-Ручна регенерація:
+Manual regeneration:
 
 ```bash
 php generate-seo.php
 ```
 
-Файли пишуться в **корінь проєкту і `public/`** одночасно.
+Files are written to **project root and `public/`** at once.
 
 ## Product feeds
 
@@ -42,10 +42,10 @@ php generate-seo.php
 | Google | `/feeds/google.xml?token=FEED_SECRET` |
 | Meta | `/feeds/meta.xml?token=FEED_SECRET` |
 
-Посилання з token з'являються в **Admin → System → Посилання для реклами**.
+Links with token appear in **Admin → System → Ad links**.
 
-Якщо `FEED_SECRET` порожній — feeds без token (не рекомендовано на prod).
+If `FEED_SECRET` is empty, feeds work without `?token=` (not recommended on production).
 
-## Логи
+## Logs
 
-`storage/logs/app.log` — помилки замовлень, Telegram тощо.
+`storage/logs/app.log` — order errors, Telegram failures, etc.
