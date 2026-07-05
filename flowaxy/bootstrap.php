@@ -32,7 +32,9 @@ use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\OrderService;
 use Flowaxy\Services\ProductFeedService;
 use Flowaxy\Services\RecaptchaService;
+use Flowaxy\Services\SeoFilesService;
 use Flowaxy\Services\SecurityLogService;
+use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
 use Flowaxy\Support\OrderRateLimiter;
@@ -166,9 +168,21 @@ $container->singleton(SystemCheckService::class, static function (Container $c) 
     );
 });
 
+$container->singleton(SitemapService::class, static fn(Container $c): SitemapService => new SitemapService(
+    $c->make(CatalogService::class),
+));
+
+$container->singleton(SeoFilesService::class, static function (Container $c) use ($config): SeoFilesService {
+    return new SeoFilesService(
+        $c->make(SitemapService::class),
+        (string) $config['project_root'],
+    );
+});
+
 $container->singleton(CronService::class, static fn(Container $c): CronService => new CronService(
     $c->make(GitUpdateService::class),
     $c->make(SystemCheckService::class),
+    $c->make(SeoFilesService::class),
     $c->make(SettingsRepositoryInterface::class),
 ));
 

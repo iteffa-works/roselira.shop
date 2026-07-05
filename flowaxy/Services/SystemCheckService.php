@@ -183,13 +183,16 @@ final class SystemCheckService
     private function checkRobots(): array
     {
         $path = $this->projectRoot . '/public/robots.txt';
+        $rootPath = $this->projectRoot . '/robots.txt';
         $url = absolute_url('/robots.txt');
 
-        if (!is_file($path)) {
+        if (!is_file($path) && !is_file($rootPath)) {
             return $this->item('robots', 'robots.txt', 'error', 'Файл відсутній', $url);
         }
 
-        $content = (string) file_get_contents($path);
+        $content = is_file($path)
+            ? (string) file_get_contents($path)
+            : (string) file_get_contents($rootPath);
 
         return $this->item(
             'robots',

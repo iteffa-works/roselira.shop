@@ -47,6 +47,8 @@ use Flowaxy\Services\CronService;
 use Flowaxy\Services\GitUpdateService;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\ProductFeedService;
+use Flowaxy\Services\SeoFilesService;
+use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
 use Flowaxy\Services\TelegramNotificationService;
 use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
@@ -92,7 +94,9 @@ $systemCheck = new SystemCheckService(
     $settings,
     $config['project_root'],
 );
-$cron = new CronService($gitUpdate, $systemCheck, $settings);
+$sitemap = new SitemapService($catalog);
+$seoFiles = new SeoFilesService($sitemap, $config['project_root']);
+$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $settings);
 
 $result = $cron->runDaily(forceDaily: true);
 

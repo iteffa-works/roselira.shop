@@ -16,6 +16,7 @@ final class CronService
     public function __construct(
         private readonly GitUpdateService $gitUpdate,
         private readonly SystemCheckService $systemCheck,
+        private readonly SeoFilesService $seoFiles,
         private readonly SettingsRepositoryInterface $settings,
     ) {
     }
@@ -58,6 +59,14 @@ final class CronService
             if (($item['status'] ?? '') === 'error') {
                 $hasError = true;
             }
+        }
+
+        $lines[] = '';
+        $lines[] = '=== SEO files ===';
+        $seo = $this->seoFiles->sync();
+        $lines[] = ($seo['success'] ? 'OK' : 'ERROR') . ': ' . $seo['message'];
+        if (!$seo['success']) {
+            $hasError = true;
         }
 
         $output = implode("\n", $lines);
