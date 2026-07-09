@@ -125,13 +125,39 @@ final class SeoService
             $position++;
         }
 
+        $config = app_config();
+        $contactEmail = trim((string) ($config['contact_email'] ?? ''));
+        $contactPhone = trim((string) ($config['contact_phone'] ?? ''));
+        $legalName = trim((string) ($config['business_legal_name'] ?? ''));
+        /** @var list<string> $addressLines */
+        $addressLines = is_array($config['business_address'] ?? null) ? $config['business_address'] : [];
+
+        $organization = [
+            '@type' => 'Organization',
+            'name' => $legalName !== '' ? $legalName : 'Roselira',
+            'url' => absolute_url('/'),
+            'logo' => absolute_url('assets/img/brand/logo-light.svg'),
+        ];
+
+        if ($contactEmail !== '') {
+            $organization['email'] = $contactEmail;
+        }
+
+        if ($contactPhone !== '') {
+            $organization['telephone'] = $contactPhone;
+        }
+
+        if ($addressLines !== []) {
+            $organization['address'] = [
+                '@type' => 'PostalAddress',
+                'addressLocality' => 'Суми',
+                'addressRegion' => 'Сумська область',
+                'addressCountry' => 'UA',
+            ];
+        }
+
         $schemas = [
-            [
-                '@type' => 'Organization',
-                'name' => 'Roselira',
-                'url' => absolute_url('/'),
-                'logo' => absolute_url('assets/img/brand/logo-light.svg'),
-            ],
+            $organization,
             [
                 '@type' => 'WebSite',
                 'name' => 'Roselira',
