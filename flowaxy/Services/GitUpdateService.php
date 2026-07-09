@@ -72,6 +72,7 @@ final class GitUpdateService
         $date = $this->run(['log', '-1', '--pretty=format:%ci']);
         $remoteSubject = $this->run(['log', '-1', '--pretty=format:%s', 'origin/' . $this->branch]);
         $remoteDate = $this->run(['log', '-1', '--pretty=format:%ci', 'origin/' . $this->branch]);
+        $dirty = $this->workingTreeStatus();
 
         return [
             'available' => true,
@@ -89,6 +90,8 @@ final class GitUpdateService
             'remote_date' => $this->firstLine($remoteDate['output']),
             'behind' => $behind,
             'updates_available' => $behind > 0,
+            'dirty' => $dirty['dirty'],
+            'dirty_files' => $dirty['files'],
             'last_update_at' => $this->settings->get(self::KEY_LAST_AT),
             'last_update_commit' => $this->settings->get(self::KEY_LAST_COMMIT),
             'last_update_status' => $this->settings->get(self::KEY_LAST_STATUS),
@@ -154,8 +157,22 @@ final class GitUpdateService
             ];
         }
 
+        $stashed = false;
+        if ($status['dirty'] ?? false) {
+            $stash = $this->run(['stash', 'push', '-m', 'flowaxy-pre-pull', '--include-untracked']);
+            $outputLines = array_merge($outputLines, $stash['output']);
+            $stashed = $stash['ok'];
+        }
+
         $pull = $this->run(['merge', '--ff-only', 'origin/' . $this->branch]);
         $outputLines = array_merge($outputLines, $pull['output']);
+
+        if ($pull['ok'] && $stashed) {
+            $this->run(['stash', 'drop']);
+            $outputLines[] = 'Локальні правки тимчасово прибрано — оновлення з GitHub застосовано.';
+        } elseif (!$pull['ok'] && $stashed) {
+            $this->run(['stash', 'pop']);
+        }
 
         if (!$pull['ok']) {
             $output = implode("\n", $outputLines);
@@ -342,6 +359,32 @@ final class GitUpdateService
     private function firstLine(array $lines): string
     {
         return $lines[0] ?? '';
+    }
+
+    /** @return array{dirty: bool, files: list<string>} */
+    private function workingTreeStatus(): array
+    {
+        $result = $this->run(['status', '--porcelain']);
+        if (!$result['ok']) {
+            return ['dirty' => false, 'files' => []];
+        }
+
+        $files = [];
+        foreach ($result['output'] as $line) {
+            if (strlen($line) < 4) {
+                continue;
+            }
+
+            $path = trim(substr($line, 3));
+            if ($path !== '') {
+                $files[] = $path;
+            }
+        }
+
+        return [
+            'dirty' => $files !== [],
+            'files' => $files,
+        ];
     }
 
     private function shouldBypassShell(string $binary): bool

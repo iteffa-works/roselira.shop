@@ -2374,6 +2374,22 @@ body.admin {
     font-weight: 500;
 }
 
+.admin-system__git-dirty {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.admin-system__git-dirty code {
+    margin: 0 0.15rem;
+    font-size: 0.75rem;
+}
+
 .admin-system__commit-wrap {
     margin-bottom: 1rem;
 }

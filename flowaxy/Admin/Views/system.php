@@ -183,6 +183,16 @@ $feedLinks = [
                 <?php endif; ?>
             </dl>
 
+            <?php if (!empty($gitStatus['dirty'])): ?>
+            <p class="admin-system__git-dirty">
+                Локальні зміни на сервері:
+                <?php foreach (($gitStatus['dirty_files'] ?? []) as $dirtyFile): ?>
+                <code><?= e((string) $dirtyFile) ?></code>
+                <?php endforeach; ?>
+                · при оновленні будуть тимчасово прибрані (fix уже в GitHub).
+            </p>
+            <?php endif; ?>
+
             <?php if ($gitSubject !== ''): ?>
             <div class="admin-system__commit-wrap">
                 <span class="admin-system__field-label">Повідомлення commit</span>
