@@ -176,6 +176,17 @@ final class Connection
 
             CREATE INDEX IF NOT EXISTS idx_visitor_events_session ON visitor_events(session_id, created_at DESC);
             CREATE INDEX IF NOT EXISTS idx_visitor_events_path_type ON visitor_events(path, event_type, created_at DESC);
+
+            CREATE TABLE IF NOT EXISTS product_ratings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_slug TEXT NOT NULL,
+                rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+                voter_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                UNIQUE(product_slug, voter_hash)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_product_ratings_slug ON product_ratings(product_slug);
             SQL);
     }
 

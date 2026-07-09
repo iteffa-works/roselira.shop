@@ -11,14 +11,14 @@ use Flowaxy\Core\View;
 use Flowaxy\Repositories\Contracts\AdminUserRepositoryInterface;
 use Flowaxy\Repositories\Contracts\CatalogRepositoryInterface;
 use Flowaxy\Repositories\Contracts\LocaleRepositoryInterface;
-use Flowaxy\Repositories\Contracts\OrderRepositoryInterface;
+use Flowaxy\Repositories\Contracts\ProductRatingRepositoryInterface;
 use Flowaxy\Repositories\Contracts\SettingsRepositoryInterface;
 use Flowaxy\Repositories\Sqlite\Connection;
 use Flowaxy\Repositories\Sqlite\LocaleSeeder;
 use Flowaxy\Repositories\Sqlite\SqliteAdminUserRepository;
 use Flowaxy\Repositories\Sqlite\SqliteCatalogRepository;
 use Flowaxy\Repositories\Sqlite\SqliteLocaleRepository;
-use Flowaxy\Repositories\Sqlite\SqliteOrderRepository;
+use Flowaxy\Repositories\Sqlite\SqliteProductRatingRepository;
 use Flowaxy\Repositories\Sqlite\SqliteSettingsRepository;
 use Flowaxy\Repositories\Contracts\SecurityRepositoryInterface;
 use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
@@ -32,7 +32,7 @@ use Flowaxy\Services\GitUpdateService;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\OrderService;
-use Flowaxy\Services\ProductFeedService;
+use Flowaxy\Services\ProductRatingService;
 use Flowaxy\Services\RecaptchaService;
 use Flowaxy\Services\SeoFilesService;
 use Flowaxy\Services\SecurityLogService;
@@ -84,6 +84,7 @@ $container->singleton(Connection::class, static function () use ($config): Conne
 
 $container->singleton(CatalogRepositoryInterface::class, static fn(Container $c): SqliteCatalogRepository => new SqliteCatalogRepository($c->make(Connection::class)));
 $container->singleton(OrderRepositoryInterface::class, static fn(Container $c): SqliteOrderRepository => new SqliteOrderRepository($c->make(Connection::class)));
+$container->singleton(ProductRatingRepositoryInterface::class, static fn(Container $c): SqliteProductRatingRepository => new SqliteProductRatingRepository($c->make(Connection::class)));
 $container->singleton(LocaleRepositoryInterface::class, static fn(Container $c): SqliteLocaleRepository => new SqliteLocaleRepository($c->make(Connection::class)));
 $container->singleton(AdminUserRepositoryInterface::class, static fn(Container $c): SqliteAdminUserRepository => new SqliteAdminUserRepository($c->make(Connection::class)));
 $container->singleton(SettingsRepositoryInterface::class, static fn(Container $c): SqliteSettingsRepository => new SqliteSettingsRepository($c->make(Connection::class)));
@@ -106,6 +107,11 @@ $container->singleton(LocaleService::class, static function (Container $c) use (
 $container->singleton(CatalogService::class, static fn(Container $c): CatalogService => new CatalogService(
     $c->make(CatalogRepositoryInterface::class),
     $c->make(LocaleService::class),
+));
+
+$container->singleton(ProductRatingService::class, static fn(Container $c): ProductRatingService => new ProductRatingService(
+    $c->make(ProductRatingRepositoryInterface::class),
+    $c->make(CatalogService::class),
 ));
 
 $container->singleton(VisitorRepositoryInterface::class, static fn(Container $c): SqliteVisitorRepository => new SqliteVisitorRepository($c->make(Connection::class)));
