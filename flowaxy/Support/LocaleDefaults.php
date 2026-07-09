@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 11;
+    public const STRINGS_VERSION = 12;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -42,6 +42,14 @@ final class LocaleDefaults
             'cookie_accept',
             'cookie_reject',
             'order_success',
+            'meta_home_title',
+            'meta_home_desc',
+            'seo_product_title',
+            'seo_product_desc',
+            'seo_breadcrumb_home',
+            'seo_breadcrumb_label',
+            'seo_itemlist_name',
+            'seo_price_on_request',
         ];
     }
 
@@ -79,10 +87,16 @@ final class LocaleDefaults
             'not_found_text' => 'The requested product was not found.',
             'not_found_back' => 'Back to catalog',
             'theme_toggle' => 'Toggle theme',
-            'meta_home_title' => 'Roselira Product Catalog',
-            'meta_home_desc' => 'KIKO Milano cosmetics and accessories. Browse the catalog and place orders online.',
+            'meta_home_title' => 'KIKO Milano — Buy Cosmetics Online | Roselira',
+            'meta_home_desc' => 'Original KIKO Milano cosmetics: lip gloss, lipstick, contour, powder. Prices in UAH, delivery in Ukraine. Order at roselira.shop.',
             'meta_not_found_title' => 'Product not found — Roselira',
             'meta_not_found_desc' => 'The requested product is not in the catalog.',
+            'seo_product_title' => ':brand :name — :price | Buy Roselira',
+            'seo_product_desc' => ':brand :name. :short Price :price. Original cosmetics, delivery in Ukraine.',
+            'seo_breadcrumb_home' => 'Catalog',
+            'seo_breadcrumb_label' => 'Breadcrumb',
+            'seo_itemlist_name' => 'KIKO Milano cosmetics',
+            'seo_price_on_request' => 'price on request',
             'variant_label' => 'Shade',
             'variant_all' => 'All shades (:count)',
             'variant_collapse' => 'Collapse',
@@ -154,10 +168,16 @@ final class LocaleDefaults
             'not_found_text' => 'Запрошений товар не знайдено.',
             'not_found_back' => 'До каталогу',
             'theme_toggle' => 'Перемкнути тему',
-            'meta_home_title' => 'Каталог товарів Roselira',
-            'meta_home_desc' => 'Косметика KIKO Milano та аксесуари. Перегляд асортименту та оформлення замовлення онлайн.',
+            'meta_home_title' => 'KIKO Milano Україна — купити косметику онлайн | Roselira',
+            'meta_home_desc' => 'Оригінальна косметика KIKO Milano: блиск, помади, контур, пудра. Ціни в грн, доставка по Україні. Замовлення на roselira.shop.',
             'meta_not_found_title' => 'Товар не знайдено — Roselira',
             'meta_not_found_desc' => 'Запрошений товар відсутній у каталозі.',
+            'seo_product_title' => ':brand :name — :price | купити Roselira',
+            'seo_product_desc' => ':brand :name. :short Ціна :price. Оригінальна косметика, доставка по Україні.',
+            'seo_breadcrumb_home' => 'Каталог',
+            'seo_breadcrumb_label' => 'Навігація',
+            'seo_itemlist_name' => 'Косметика KIKO Milano',
+            'seo_price_on_request' => 'ціна за запитом',
             'variant_label' => 'Відтінок',
             'variant_all' => 'Усі відтінки (:count)',
             'variant_collapse' => 'Згорнути',
@@ -229,10 +249,16 @@ final class LocaleDefaults
             'not_found_text' => 'Запрошенный товар не найден.',
             'not_found_back' => 'В каталог',
             'theme_toggle' => 'Переключить тему',
-            'meta_home_title' => 'Каталог товаров Roselira',
-            'meta_home_desc' => 'Косметика KIKO Milano и аксессуары. Просмотр ассортимента и оформление заказа онлайн.',
+            'meta_home_title' => 'KIKO Milano Украина — купить косметику онлайн | Roselira',
+            'meta_home_desc' => 'Оригинальная косметика KIKO Milano: блеск, помады, контур, пудра. Цены в грн, доставка по Украине. Заказ на roselira.shop.',
             'meta_not_found_title' => 'Товар не найден — Roselira',
             'meta_not_found_desc' => 'Запрошенный товар отсутствует в каталоге.',
+            'seo_product_title' => ':brand :name — :price | купить Roselira',
+            'seo_product_desc' => ':brand :name. :short Цена :price. Оригинальная косметика, доставка по Украине.',
+            'seo_breadcrumb_home' => 'Каталог',
+            'seo_breadcrumb_label' => 'Навигация',
+            'seo_itemlist_name' => 'Косметика KIKO Milano',
+            'seo_price_on_request' => 'цена по запросу',
             'variant_label' => 'Оттенок',
             'variant_all' => 'Все оттенки (:count)',
             'variant_collapse' => 'Свернуть',

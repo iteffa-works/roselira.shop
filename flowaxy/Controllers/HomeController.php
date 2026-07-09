@@ -8,6 +8,7 @@ use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\CatalogService;
 use Flowaxy\Services\LocaleService;
+use Flowaxy\Services\SeoService;
 
 final class HomeController
 {
@@ -15,6 +16,7 @@ final class HomeController
         private readonly View $view,
         private readonly LocaleService $locale,
         private readonly CatalogService $catalog,
+        private readonly SeoService $seo,
     ) {
     }
 
@@ -22,12 +24,14 @@ final class HomeController
     {
         $locale = $this->locale->current();
         $productGroups = [];
+        $flatProducts = [];
 
         foreach ($this->catalog->getGroupedActiveProducts($locale) as $groupId => $products) {
             foreach ($products as $product) {
                 $product['_hasRating'] = $this->catalog->productHasRating($product);
             }
             $productGroups[$groupId] = $products;
+            $flatProducts = array_merge($flatProducts, $products);
         }
 
         return Response::html($this->view->render('layout', [
@@ -35,6 +39,8 @@ final class HomeController
             'title' => $this->locale->t('meta_home_title'),
             'description' => $this->locale->t('meta_home_desc'),
             'canonicalPath' => '/',
+            'hreflangAlternates' => $this->seo->hreflangAlternates('/'),
+            'jsonLd' => $this->seo->homeStructuredData($flatProducts),
             'content' => 'home',
             'productGroups' => $productGroups,
         ]));
@@ -46,6 +52,7 @@ final class HomeController
             'locale' => $this->locale->current(),
             'title' => $this->locale->t('meta_not_found_title'),
             'description' => $this->locale->t('meta_not_found_desc'),
+            'canonicalPath' => '/',
             'content' => 'not-found',
         ]), 404);
     }

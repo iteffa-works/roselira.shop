@@ -18,13 +18,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <link rel="canonical" href="<?= e($canonicalUrl) ?>">
+    <?php foreach ($hreflangAlternates ?? [] as $alternate): ?>
+    <link rel="alternate" hreflang="<?= e($alternate['hreflang']) ?>" href="<?= e($alternate['href']) ?>">
+    <?php endforeach; ?>
     <script src="<?= asset('assets/js/theme-init.js') ?>"></script>
     <script>window.FlowaxyTheme.applyTheme(window.FlowaxyTheme.resolveTheme());</script>
     <title><?= e($title ?? 'Roselira') ?></title>
     <meta name="description" content="<?= e($description ?? '') ?>">
     <meta property="og:title" content="<?= e($title ?? '') ?>">
     <meta property="og:description" content="<?= e($description ?? '') ?>">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="<?= e($ogType ?? 'website') ?>">
     <meta property="og:url" content="<?= e($canonicalUrl) ?>">
     <meta property="og:locale" content="<?= ($locale ?? currentLocale()) === 'ru' ? 'ru_RU' : 'uk_UA' ?>">
     <?php if ($ogImageUrl !== ''): ?>

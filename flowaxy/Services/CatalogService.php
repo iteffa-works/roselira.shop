@@ -228,11 +228,16 @@ public function productHasRating(array $product): bool
             'description' => strip_tags((string) ($product['short_desc'] ?? '')),
             'image' => absolute_url($imagePath),
             'url' => absolute_url('/' . rawurlencode($slug)),
+            'sku' => $slug,
             'brand' => [
                 '@type' => 'Brand',
                 'name' => (string) ($product['brand'] ?? 'Roselira'),
             ],
         ];
+
+        if (!empty($product['category'])) {
+            $jsonLd['category'] = (string) $product['category'];
+        }
 
         if ($price !== null) {
             $defaultVariant = $this->getDefaultVariant($product);
@@ -242,6 +247,7 @@ public function productHasRating(array $product): bool
                 'url' => absolute_url('/' . rawurlencode($slug)),
                 'priceCurrency' => $currency,
                 'price' => number_format($price, 2, '.', ''),
+                'itemCondition' => 'https://schema.org/NewCondition',
                 'availability' => $inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
             ];
         }

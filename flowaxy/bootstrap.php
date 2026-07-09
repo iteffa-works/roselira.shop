@@ -38,6 +38,7 @@ use Flowaxy\Services\ProductFeedService;
 use Flowaxy\Services\ProductRatingService;
 use Flowaxy\Services\RecaptchaService;
 use Flowaxy\Services\SeoFilesService;
+use Flowaxy\Services\SeoService;
 use Flowaxy\Services\SecurityLogService;
 use Flowaxy\Services\SitemapService;
 use Flowaxy\Services\SystemCheckService;
@@ -208,6 +209,10 @@ $container->singleton(SeoFilesService::class, static function (Container $c) use
         (string) $config['project_root'],
     );
 });
+
+$container->singleton(SeoService::class, static fn(Container $c): SeoService => new SeoService(
+    $c->make(LocaleService::class),
+));
 
 $container->singleton(CronService::class, static fn(Container $c): CronService => new CronService(
     $c->make(GitUpdateService::class),

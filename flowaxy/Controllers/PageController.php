@@ -8,6 +8,7 @@ use Flowaxy\Core\Response;
 use Flowaxy\Core\View;
 use Flowaxy\Services\LegalPageService;
 use Flowaxy\Services\LocaleService;
+use Flowaxy\Services\SeoService;
 use Flowaxy\Support\LegalPages;
 
 final class PageController
@@ -16,6 +17,7 @@ final class PageController
         private readonly View $view,
         private readonly LocaleService $locale,
         private readonly LegalPageService $legalPages,
+        private readonly SeoService $seo,
     ) {
     }
 
@@ -44,6 +46,7 @@ final class PageController
             'title' => $this->locale->t($meta['title']),
             'description' => $this->locale->t($meta['desc']),
             'canonicalPath' => '/' . $page,
+            'hreflangAlternates' => $this->seo->hreflangAlternates('/' . $page),
             'content' => 'legal/page',
             'pageHeading' => $this->locale->t($meta['title']),
             'legalSections' => $this->legalPages->getSections($page, $locale),

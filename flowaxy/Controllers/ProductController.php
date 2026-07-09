@@ -9,6 +9,7 @@ use Flowaxy\Core\View;
 use Flowaxy\Services\CatalogService;
 use Flowaxy\Services\LocaleService;
 use Flowaxy\Services\ProductRatingService;
+use Flowaxy\Services\SeoService;
 
 final class ProductController
 {
@@ -17,6 +18,7 @@ final class ProductController
         private readonly LocaleService $locale,
         private readonly CatalogService $catalog,
         private readonly ProductRatingService $ratings,
+        private readonly SeoService $seo,
         private readonly HomeController $home,
     ) {
     }
@@ -40,20 +42,28 @@ final class ProductController
             'reviews_count' => $ratingStats['reviews_count'],
         ]);
 
-        $jsonLd = $this->catalog->buildProductStructuredData(
+        $productSchema = $this->catalog->buildProductStructuredData(
             $productForSchema,
             $slug,
             $defaultVariant,
             $price !== null ? (float) $price : null,
             $currency,
         );
+        $jsonLd = $this->seo->graph([
+            $productSchema,
+            $this->seo->breadcrumbSchema((string) ($product['name'] ?? $slug), $slug),
+        ]);
+
+        $canonicalPath = '/' . $slug;
 
         return Response::html($this->view->render('layout', [
             'locale' => $locale,
-            'title' => ($product['name'] ?? '') . ' — ' . ($product['brand'] ?? 'Roselira'),
-            'description' => $product['short_desc'] ?? '',
+            'title' => $this->seo->productTitle($product, $price !== null ? (float) $price : null, $currency),
+            'description' => $this->seo->productDescription($product, $price !== null ? (float) $price : null, $currency),
             'ogImage' => $ogImage,
-            'canonicalPath' => '/' . $slug,
+            'ogType' => 'product',
+            'canonicalPath' => $canonicalPath,
+            'hreflangAlternates' => $this->seo->hreflangAlternates($canonicalPath),
             'jsonLd' => $jsonLd,
             'trackingProduct' => [
                 'id' => $slug,

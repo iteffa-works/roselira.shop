@@ -36,6 +36,11 @@ $productJson = json_encode([
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 ?>
 <div class="container">
+    <nav class="breadcrumbs" aria-label="<?= e(t('seo_breadcrumb_label')) ?>">
+        <a href="/"><?= e(t('seo_breadcrumb_home')) ?></a>
+        <span class="breadcrumbs__sep" aria-hidden="true">/</span>
+        <span aria-current="page"><?= e($product['name'] ?? '') ?></span>
+    </nav>
     <article
         class="landing"
         data-product="<?= e($productJson) ?>"
