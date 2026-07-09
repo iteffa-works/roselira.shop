@@ -80,21 +80,21 @@ final class ExchangeService
     {
         $rates ??= $this->getRates();
 
-        foreach ($catalog['products'] ?? [] as &$product) {
-            if (!is_array($product)) {
+        foreach (array_keys($catalog['products'] ?? []) as $slug) {
+            if (!is_array($catalog['products'][$slug])) {
                 continue;
             }
 
-            foreach ($product['variants'] ?? [] as &$variant) {
-                if (is_array($variant)) {
-                    $this->applyVariantPricing($variant, $rates);
+            foreach (array_keys($catalog['products'][$slug]['variants'] ?? []) as $index) {
+                if (!is_array($catalog['products'][$slug]['variants'][$index])) {
+                    continue;
                 }
-            }
-            unset($variant);
 
-            $product['price_currency'] = 'UAH';
+                $this->applyVariantPricing($catalog['products'][$slug]['variants'][$index], $rates);
+            }
+
+            $catalog['products'][$slug]['price_currency'] = 'UAH';
         }
-        unset($product);
 
         return $catalog;
     }
