@@ -124,32 +124,72 @@
     </main>
 
     <?php
-    $contactEmail = (string) ($siteConfig['contact_email'] ?? '');
-    $contactTelegram = (string) ($siteConfig['contact_telegram'] ?? '');
+    $siteName = (string) ($siteConfig['business_site_name'] ?? 'roselira.shop');
+    $contactEmail = (string) ($siteConfig['contact_email'] ?? 'contact@roselira.shop');
+    $contactPhone = (string) ($siteConfig['contact_phone'] ?? '');
+    $contactTelegramUrl = trim((string) ($siteConfig['contact_telegram_url'] ?? ''));
+    if ($contactTelegramUrl === '') {
+        $contactTelegram = trim((string) ($siteConfig['contact_telegram'] ?? ''));
+        if ($contactTelegram !== '') {
+            $contactTelegramUrl = 'https://t.me/' . ltrim($contactTelegram, '@');
+        }
+    }
+    $legalName = (string) ($siteConfig['business_legal_name'] ?? '');
+    $taxId = (string) ($siteConfig['business_tax_id'] ?? '');
+    /** @var list<string> $addressLines */
+    $addressLines = is_array($siteConfig['business_address'] ?? null) ? $siteConfig['business_address'] : [];
+    $phoneHref = preg_replace('/[^\d+]/', '', $contactPhone) ?? '';
+    $addressInline = implode(', ', $addressLines);
     ?>
     <footer class="site-footer">
-        <div class="container site-footer__bar">
-            <div class="site-footer__col site-footer__col--copy">
-                <span class="site-footer__copy"><?= e(t('footer_copy', ['year' => date('Y')])) ?></span>
-            </div>
-            <div class="site-footer__col site-footer__col--nav">
-                <nav class="site-footer__nav" aria-label="<?= e(t('footer_nav_label')) ?>">
+        <div class="container site-footer__inner">
+            <div class="site-footer__primary">
+                <a href="/" class="site-footer__brand">
+                    <span class="site-footer__brand-year">© <?= e((string) date('Y')) ?></span>
+                    <span class="site-footer__brand-name"><?= e($siteName) ?></span>
+                </a>
+                <nav class="site-footer__links" aria-label="<?= e(t('footer_nav_label')) ?>">
                     <a href="/privacy"><?= e(t('footer_privacy')) ?></a>
                     <a href="/terms"><?= e(t('footer_terms')) ?></a>
                     <a href="/delivery"><?= e(t('footer_delivery')) ?></a>
-                    <?php if ($contactEmail !== ''): ?>
-                    <a href="mailto:<?= e($contactEmail) ?>" class="site-footer__nav-contact"><?= e($contactEmail) ?></a>
-                    <?php endif; ?>
-                    <?php if ($contactTelegram !== ''): ?>
-                    <a href="https://t.me/<?= e(ltrim($contactTelegram, '@')) ?>" target="_blank" rel="noopener" class="site-footer__nav-contact"><?= e($contactTelegram) ?></a>
-                    <?php endif; ?>
                 </nav>
+                <?php if ($contactEmail !== '' || $contactPhone !== '' || $contactTelegramUrl !== ''): ?>
+                <div class="site-footer__social" aria-label="<?= e(t('footer_contacts_label')) ?>">
+                    <?php if ($contactEmail !== ''): ?>
+                    <a href="mailto:<?= e($contactEmail) ?>" class="site-footer__icon" aria-label="<?= e(t('footer_email_aria')) ?>">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($contactPhone !== ''): ?>
+                    <a href="tel:<?= e($phoneHref) ?>" class="site-footer__icon" aria-label="<?= e(t('footer_phone_aria')) ?>">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($contactTelegramUrl !== ''): ?>
+                    <a href="<?= e($contactTelegramUrl) ?>" class="site-footer__icon site-footer__icon--telegram" target="_blank" rel="noopener" aria-label="<?= e(t('footer_telegram_aria')) ?>">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.5 4.5-19 7.5 6.5 2.5 2.5 6.5 10-16.5z"/><path d="M9.5 14.5 14 10"/></svg>
+                    </a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             </div>
-            <div class="site-footer__col site-footer__col--credit">
-                <span class="site-footer__credit">
-                    <?= e(t('footer_credit')) ?> <a href="https://flowaxy.com" target="_blank" rel="noopener">Flowaxy Digital Studio</a>
-                </span>
+            <?php if ($addressInline !== '' || $legalName !== '' || $taxId !== ''): ?>
+            <div class="site-footer__legal">
+                <?php if ($addressInline !== ''): ?>
+                <p class="site-footer__meta"><?= e($addressInline) ?></p>
+                <?php endif; ?>
+                <?php if ($legalName !== '' || $taxId !== ''): ?>
+                <p class="site-footer__meta">
+                    <?php if ($legalName !== ''): ?><?= e($legalName) ?><?php endif; ?>
+                    <?php if ($legalName !== '' && $taxId !== ''): ?> · <?php endif; ?>
+                    <?php if ($taxId !== ''): ?><?= e(t('footer_tax_label')) ?> <?= e($taxId) ?><?php endif; ?>
+                </p>
+                <?php endif; ?>
             </div>
+            <?php endif; ?>
+            <p class="site-footer__credit">
+                <?= e(t('footer_credit')) ?> <a href="https://flowaxy.com" target="_blank" rel="noopener">Flowaxy Digital Studio</a>
+            </p>
         </div>
     </footer>
 
