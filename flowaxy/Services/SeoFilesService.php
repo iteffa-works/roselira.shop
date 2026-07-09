@@ -12,9 +12,18 @@ final class SeoFilesService
     ) {
     }
 
-    /** @return array{success: bool, message: string, files: list<string>} */
+    /** @return array{success: bool, message: string, files: list<string>, skipped?: bool} */
     public function sync(): array
     {
+        if (!$this->isProductionEnvironment()) {
+            return [
+                'success' => true,
+                'message' => 'Пропущено: SEO-файли генеруються лише на production (APP_ENV=production).',
+                'files' => [],
+                'skipped' => true,
+            ];
+        }
+
         $robots = $this->buildRobotsTxt();
         $sitemap = $this->sitemap->buildXml();
         $targets = [
@@ -66,5 +75,10 @@ final class SeoFilesService
         }
 
         return file_put_contents($path, $content) !== false;
+    }
+
+    private function isProductionEnvironment(): bool
+    {
+        return (app_config()['app_env'] ?? '') === 'production';
     }
 }

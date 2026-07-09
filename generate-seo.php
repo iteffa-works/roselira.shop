@@ -15,6 +15,11 @@ $ctx = flowaxy_cli_bootstrap($projectRoot);
 
 $result = $ctx['seoFiles']->sync();
 
+if (!empty($result['skipped'])) {
+    fwrite(STDOUT, 'SKIP: ' . $result['message'] . PHP_EOL);
+    exit(0);
+}
+
 fwrite(STDOUT, ($result['success'] ? 'OK' : 'ERROR') . ': ' . $result['message'] . PHP_EOL);
 
 if (!$result['success']) {
