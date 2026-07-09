@@ -73,6 +73,12 @@ final class ProductController extends CatalogAdminController
 
         $product['active'] = $request->post('active') !== null;
         $product['default_variant'] = trim((string) $request->post('default_variant', $product['default_variant'] ?? ''));
+        $inventoryNote = trim((string) $request->post('inventory_note', ''));
+        if ($inventoryNote !== '') {
+            $product['inventory_note'] = $inventoryNote;
+        } else {
+            unset($product['inventory_note']);
+        }
 
         foreach ($this->locale->editableLocales() as $loc) {
             $product['i18n'][$loc]['name'] = trim((string) $request->post("name_$loc", ''));
@@ -86,6 +92,7 @@ final class ProductController extends CatalogAdminController
         $variantActive = $request->post('variant_active', []);
         $variantPriceEur = $request->post('variant_price_eur', []);
         $variantPriceUsd = $request->post('variant_price_usd', []);
+        $variantStock = $request->post('variant_stock', []);
 
         if (is_array($product['variants'] ?? null) && is_array($variantIds)) {
             foreach ($product['variants'] as $index => $variant) {
@@ -95,6 +102,12 @@ final class ProductController extends CatalogAdminController
                 }
 
                 $product['variants'][$index]['active'] = is_array($variantActive) && isset($variantActive[$vid]);
+                $stockRaw = trim((string) (is_array($variantStock) ? ($variantStock[$vid] ?? '') : ''));
+                if ($stockRaw === '') {
+                    unset($product['variants'][$index]['stock']);
+                } elseif (is_numeric($stockRaw)) {
+                    $product['variants'][$index]['stock'] = max(0, (int) $stockRaw);
+                }
                 $eur = trim((string) (is_array($variantPriceEur) ? ($variantPriceEur[$vid] ?? '') : ''));
                 $usd = trim((string) (is_array($variantPriceUsd) ? ($variantPriceUsd[$vid] ?? '') : ''));
 

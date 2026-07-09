@@ -221,3 +221,68 @@ function format_datetime_or_null(?string $value, bool $withSeconds = false): ?st
 
     return date($withSeconds ? 'd.m.Y H:i:s' : 'd.m.Y H:i', $timestamp);
 }
+
+function variant_shade_code(string $id): string
+{
+    if (preg_match('/^(\d+)/', $id, $matches) === 1) {
+        return $matches[1];
+    }
+
+    return $id;
+}
+
+function variant_color_name(string $id): string
+{
+    if (!str_contains($id, '-')) {
+        return '';
+    }
+
+    $parts = explode('-', $id, 2);
+
+    return str_replace('-', ' ', (string) ($parts[1] ?? ''));
+}
+
+function variant_has_stock(array $variant): bool
+{
+    if (($variant['active'] ?? true) === false) {
+        return false;
+    }
+
+    if (!array_key_exists('stock', $variant)) {
+        return true;
+    }
+
+    $stock = $variant['stock'];
+    if ($stock === null || $stock === '') {
+        return true;
+    }
+
+    return (int) $stock > 0;
+}
+
+/** @return array{total: int, in_stock: int} */
+function product_stock_summary(array $product): array
+{
+    $total = 0;
+    $inStock = 0;
+
+    foreach ($product['variants'] ?? [] as $variant) {
+        if (!array_key_exists('stock', $variant)) {
+            continue;
+        }
+
+        $stock = $variant['stock'];
+        if ($stock === null || $stock === '') {
+            continue;
+        }
+
+        $qty = max(0, (int) $stock);
+        $total += $qty;
+
+        if ($qty > 0 && ($variant['active'] ?? true) !== false) {
+            $inStock++;
+        }
+    }
+
+    return ['total' => $total, 'in_stock' => $inStock];
+}

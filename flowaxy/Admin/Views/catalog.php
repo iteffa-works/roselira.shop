@@ -9,6 +9,7 @@
         $name = (string) ($product['i18n']['uk']['name'] ?? $slug);
         $isActive = ($product['active'] ?? false) === true;
         $variantCount = (int) count($product['variants'] ?? []);
+        $stockSummary = product_stock_summary($product);
     ?>
     <article class="admin-item-card">
         <header class="admin-item-card__head">
@@ -18,7 +19,7 @@
         <dl class="admin-item-card__meta">
             <div><dt>Ціна</dt><dd><?= $price !== null ? e(formatPrice((float) $price, 'UAH')) : '—' ?></dd></div>
             <div><dt>Група</dt><dd><?= e((string) ($product['group'] ?? '')) ?></dd></div>
-            <div><dt>Варіантів</dt><dd><?= $variantCount ?></dd></div>
+            <div><dt>Варіантів</dt><dd><?= $variantCount ?><?php if ($stockSummary['total'] > 0): ?> · <?= (int) $stockSummary['total'] ?> шт.<?php endif; ?></dd></div>
             <div><dt>Slug</dt><dd><code class="admin-code"><?= e($slug) ?></code></dd></div>
         </dl>
         <footer class="admin-item-card__actions">
@@ -38,6 +39,7 @@
             <th>Активний</th>
             <th>Ціна</th>
             <th>Варіантів</th>
+            <th>Залишок</th>
             <th></th>
         </tr>
     </thead>
@@ -51,6 +53,8 @@
             <td><?= ($product['active'] ?? false) ? '✓' : '—' ?></td>
             <td><?= $price !== null ? e(formatPrice((float) $price, 'UAH')) : '—' ?></td>
             <td><?= (int) count($product['variants'] ?? []) ?></td>
+            <?php $stockSummary = product_stock_summary($product); ?>
+            <td><?= $stockSummary['total'] > 0 ? (int) $stockSummary['total'] . ' шт.' : '—' ?></td>
             <td><a href="<?= admin_url('product', ['slug' => $slug]) ?>">Редагувати</a></td>
         </tr>
     <?php endforeach; ?>
