@@ -149,6 +149,16 @@ final class OrderService
             ];
         }
 
+        if (!variant_has_stock($variant)) {
+            $this->logValidation('order_validation', 'Out of stock variant', $slug, $phone);
+
+            return [
+                'success' => false,
+                'message' => $this->locale->t('order_error_variant_inactive'),
+                'status' => 422,
+            ];
+        }
+
         if ($name === '' || mb_strlen($name) < 2) {
             $this->logValidation('order_validation', 'Invalid name', $slug, $phone);
 

@@ -234,12 +234,14 @@ public function productHasRating(array $product): bool
         ];
 
         if ($price !== null) {
+            $defaultVariant = $this->getDefaultVariant($product);
+            $inStock = $defaultVariant !== [] && variant_has_stock($defaultVariant);
             $jsonLd['offers'] = [
                 '@type' => 'Offer',
                 'url' => absolute_url('/' . rawurlencode($slug)),
                 'priceCurrency' => $currency,
                 'price' => number_format($price, 2, '.', ''),
-                'availability' => 'https://schema.org/InStock',
+                'availability' => $inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
             ];
         }
 
@@ -342,7 +344,7 @@ public function productHasRating(array $product): bool
                 'link' => absolute_url('/' . rawurlencode($slug)),
                 'image' => absolute_url((string) $imagePath),
                 'price' => number_format((float) $price, 2, '.', '') . ' ' . $currency,
-                'availability' => 'in stock',
+                'availability' => variant_has_stock($variant) ? 'in stock' : 'out of stock',
                 'brand' => (string) ($product['brand'] ?? 'Roselira'),
             ];
         }
@@ -362,14 +364,18 @@ public function productHasRating(array $product): bool
                 }
 
                 if (empty($variant['name'])) {
-                    $variants[$index]['name'] = (string) ($variant['id'] ?? '');
+                    $color = variant_color_name((string) ($variant['id'] ?? ''));
+                    $shade = variant_shade_code((string) ($variant['id'] ?? ''));
+                    $variants[$index]['name'] = $color !== ''
+                        ? '№' . str_pad($shade, 2, '0', STR_PAD_LEFT) . ' · ' . ucwords($color)
+                        : (string) ($variant['id'] ?? '');
                 }
             }
 
             $availableVariants = [];
             $unavailableVariants = [];
             foreach ($variants as $variant) {
-                if (($variant['active'] ?? true) !== false) {
+                if (variant_has_stock($variant)) {
                     $availableVariants[] = $variant;
                 } else {
                     $unavailableVariants[] = $variant;
@@ -382,7 +388,7 @@ public function productHasRating(array $product): bool
             foreach ($variants as $variant) {
                 if (($variant['id'] ?? '') === $defaultId) {
                     $defaultExists = true;
-                    $defaultIsActive = ($variant['active'] ?? true) !== false;
+                    $defaultIsActive = variant_has_stock($variant);
                     break;
                 }
             }
@@ -390,7 +396,7 @@ public function productHasRating(array $product): bool
             if (!$defaultExists || !$defaultIsActive) {
                 $defaultId = '';
                 foreach ($variants as $variant) {
-                    if (($variant['active'] ?? true) !== false) {
+                    if (variant_has_stock($variant)) {
                         $defaultId = (string) ($variant['id'] ?? '');
                         break;
                     }

@@ -43,7 +43,15 @@
     }
 
     function isVariantAvailable(variant) {
-        return Boolean(variant) && variant.active !== false;
+        if (!variant || variant.active === false) {
+            return false;
+        }
+
+        if (variant.stock === null || variant.stock === undefined || variant.stock === '') {
+            return true;
+        }
+
+        return Number(variant.stock) > 0;
     }
 
     function findFirstAvailableVariantId() {

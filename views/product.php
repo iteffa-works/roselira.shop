@@ -24,7 +24,8 @@ $productJson = json_encode([
         return [
             'id' => $variant['id'] ?? '',
             'name' => $variant['name'] ?? '',
-            'active' => ($variant['active'] ?? true) !== false,
+            'active' => variant_has_stock($variant),
+            'stock' => array_key_exists('stock', $variant) ? $variant['stock'] : null,
             'swatch' => $variant['swatch'] ?? '#d4d4d4',
             'swatch_image' => !empty($variant['swatch_image']) ? asset((string) $variant['swatch_image']) : null,
             'images' => array_map(static fn(string $image): string => asset($image), $variant['images'] ?? []),
@@ -149,7 +150,7 @@ $productJson = json_encode([
                             aria-label="<?= e(t('variant_label')) ?>"
                         >
                         <?php foreach ($product['variants'] as $variant): ?>
-                        <?php $variantAvailable = ($variant['active'] ?? true) !== false; ?>
+                        <?php $variantAvailable = variant_has_stock($variant); ?>
                         <button
                             type="button"
                             class="variant-swatch<?= ($variant['id'] ?? '') === ($product['default_variant'] ?? '') ? ' is-active' : '' ?><?= !$variantAvailable ? ' is-unavailable' : '' ?>"
