@@ -139,18 +139,8 @@ final class OrderService
             ];
         }
 
-        if (($variant['active'] ?? true) === false) {
-            $this->logValidation('order_validation', 'Inactive variant', $slug, $phone);
-
-            return [
-                'success' => false,
-                'message' => $this->locale->t('order_error_variant_inactive'),
-                'status' => 422,
-            ];
-        }
-
         if (!variant_has_stock($variant)) {
-            $this->logValidation('order_validation', 'Out of stock variant', $slug, $phone);
+            $this->logValidation('order_validation', 'Unavailable variant', $slug, $phone);
 
             return [
                 'success' => false,

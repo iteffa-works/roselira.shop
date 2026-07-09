@@ -163,17 +163,18 @@ final class CatalogService
     public function getDefaultVariant(array $product): array
     {
         $defaultId = (string) ($product['default_variant'] ?? '');
+        $variant = $this->findVariantById($product, $defaultId);
 
-        foreach ($product['variants'] ?? [] as $variant) {
-            if (($variant['id'] ?? '') === $defaultId) {
-                return $variant;
-            }
-        }
-
-        return $product['variants'][0] ?? [];
+        return $variant ?? ($product['variants'][0] ?? []);
     }
 
     public function findVariant(array $product, string $variantId): ?array
+    {
+        return $this->findVariantById($product, $variantId);
+    }
+
+    /** @return array<string, mixed>|null */
+    private function findVariantById(array $product, string $variantId): ?array
     {
         foreach ($product['variants'] ?? [] as $variant) {
             if (($variant['id'] ?? '') === $variantId) {
@@ -364,11 +365,7 @@ public function productHasRating(array $product): bool
                 }
 
                 if (empty($variant['name'])) {
-                    $color = variant_color_name((string) ($variant['id'] ?? ''));
-                    $shade = variant_shade_code((string) ($variant['id'] ?? ''));
-                    $variants[$index]['name'] = $color !== ''
-                        ? '№' . str_pad($shade, 2, '0', STR_PAD_LEFT) . ' · ' . ucwords($color)
-                        : (string) ($variant['id'] ?? '');
+                    $variants[$index]['name'] = variant_display_name((string) ($variant['id'] ?? ''));
                 }
             }
 

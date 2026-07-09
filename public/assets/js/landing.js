@@ -43,15 +43,23 @@
     }
 
     function isVariantAvailable(variant) {
-        if (!variant || variant.active === false) {
-            return false;
+        return Boolean(variant) && variant.available === true;
+    }
+
+    function updateTrackFade(wrap, track, skip) {
+        if (!track || !wrap || skip) {
+            if (track) {
+                track.classList.remove('is-scrollable', 'is-scrolled-start', 'is-scrolled-end');
+            }
+            return;
         }
 
-        if (variant.stock === null || variant.stock === undefined || variant.stock === '') {
-            return true;
-        }
+        var maxScroll = wrap.scrollWidth - wrap.clientWidth;
+        var canScroll = maxScroll > 4;
 
-        return Number(variant.stock) > 0;
+        track.classList.toggle('is-scrollable', canScroll);
+        track.classList.toggle('is-scrolled-start', wrap.scrollLeft <= 4);
+        track.classList.toggle('is-scrolled-end', wrap.scrollLeft >= maxScroll - 4);
     }
 
     function findFirstAvailableVariantId() {
@@ -165,19 +173,11 @@
     }
 
     function updateThumbTrackFade() {
-        if (!thumbsTrack || !thumbsWrap || thumbsWrap.classList.contains('is-hidden')) {
-            if (thumbsTrack) {
-                thumbsTrack.classList.remove('is-scrollable', 'is-scrolled-start', 'is-scrolled-end');
-            }
-            return;
-        }
-
-        var maxScroll = thumbsWrap.scrollWidth - thumbsWrap.clientWidth;
-        var canScroll = maxScroll > 4;
-
-        thumbsTrack.classList.toggle('is-scrollable', canScroll);
-        thumbsTrack.classList.toggle('is-scrolled-start', thumbsWrap.scrollLeft <= 4);
-        thumbsTrack.classList.toggle('is-scrolled-end', thumbsWrap.scrollLeft >= maxScroll - 4);
+        updateTrackFade(
+            thumbsWrap,
+            thumbsTrack,
+            !thumbsWrap || thumbsWrap.classList.contains('is-hidden'),
+        );
     }
 
     function scrollActiveThumbIntoView() {
@@ -330,19 +330,7 @@
     }
 
     function updateSwatchTrackFade() {
-        if (!swatchesTrack || !swatchesWrap || variantExpanded) {
-            if (swatchesTrack) {
-                swatchesTrack.classList.remove('is-scrollable', 'is-scrolled-start', 'is-scrolled-end');
-            }
-            return;
-        }
-
-        var maxScroll = swatchesWrap.scrollWidth - swatchesWrap.clientWidth;
-        var canScroll = maxScroll > 4;
-
-        swatchesTrack.classList.toggle('is-scrollable', canScroll);
-        swatchesTrack.classList.toggle('is-scrolled-start', swatchesWrap.scrollLeft <= 4);
-        swatchesTrack.classList.toggle('is-scrolled-end', swatchesWrap.scrollLeft >= maxScroll - 4);
+        updateTrackFade(swatchesWrap, swatchesTrack, !swatchesWrap || !swatchesTrack || variantExpanded);
     }
 
     function scrollActiveSwatchIntoView() {

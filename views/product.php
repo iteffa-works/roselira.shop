@@ -24,8 +24,7 @@ $productJson = json_encode([
         return [
             'id' => $variant['id'] ?? '',
             'name' => $variant['name'] ?? '',
-            'active' => variant_has_stock($variant),
-            'stock' => array_key_exists('stock', $variant) ? $variant['stock'] : null,
+            'available' => variant_has_stock($variant),
             'swatch' => $variant['swatch'] ?? '#d4d4d4',
             'swatch_image' => !empty($variant['swatch_image']) ? asset((string) $variant['swatch_image']) : null,
             'images' => array_map(static fn(string $image): string => asset($image), $variant['images'] ?? []),

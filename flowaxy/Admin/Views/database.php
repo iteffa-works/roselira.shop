@@ -1,5 +1,5 @@
 <?php
-$statusLabels = ['new' => 'Нові', 'done' => 'Виконані', 'cancelled' => 'Скасовані'];
+$statusLabels = order_status_labels(true);
 $dbSizeKb = round($dbSize / 1024, 1);
 ?>
 

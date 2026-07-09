@@ -214,12 +214,23 @@ function format_datetime_or_null(?string $value, bool $withSeconds = false): ?st
         return null;
     }
 
-    $timestamp = strtotime($value);
-    if ($timestamp === false) {
-        return $value;
-    }
+    return format_datetime($value, '—', $withSeconds);
+}
 
-    return date($withSeconds ? 'd.m.Y H:i:s' : 'd.m.Y H:i', $timestamp);
+/** @return array<string, string> */
+function order_status_labels(bool $plural = false): array
+{
+    $config = app_config();
+    $key = $plural ? 'order_status_filter_labels' : 'order_status_labels';
+
+    return is_array($config[$key] ?? null) ? $config[$key] : [];
+}
+
+function order_status_label(string $status, bool $plural = false): string
+{
+    $labels = order_status_labels($plural);
+
+    return $labels[$status] ?? $status;
 }
 
 function variant_shade_code(string $id): string
@@ -240,6 +251,18 @@ function variant_color_name(string $id): string
     $parts = explode('-', $id, 2);
 
     return str_replace('-', ' ', (string) ($parts[1] ?? ''));
+}
+
+function variant_display_name(string $id): string
+{
+    $color = variant_color_name($id);
+    if ($color === '') {
+        return $id;
+    }
+
+    $shade = variant_shade_code($id);
+
+    return '№' . str_pad($shade, 2, '0', STR_PAD_LEFT) . ' · ' . ucwords($color);
 }
 
 function variant_has_stock(array $variant): bool

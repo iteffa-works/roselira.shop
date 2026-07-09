@@ -99,20 +99,14 @@ final class DashboardController extends CatalogAdminController
             return $response;
         }
 
-        $scope = (string) $request->post('scope', '');
-        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
-            $this->auth->flash('error', 'Невідомий параметр очистки.');
-
-            return $this->redirectToHeatmap($request);
-        }
-
-        $periodDays = max(1, min(3650, (int) $request->post('period_days', 7)));
-        $path = $request->post('filter_page') === '1' ? (string) $request->post('page', '/') : null;
-        $viewport = $request->post('filter_viewport') === '1' ? (string) $request->post('viewport', '') : null;
-        $eventTypes = $request->post('clicks_only') === '1' ? ['click'] : null;
-
         try {
-            $result = $this->analytics->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
+            $result = $this->analytics->purgeFromRequest($request);
+            if ($result === null) {
+                $this->auth->flash('error', 'Невідомий параметр очистки.');
+
+                return $this->redirectToHeatmap($request);
+            }
+
             $this->auth->flash(
                 'success',
                 sprintf('Видалено %d подій та %d сесій.', $result['events'], $result['sessions']),

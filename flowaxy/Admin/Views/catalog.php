@@ -9,7 +9,7 @@
         $name = (string) ($product['i18n']['uk']['name'] ?? $slug);
         $isActive = ($product['active'] ?? false) === true;
         $variantCount = (int) count($product['variants'] ?? []);
-        $stockSummary = product_stock_summary($product);
+        $stockSummary = $row['stockSummary'] ?? product_stock_summary($product);
     ?>
     <article class="admin-item-card">
         <header class="admin-item-card__head">
@@ -53,8 +53,7 @@
             <td><?= ($product['active'] ?? false) ? '✓' : '—' ?></td>
             <td><?= $price !== null ? e(formatPrice((float) $price, 'UAH')) : '—' ?></td>
             <td><?= (int) count($product['variants'] ?? []) ?></td>
-            <?php $stockSummary = product_stock_summary($product); ?>
-            <td><?= $stockSummary['total'] > 0 ? (int) $stockSummary['total'] . ' шт.' : '—' ?></td>
+            <td><?= ($row['stockSummary']['total'] ?? 0) > 0 ? (int) $row['stockSummary']['total'] . ' шт.' : '—' ?></td>
             <td><a href="<?= admin_url('product', ['slug' => $slug]) ?>">Редагувати</a></td>
         </tr>
     <?php endforeach; ?>

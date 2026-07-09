@@ -43,5 +43,15 @@ return [
     'locale_editable' => ['uk', 'ru'],
 
     'order_statuses' => ['new', 'done', 'cancelled'],
+    'order_status_labels' => [
+        'new' => 'Нове',
+        'done' => 'Виконано',
+        'cancelled' => 'Скасовано',
+    ],
+    'order_status_filter_labels' => [
+        'new' => 'Нові',
+        'done' => 'Виконані',
+        'cancelled' => 'Скасовані',
+    ],
     'admin_session_key' => 'flowaxy_admin',
 ];

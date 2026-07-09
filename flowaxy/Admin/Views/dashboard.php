@@ -1,5 +1,5 @@
 <?php
-$statusLabels = ['new' => 'Нове', 'done' => 'Виконано', 'cancelled' => 'Скасовано'];
+$statusLabels = order_status_labels();
 $analytics = $analytics ?? [];
 $analyticsSource = $analyticsSource ?? 'local';
 $googleTabAvailable = $googleTabAvailable ?? false;

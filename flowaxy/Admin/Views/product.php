@@ -49,7 +49,7 @@
                 <?php
                     $vid = (string) ($variant['id'] ?? '');
                     $shade = variant_shade_code($vid);
-                    $color = variant_color_name($vid);
+                    $colorLabel = variant_display_name($vid);
                     $stock = array_key_exists('stock', $variant) ? (string) $variant['stock'] : '';
                 ?>
                 <tr>
@@ -58,7 +58,7 @@
                         <code><?= e($shade) ?></code>
                     </td>
                     <td>
-                        <?= e($color !== '' ? ucwords($color) : $vid) ?>
+                        <?= e($colorLabel) ?>
                         <?php if (!empty($variant['swatch_image'])): ?>
                         <span class="admin-variant-swatch" style="background-image:url('<?= e(asset((string) $variant['swatch_image'])) ?>')"></span>
                         <?php elseif (!empty($variant['swatch'])): ?>

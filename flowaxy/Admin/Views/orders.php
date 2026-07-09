@@ -1,6 +1,6 @@
 <?php
-$statusLabels = ['new' => 'Нове', 'done' => 'Виконано', 'cancelled' => 'Скасовано'];
-$filterLabels = ['new' => 'Нові', 'done' => 'Виконані', 'cancelled' => 'Скасовані'];
+$statusLabels = order_status_labels();
+$filterLabels = order_status_labels(true);
 ?>
 
 <div class="admin-page-header">

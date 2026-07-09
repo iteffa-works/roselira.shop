@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flowaxy\Services;
 
+use Flowaxy\Core\Request;
 use Flowaxy\Repositories\Contracts\VisitorRepositoryInterface;
 use Flowaxy\Support\HeatmapViewport;
 use Flowaxy\Support\RequestContext;
@@ -211,6 +212,28 @@ final class VisitorAnalyticsService
         }
 
         return $this->visitors->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
+    }
+
+    /**
+     * @return array{events: int, sessions: int}|null null when scope is invalid
+     */
+    public function purgeFromRequest(Request $request): ?array
+    {
+        $scope = (string) $request->post('scope', '');
+        if (!in_array($scope, ['all', 'within_last', 'older_than'], true)) {
+            return null;
+        }
+
+        $periodDays = max(1, min(3650, (int) $request->post('period_days', 7)));
+        $path = $request->post('filter_page') === '1'
+            ? (string) $request->post('page', '/')
+            : null;
+        $viewport = $request->post('filter_viewport') === '1'
+            ? (string) $request->post('viewport', '')
+            : null;
+        $eventTypes = $request->post('clicks_only') === '1' ? ['click'] : null;
+
+        return $this->purgeAnalytics($scope, $periodDays, $path, $viewport, $eventTypes);
     }
 
     private function normalizePath(string $path): string

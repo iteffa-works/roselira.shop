@@ -20,6 +20,7 @@ final class CatalogController extends CatalogAdminController
                 'slug' => $slug,
                 'product' => $product,
                 'price' => $this->catalog->localizeProduct($product, 'uk')['price'] ?? null,
+                'stockSummary' => product_stock_summary($product),
             ];
         }
 
