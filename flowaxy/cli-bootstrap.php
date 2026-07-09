@@ -10,7 +10,11 @@ declare(strict_types=1);
  *     connection: Flowaxy\Repositories\Sqlite\Connection,
  *     catalog: Flowaxy\Services\CatalogService,
  *     locale: Flowaxy\Services\LocaleService,
- *     settings: Flowaxy\Repositories\Sqlite\SqliteSettingsRepository
+ *     settings: Flowaxy\Repositories\Sqlite\SqliteSettingsRepository,
+ *     cron: Flowaxy\Services\CronService,
+ *     seoFiles: Flowaxy\Services\SeoFilesService,
+ *     exchange: Flowaxy\Services\ExchangeService,
+ *     analytics: Flowaxy\Services\VisitorAnalyticsService
  * }
  */
 function flowaxy_cli_bootstrap(string $projectRoot): array
@@ -48,11 +52,48 @@ function flowaxy_cli_bootstrap(string $projectRoot): array
         $locale,
     );
 
+    $analytics = new Flowaxy\Services\VisitorAnalyticsService(
+        new Flowaxy\Repositories\Sqlite\SqliteVisitorRepository($connection),
+    );
+    $telegram = new Flowaxy\Services\TelegramNotificationService($settings);
+    $feeds = new Flowaxy\Services\ProductFeedService($catalog);
+    $gitUpdate = new Flowaxy\Services\GitUpdateService(
+        $settings,
+        (string) $config['project_root'],
+        (string) $config['git_repo_url'],
+        (string) $config['git_branch'],
+        (string) ($config['git_binary'] ?? ''),
+    );
+    $systemCheck = new Flowaxy\Services\SystemCheckService(
+        $catalog,
+        $feeds,
+        $telegram,
+        $settings,
+        (string) $config['project_root'],
+    );
+    $sitemap = new Flowaxy\Services\SitemapService($catalog);
+    $seoFiles = new Flowaxy\Services\SeoFilesService(
+        $sitemap,
+        (string) $config['project_root'],
+    );
+    $cron = new Flowaxy\Services\CronService(
+        $gitUpdate,
+        $systemCheck,
+        $seoFiles,
+        $settings,
+        $analytics,
+    );
+    $exchange = new Flowaxy\Services\ExchangeService($catalog);
+
     return [
         'config' => $config,
         'connection' => $connection,
         'catalog' => $catalog,
         'locale' => $locale,
         'settings' => $settings,
+        'cron' => $cron,
+        'seoFiles' => $seoFiles,
+        'exchange' => $exchange,
+        'analytics' => $analytics,
     ];
 }

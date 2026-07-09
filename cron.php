@@ -38,41 +38,10 @@ if (!$isCli) {
 
 require_once $projectRoot . '/flowaxy/cli-bootstrap.php';
 
-$ctx = flowaxy_cli_bootstrap($projectRoot);
-
-use Flowaxy\Repositories\Sqlite\SqliteVisitorRepository;
 use Flowaxy\Services\CronService;
-use Flowaxy\Services\GitUpdateService;
-use Flowaxy\Services\ProductFeedService;
-use Flowaxy\Services\SeoFilesService;
-use Flowaxy\Services\SitemapService;
-use Flowaxy\Services\SystemCheckService;
-use Flowaxy\Services\TelegramNotificationService;
-use Flowaxy\Services\VisitorAnalyticsService;
 
-$config = $ctx['config'];
-$feeds = new ProductFeedService($ctx['catalog']);
-$telegram = new TelegramNotificationService($ctx['settings']);
-$gitUpdate = new GitUpdateService(
-    $ctx['settings'],
-    $config['project_root'],
-    $config['git_repo_url'],
-    $config['git_branch'],
-    (string) ($config['git_binary'] ?? ''),
-);
-$systemCheck = new SystemCheckService(
-    $ctx['catalog'],
-    $feeds,
-    $telegram,
-    $ctx['settings'],
-    $config['project_root'],
-);
-$sitemap = new SitemapService($ctx['catalog']);
-$seoFiles = new SeoFilesService($sitemap, $config['project_root']);
-$visitorAnalytics = new VisitorAnalyticsService(new SqliteVisitorRepository($ctx['connection']));
-$cron = new CronService($gitUpdate, $systemCheck, $seoFiles, $ctx['settings'], $visitorAnalytics);
-
-$result = $cron->runDaily(forceDaily: true, source: $isCli ? CronService::SOURCE_CLI : CronService::SOURCE_HTTP);
+$ctx = flowaxy_cli_bootstrap($projectRoot);
+$result = $ctx['cron']->runDaily(forceDaily: true, source: $isCli ? CronService::SOURCE_CLI : CronService::SOURCE_HTTP);
 
 header('Content-Type: text/plain; charset=utf-8');
 
