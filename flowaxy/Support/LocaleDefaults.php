@@ -6,7 +6,7 @@ namespace Flowaxy\Support;
 
 final class LocaleDefaults
 {
-    public const STRINGS_VERSION = 10;
+    public const STRINGS_VERSION = 11;
 
     /** @return array<string, array<string, string>> */
     public static function all(): array
@@ -53,6 +53,12 @@ final class LocaleDefaults
             'home_subtitle' => 'Original KIKO Milano cosmetics and accessories — browse and order online.',
             'reviews' => 'reviews',
             'rating_of' => ':rating of :max',
+            'rating_vote_label' => 'Rate this product',
+            'rating_star_label' => ':value stars',
+            'rating_success' => 'Thank you for your rating!',
+            'rating_error_product' => 'Product not found.',
+            'rating_error_value' => 'Please select a rating from 1 to 5.',
+            'rating_error_server' => 'Could not save your rating. Please try again.',
             'footer_credit' => 'Made with love by',
             'footer_copy' => '© :year Roselira · product catalog',
             'footer_nav_label' => 'Footer links',
@@ -122,6 +128,12 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригінальна косметика KIKO Milano та аксесуари — перегляд і швидке замовлення онлайн.',
             'reviews' => 'відгуків',
             'rating_of' => ':rating з :max',
+            'rating_vote_label' => 'Оцінити товар',
+            'rating_star_label' => ':value зірок',
+            'rating_success' => 'Дякуємо за вашу оцінку!',
+            'rating_error_product' => 'Товар не знайдено.',
+            'rating_error_value' => 'Оберіть оцінку від 1 до 5.',
+            'rating_error_server' => 'Не вдалося зберегти оцінку. Спробуйте ще раз.',
             'footer_copy' => '© :year Roselira · каталог товарів',
             'footer_nav_label' => 'Посилання сайту',
             'footer_privacy' => 'Конфіденційність',
@@ -191,6 +203,12 @@ final class LocaleDefaults
             'home_subtitle' => 'Оригинальная косметика KIKO Milano и аксессуары — просмотр и быстрый заказ онлайн.',
             'reviews' => 'отзывов',
             'rating_of' => ':rating из :max',
+            'rating_vote_label' => 'Оценить товар',
+            'rating_star_label' => ':value звёзд',
+            'rating_success' => 'Спасибо за вашу оценку!',
+            'rating_error_product' => 'Товар не найден.',
+            'rating_error_value' => 'Выберите оценку от 1 до 5.',
+            'rating_error_server' => 'Не удалось сохранить оценку. Попробуйте ещё раз.',
             'footer_copy' => '© :year Roselira · каталог товаров',
             'footer_nav_label' => 'Ссылки сайта',
             'footer_privacy' => 'Конфиденциальность',

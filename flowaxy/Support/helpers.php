@@ -125,6 +125,35 @@ function renderStars(float $rating, int $max = 5): string
     return $html;
 }
 
+function renderRatingWidget(
+    string $productSlug,
+    float $rating,
+    int $reviewCount,
+    ?int $userVote = null,
+): string {
+    $rating = max(0, min(5, $rating));
+    $userVote = ($userVote !== null && $userVote >= 1 && $userVote <= 5) ? $userVote : 0;
+
+    $html = '<div class="rating-widget" data-rating-widget'
+        . ' data-product-slug="' . e($productSlug) . '"'
+        . ' data-rating="' . e(number_format($rating, 1, '.', '')) . '"'
+        . ' data-count="' . (int) $reviewCount . '"'
+        . ' data-user-vote="' . (int) $userVote . '">';
+
+    $html .= '<div class="stars stars--vote" role="group" aria-label="' . e(t('rating_vote_label')) . '">';
+    for ($value = 1; $value <= 5; $value++) {
+        $html .= '<button type="button" class="star star--vote" data-star="' . $value . '" aria-label="' . e(t('rating_star_label', ['value' => (string) $value])) . '">★</button>';
+    }
+    $html .= '</div>';
+
+    $html .= '<span class="rating-value" data-rating-value>' . e(number_format($rating, 1)) . '/5</span>';
+    $html .= '<span class="rating-count" data-rating-count>(' . (int) $reviewCount . ')</span>';
+    $html .= '</div>';
+    $html .= '<span class="rating-feedback" data-rating-feedback hidden aria-live="polite"></span>';
+
+    return $html;
+}
+
 function t(string $key, array $replace = []): string
 {
     return AppState::$locale->t($key, $replace);

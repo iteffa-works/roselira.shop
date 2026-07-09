@@ -98,9 +98,12 @@ $productJson = json_encode([
 
                             <?php if (!empty($hasRating)): ?>
                             <div class="landing__rating">
-                                <?= renderStars((float) ($product['rating'] ?? 0)) ?>
-                                <span class="rating-value"><?= e(number_format((float) ($product['rating'] ?? 0), 1)) ?>/5</span>
-                                <span class="rating-count">(<?= e((string) ($product['reviews_count'] ?? 0)) ?>)</span>
+                                <?= renderRatingWidget(
+                                    (string) ($productSlug ?? $product['slug'] ?? ''),
+                                    (float) ($displayRating ?? $product['rating'] ?? 0),
+                                    (int) ($displayReviewCount ?? $product['reviews_count'] ?? 0),
+                                    isset($userRatingVote) ? (int) $userRatingVote : null,
+                                ) ?>
                             </div>
                             <?php endif; ?>
                         </div>

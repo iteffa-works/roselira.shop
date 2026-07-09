@@ -613,4 +613,181 @@
             });
         });
     });
+
+    var ratingWrap = landing.querySelector('.landing__rating');
+    var ratingWidget = ratingWrap ? ratingWrap.querySelector('[data-rating-widget]') : null;
+    if (ratingWidget) {
+        var starButtons = ratingWidget.querySelectorAll('.star--vote');
+        var ratingValueEl = ratingWidget.querySelector('[data-rating-value]');
+        var ratingCountEl = ratingWidget.querySelector('[data-rating-count]');
+        var feedbackEl = ratingWrap ? ratingWrap.querySelector('[data-rating-feedback]') : null;
+        var productSlug = ratingWidget.getAttribute('data-product-slug') || product.slug || '';
+        var averageRating = parseFloat(ratingWidget.getAttribute('data-rating') || '0') || 0;
+        var reviewCount = parseInt(ratingWidget.getAttribute('data-count') || '0', 10) || 0;
+        var userVote = parseInt(ratingWidget.getAttribute('data-user-vote') || '0', 10) || 0;
+        var hoverValue = 0;
+        var isSubmitting = false;
+        var feedbackTimer = null;
+
+        function displayValue() {
+            if (hoverValue > 0) {
+                return hoverValue;
+            }
+
+            if (userVote > 0) {
+                return userVote;
+            }
+
+            return Math.max(0, Math.min(5, Math.floor(averageRating + 0.25)));
+        }
+
+        function paintStars(value) {
+            starButtons.forEach(function (button) {
+                var starValue = parseInt(button.getAttribute('data-star') || '0', 10);
+                button.classList.toggle('is-filled', starValue <= value && value > 0);
+                button.classList.toggle('is-preview', hoverValue > 0 && starValue <= hoverValue);
+            });
+        }
+
+        function setFeedback(message, type) {
+            if (!feedbackEl) {
+                return;
+            }
+
+            if (feedbackTimer) {
+                clearTimeout(feedbackTimer);
+                feedbackTimer = null;
+            }
+
+            if (!message) {
+                feedbackEl.hidden = true;
+                feedbackEl.textContent = '';
+                feedbackEl.classList.remove('is-error', 'is-success');
+                return;
+            }
+
+            feedbackEl.hidden = false;
+            feedbackEl.textContent = message;
+            feedbackEl.classList.remove('is-error', 'is-success');
+            if (type) {
+                feedbackEl.classList.add(type);
+            }
+
+            feedbackTimer = setTimeout(function () {
+                setFeedback('', '');
+            }, 2600);
+        }
+
+        function updateSummary(rating, count, bumpCount) {
+            averageRating = rating;
+            reviewCount = count;
+            ratingWidget.setAttribute('data-rating', String(rating));
+            ratingWidget.setAttribute('data-count', String(count));
+            if (ratingValueEl) {
+                ratingValueEl.textContent = rating.toFixed(1) + '/5';
+            }
+            if (ratingCountEl) {
+                ratingCountEl.textContent = '(' + count + ')';
+                if (bumpCount) {
+                    ratingCountEl.classList.remove('is-bumped');
+                    void ratingCountEl.offsetWidth;
+                    ratingCountEl.classList.add('is-bumped');
+                }
+            }
+        }
+
+        paintStars(displayValue());
+
+        starButtons.forEach(function (button) {
+            button.addEventListener('mouseenter', function () {
+                hoverValue = parseInt(button.getAttribute('data-star') || '0', 10);
+                paintStars(hoverValue);
+            });
+
+            button.addEventListener('focus', function () {
+                hoverValue = parseInt(button.getAttribute('data-star') || '0', 10);
+                paintStars(hoverValue);
+            });
+
+            button.addEventListener('click', function () {
+                if (isSubmitting || !productSlug) {
+                    return;
+                }
+
+                var selected = parseInt(button.getAttribute('data-star') || '0', 10);
+                if (selected < 1 || selected > 5) {
+                    return;
+                }
+
+                isSubmitting = true;
+                ratingWidget.classList.add('is-busy');
+                setFeedback('', '');
+
+                var body = new URLSearchParams();
+                body.set('product_slug', productSlug);
+                body.set('rating', String(selected));
+
+                fetch('/rate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: body.toString(),
+                    credentials: 'same-origin',
+                })
+                    .then(function (response) {
+                        return response.json().then(function (payload) {
+                            return { ok: response.ok, payload: payload };
+                        });
+                    })
+                    .then(function (result) {
+                        if (!result.ok || !result.payload.success) {
+                            throw new Error(result.payload.message || 'Error');
+                        }
+
+                        var hadVote = userVote > 0;
+                        userVote = parseInt(result.payload.user_vote || selected, 10) || selected;
+                        ratingWidget.setAttribute('data-user-vote', String(userVote));
+
+                        var nextCount = parseInt(result.payload.reviews_count, 10);
+                        if (!Number.isFinite(nextCount)) {
+                            nextCount = reviewCount;
+                        }
+                        if (result.payload.count_increased && nextCount <= reviewCount) {
+                            nextCount = reviewCount + 1;
+                        }
+
+                        var nextRating = parseFloat(result.payload.rating);
+                        if (!Number.isFinite(nextRating)) {
+                            nextRating = averageRating;
+                        }
+
+                        updateSummary(
+                            nextRating,
+                            nextCount,
+                            Boolean(result.payload.count_increased || (!hadVote && userVote > 0)),
+                        );
+                        hoverValue = 0;
+                        paintStars(userVote);
+                        setFeedback(result.payload.message || '', 'is-success');
+                    })
+                    .catch(function (error) {
+                        setFeedback(error.message || 'Error', 'is-error');
+                        hoverValue = 0;
+                        paintStars(displayValue());
+                    })
+                    .finally(function () {
+                        isSubmitting = false;
+                        ratingWidget.classList.remove('is-busy');
+                    });
+            });
+        });
+
+        ratingWidget.addEventListener('mouseleave', function () {
+            hoverValue = 0;
+            paintStars(displayValue());
+        });
+    }
 })();
