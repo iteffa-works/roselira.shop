@@ -205,10 +205,109 @@ final class CatalogService
         return ($product['order_mode'] ?? 'form') === 'form';
     }
 
-    public function productHasRating(array $product): bool
+public function productHasRating(array $product): bool
     {
         return ((float) ($product['rating'] ?? 0)) > 0
             || ((int) ($product['reviews_count'] ?? 0)) > 0;
+    }
+
+    /** @return array<string, mixed> */
+    public function buildProductStructuredData(
+        array $product,
+        string $slug,
+        array $defaultVariant,
+        ?float $price,
+        string $currency,
+    ): array {
+        $imagePath = (string) ($defaultVariant['images'][0] ?? $product['image'] ?? '');
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => (string) ($product['name'] ?? ''),
+            'description' => strip_tags((string) ($product['short_desc'] ?? '')),
+            'image' => absolute_url($imagePath),
+            'url' => absolute_url('/' . rawurlencode($slug)),
+            'brand' => [
+                '@type' => 'Brand',
+                'name' => (string) ($product['brand'] ?? 'Roselira'),
+            ],
+        ];
+
+        if ($price !== null) {
+            $jsonLd['offers'] = [
+                '@type' => 'Offer',
+                'url' => absolute_url('/' . rawurlencode($slug)),
+                'priceCurrency' => $currency,
+                'price' => number_format($price, 2, '.', ''),
+                'availability' => 'https://schema.org/InStock',
+            ];
+        }
+
+        $rating = (float) ($product['rating'] ?? 0);
+        $reviewCount = (int) ($product['reviews_count'] ?? 0);
+        if ($rating > 0 && $reviewCount > 0) {
+            $jsonLd['aggregateRating'] = [
+                '@type' => 'AggregateRating',
+                'ratingValue' => round($rating, 1),
+                'reviewCount' => $reviewCount,
+                'bestRating' => 5,
+                'worstRating' => 1,
+            ];
+        }
+
+        $reviews = $this->structuredReviews($product);
+        if ($reviews !== []) {
+            $jsonLd['review'] = count($reviews) === 1 ? $reviews[0] : $reviews;
+        }
+
+        return $jsonLd;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function structuredReviews(array $product): array
+    {
+        $rawReviews = $product['reviews'] ?? [];
+        if (!is_array($rawReviews) || $rawReviews === []) {
+            return [];
+        }
+
+        $structured = [];
+        foreach ($rawReviews as $review) {
+            if (!is_array($review)) {
+                continue;
+            }
+
+            $ratingValue = (float) ($review['rating'] ?? $review['ratingValue'] ?? 0);
+            $body = trim((string) ($review['body'] ?? $review['reviewBody'] ?? ''));
+            $author = trim((string) ($review['author'] ?? ''));
+            if ($ratingValue <= 0 || $body === '' || $author === '') {
+                continue;
+            }
+
+            $item = [
+                '@type' => 'Review',
+                'author' => [
+                    '@type' => 'Person',
+                    'name' => $author,
+                ],
+                'reviewRating' => [
+                    '@type' => 'Rating',
+                    'ratingValue' => round($ratingValue, 1),
+                    'bestRating' => 5,
+                    'worstRating' => 1,
+                ],
+                'reviewBody' => $body,
+            ];
+
+            $datePublished = trim((string) ($review['date'] ?? $review['datePublished'] ?? ''));
+            if ($datePublished !== '') {
+                $item['datePublished'] = $datePublished;
+            }
+
+            $structured[] = $item;
+        }
+
+        return $structured;
     }
 
     /** @return list<array{id: string, title: string, description: string, link: string, image: string, price: string, availability: string, brand: string}> */
