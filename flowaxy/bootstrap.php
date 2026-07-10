@@ -111,6 +111,7 @@ $container->singleton(LocaleService::class, static function (Container $c) use (
 $container->singleton(CatalogService::class, static fn(Container $c): CatalogService => new CatalogService(
     $c->make(CatalogRepositoryInterface::class),
     $c->make(LocaleService::class),
+    $c->make(SettingsRepositoryInterface::class),
 ));
 
 $container->singleton(ProductRatingService::class, static fn(Container $c): ProductRatingService => new ProductRatingService(

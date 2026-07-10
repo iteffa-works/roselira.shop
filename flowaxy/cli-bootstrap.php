@@ -50,6 +50,7 @@ function flowaxy_cli_bootstrap(string $projectRoot): array
     $catalog = new Flowaxy\Services\CatalogService(
         new Flowaxy\Repositories\Sqlite\SqliteCatalogRepository($connection),
         $locale,
+        $settings,
     );
 
     $analytics = new Flowaxy\Services\VisitorAnalyticsService(
