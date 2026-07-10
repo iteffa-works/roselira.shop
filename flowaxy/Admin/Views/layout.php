@@ -64,6 +64,7 @@ $nav = [
     'dashboard' => ['label' => 'Dashboard', 'url' => admin_url()],
     'orders' => ['label' => 'Замовлення', 'url' => admin_url('orders')],
     'catalog' => ['label' => 'Каталог', 'url' => admin_url('catalog')],
+    'categories' => ['label' => 'Категорії', 'url' => admin_url('categories')],
     'locales' => ['label' => 'Тексти UI', 'url' => admin_url('locales')],
     'pages' => ['label' => 'Сторінки', 'url' => admin_url('pages')],
     'rates' => ['label' => 'Курси', 'url' => admin_url('rates')],

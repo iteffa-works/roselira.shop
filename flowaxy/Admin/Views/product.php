@@ -11,6 +11,23 @@
         <label>Default variant
             <input type="text" name="default_variant" value="<?= e((string) ($product['default_variant'] ?? '')) ?>">
         </label>
+        <label>Категорія
+            <select name="category_id">
+                <option value="">— без категорії —</option>
+                <?php foreach ($categories ?? [] as $catId => $category): ?>
+                    <?php
+                        $labels = is_array($category['labels'] ?? null) ? $category['labels'] : [];
+                        $catLabel = (string) ($labels['uk'] ?? $labels['en'] ?? $catId);
+                        $gpc = trim((string) ($category['google_product_category'] ?? ''));
+                        $optionLabel = $catLabel . ' (' . $catId . ')' . ($gpc !== '' ? ' · GPC ' . $gpc : '');
+                    ?>
+                    <option value="<?= e((string) $catId) ?>" <?= ((string) ($product['category_id'] ?? '') === (string) $catId) ? 'selected' : '' ?>>
+                        <?= e($optionLabel) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <span class="admin-field__hint"><a href="<?= admin_url('categories') ?>">Керувати категоріями</a></span>
+        </label>
     </fieldset>
 
     <?php foreach ($editableLocales as $loc): ?>

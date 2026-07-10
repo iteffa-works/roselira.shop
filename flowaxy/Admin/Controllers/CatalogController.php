@@ -14,6 +14,8 @@ final class CatalogController extends CatalogAdminController
             return $response;
         }
 
+        $this->catalog->ensureCategoriesBootstrapped();
+
         $rows = [];
         foreach ($this->catalog->loadProducts() as $slug => $product) {
             $rows[] = [

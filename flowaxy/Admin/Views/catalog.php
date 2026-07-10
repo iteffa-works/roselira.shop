@@ -1,4 +1,5 @@
 <h1>Каталог</h1>
+<p class="admin-muted"><a href="<?= admin_url('categories') ?>">Категорії каталогу</a></p>
 
 <div class="admin-card-list">
 <?php foreach ($rows as $row): ?>

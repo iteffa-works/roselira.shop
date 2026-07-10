@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Flowaxy\Admin\Controllers\AuthController;
 use Flowaxy\Admin\Controllers\CatalogController as AdminCatalogController;
+use Flowaxy\Admin\Controllers\CategoriesController;
 use Flowaxy\Admin\Controllers\DashboardController;
 use Flowaxy\Admin\Controllers\LocalesController;
 use Flowaxy\Admin\Controllers\OrdersController as AdminOrdersController;
@@ -46,6 +47,8 @@ return static function (Router $router): void {
     $router->get('/admin/install', AuthController::class . '::installForm');
     $router->post('/admin/install', AuthController::class . '::install');
     $router->get('/admin/catalog', AdminCatalogController::class . '::index');
+    $router->get('/admin/categories', CategoriesController::class . '::index');
+    $router->post('/admin/categories', CategoriesController::class . '::save');
     $router->get('/admin/product', AdminProductController::class . '::edit');
     $router->post('/admin/product', AdminProductController::class . '::update');
     $router->get('/admin/orders', AdminOrdersController::class . '::index');

@@ -80,6 +80,7 @@ $analyticsUrl = static function (string $source) use ($days): string {
         <div class="admin-quick-links">
             <a href="<?= admin_url('orders') ?>" class="admin-quick-link">Замовлення<?php if ($newCount > 0): ?> <span class="admin-badge admin-badge--new"><?= (int) $newCount ?></span><?php endif; ?></a>
             <a href="<?= admin_url('catalog') ?>" class="admin-quick-link">Каталог</a>
+            <a href="<?= admin_url('categories') ?>" class="admin-quick-link">Категорії</a>
             <a href="<?= admin_url('locales') ?>" class="admin-quick-link">Тексти UI</a>
             <a href="<?= admin_url('rates') ?>" class="admin-quick-link">Оновити курси НБУ</a>
             <a href="<?= admin_url('notifications') ?>" class="admin-quick-link">Сповіщення</a>

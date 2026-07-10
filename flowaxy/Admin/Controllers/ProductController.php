@@ -37,6 +37,8 @@ final class ProductController extends CatalogAdminController
             return $this->redirect(admin_url('catalog'));
         }
 
+        $this->catalog->ensureCategoriesBootstrapped();
+
         $content = $this->view->renderAdmin('product', [
             'slug' => $resolved['slug'],
             'product' => $resolved['product'],
@@ -44,6 +46,7 @@ final class ProductController extends CatalogAdminController
             'csrf' => $this->auth->csrfToken(),
             'editableLocales' => $this->locale->editableLocales(),
             'localeLabels' => $this->locale->adminLocaleLabels(),
+            'categories' => $this->catalog->loadCategories(),
         ]);
 
         return $this->renderPage($content, 'Товар', 'catalog');
@@ -73,6 +76,26 @@ final class ProductController extends CatalogAdminController
 
         $product['active'] = $request->post('active') !== null;
         $product['default_variant'] = trim((string) $request->post('default_variant', $product['default_variant'] ?? ''));
+        $categoryId = $this->catalog->normalizeCategoryId((string) $request->post('category_id', ''));
+        $category = $categoryId !== '' ? $this->catalog->findCategory($categoryId) : null;
+        if ($category !== null) {
+            $product['category_id'] = $categoryId;
+            $labels = is_array($category['labels'] ?? null) ? $category['labels'] : [];
+            foreach (['uk', 'ru', 'en'] as $loc) {
+                $label = trim((string) ($labels[$loc] ?? ''));
+                if ($label !== '') {
+                    $product['i18n'][$loc]['category'] = $label;
+                }
+            }
+            $gpc = trim((string) ($category['google_product_category'] ?? ''));
+            if ($gpc !== '') {
+                $product['google_product_category'] = $gpc;
+            } else {
+                unset($product['google_product_category']);
+            }
+        } else {
+            unset($product['category_id']);
+        }
         $inventoryNote = trim((string) $request->post('inventory_note', ''));
         if ($inventoryNote !== '') {
             $product['inventory_note'] = $inventoryNote;
