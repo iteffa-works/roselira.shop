@@ -79,6 +79,12 @@ final class Connection
                 sort_order INTEGER NOT NULL DEFAULT 999
             );
 
+            CREATE TABLE IF NOT EXISTS catalog_categories (
+                id TEXT PRIMARY KEY NOT NULL,
+                sort_order INTEGER NOT NULL DEFAULT 999,
+                data TEXT NOT NULL DEFAULT '{}'
+            );
+
             CREATE TABLE IF NOT EXISTS products (
                 slug TEXT PRIMARY KEY NOT NULL,
                 data TEXT NOT NULL
@@ -197,6 +203,7 @@ final class Connection
         try {
             $pdo->exec('DELETE FROM meta');
             $pdo->exec('DELETE FROM catalog_groups');
+            $pdo->exec('DELETE FROM catalog_categories');
             $pdo->exec('DELETE FROM products');
 
             $metaStmt = $pdo->prepare('INSERT INTO meta (key, value) VALUES (:key, :value)');
@@ -216,6 +223,25 @@ final class Connection
                 $groupStmt->execute([
                     'id' => (string) $groupId,
                     'sort_order' => (int) ($group['order'] ?? 999),
+                ]);
+            }
+
+            $categoryStmt = $pdo->prepare(
+                'INSERT INTO catalog_categories (id, sort_order, data) VALUES (:id, :sort_order, :data)'
+            );
+            foreach ($catalog['categories'] ?? [] as $categoryId => $category) {
+                if (!is_array($category)) {
+                    continue;
+                }
+
+                $order = (int) ($category['order'] ?? 999);
+                $payload = $category;
+                unset($payload['order']);
+
+                $categoryStmt->execute([
+                    'id' => (string) $categoryId,
+                    'sort_order' => $order,
+                    'data' => JsonCodec::encode($payload),
                 ]);
             }
 

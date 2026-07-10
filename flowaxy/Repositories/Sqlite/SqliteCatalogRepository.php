@@ -19,6 +19,7 @@ final class SqliteCatalogRepository implements CatalogRepositoryInterface
         $catalog = [
             'meta' => [],
             'groups' => [],
+            'categories' => [],
             'products' => [],
         ];
 
@@ -30,6 +31,25 @@ final class SqliteCatalogRepository implements CatalogRepositoryInterface
         $groupRows = $pdo->query('SELECT id, sort_order FROM catalog_groups ORDER BY sort_order, id')->fetchAll();
         foreach ($groupRows as $row) {
             $catalog['groups'][(string) $row['id']] = [
+                'order' => (int) $row['sort_order'],
+            ];
+        }
+
+        try {
+            $categoryRows = $pdo->query(
+                'SELECT id, sort_order, data FROM catalog_categories ORDER BY sort_order, id'
+            )->fetchAll();
+        } catch (\Throwable) {
+            $categoryRows = [];
+        }
+
+        foreach ($categoryRows as $row) {
+            $data = JsonCodec::decode((string) $row['data']);
+            if (!is_array($data)) {
+                $data = [];
+            }
+
+            $catalog['categories'][(string) $row['id']] = $data + [
                 'order' => (int) $row['sort_order'],
             ];
         }
